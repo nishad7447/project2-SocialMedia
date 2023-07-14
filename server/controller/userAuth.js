@@ -49,19 +49,16 @@ export const login =async(req,res)=>{
         const {Email,Password}=req.body
         const user = await User.findOne({Email:Email})
         if(!user){
-            console.log("not User")
             return res.status(400).json({message:"User does not exist"})
         } 
 
-        console.log(Password,user.Password)
         const isMatch=await bcrypt.compare(Password,user.Password)
         if(!isMatch) {
-            console.log(isMatch)
             return res.status(400).json({message:"Incorrect credentials"})
         }
-        const token=jwt.sign({id:user._id}, process.env.JWT_SECRET)
-        console.log(token,"ttoookkn")
-        delete user.Password
+        const token=jwt.sign({id:user._id}, process.env.JWT_SECRET,{expiresIn:'1hr'})
+        user.Password=""
+        console.log(user)
         res.status(200).json({token,user,message:"Login Success"})
 
     }catch (error) {
@@ -88,3 +85,22 @@ export const forgotPass = async (req, res) => {
     }
   };
   
+
+export const getUser = async (req, res) => {
+
+    console.log("working....", req.body.userId);
+    try {
+        const user = await User.findById({ _id: req.body.userId });
+        user.Password=""
+        res.send({
+            success: true,
+            message: "user fetched success",
+            data: user
+        })
+    } catch (err) {
+        res.send({
+            success: false,
+            message: err.message
+        })
+    }
+}

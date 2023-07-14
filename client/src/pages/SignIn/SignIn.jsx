@@ -6,20 +6,65 @@ import FixedPlugin from "../../componets/FixedPlugin/FixedPlugin";
 import { Link, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { UserBaseURL } from "../../API";
-import axios from "axios";
+import { axiosInstance } from "../../axios";
 
 export default function SignIn() {
+
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [emailErr, setEmailErr] = useState('')
   const [passErr, setPassErr] = useState('')
+  const [formErr, setFormErr] = useState('');
   const nav = useNavigate()
-  const userLogin = () => {
-    axios.post(`${UserBaseURL}/auth/login`, { Email: email, Password: password })
-      .then((res) => {
-        console.log(res.data.message)
+  
+  useEffect(() => {
+    if (localStorage.getItem('jwtToken')) {
+      nav('/');
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
+  const validateEmail = (email) => {
+    // Use a regular expression for email validation
+    // eslint-disable-next-line no-useless-escape
+    const emailRegex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+    return emailRegex.test(email);
+  };
+
+  const validatePasswordStrength = (password) => {
+    // Check password strength, requiring a minimum length of 3 characters
+    return password.length >= 3;
+  };
+
+
+  const userLogin = () => {
+
+    // Check if any field is empty
+    if (!email || !password) {
+      setFormErr('Please fill in all fields');
+      return;
+    }
+    // Validate email format
+    if (!validateEmail(email)) {
+      setEmailErr('Invalid email address');
+      return;
+    }
+    // Validate password strength
+    if (!validatePasswordStrength(password)) {
+      setPassErr('Password must be at least 3 char');
+      return;
+    }
+
+
+    axiosInstance.post(`${UserBaseURL}/auth/login`, { Email: email, Password: password })
+      .then((res) => {
+        console.log(res.data,"data")
+        if(res.data.message==="Login Success") {
+          localStorage.setItem('jwtToken', JSON.stringify(res.data.token));
+          localStorage.setItem('user', JSON.stringify(res.data.user));
+          window.location.href="/"
+      }
         if (res.data.success) {
           nav('/home')
         }
@@ -49,6 +94,13 @@ export default function SignIn() {
     }, 3000);
     return () => clearTimeout(timer);
   }, [passErr]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setFormErr('');
+    }, 3000);
+    return () => clearTimeout(timer);
+  }, [formErr]);
 
   return (
     <div className="flex items-center justify-center h-screen bg-gray-100 dark:bg-gray-900">
@@ -85,7 +137,7 @@ export default function SignIn() {
             placeholder="mail@simmmple.com"
             id="email"
             type="text"
-            state={emailErr ? "error" : ""}
+            state={emailErr || formErr ? "error" : ""}
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
@@ -98,7 +150,7 @@ export default function SignIn() {
             placeholder="Min. 8 characters"
             id="password"
             type="password"
-            state={passErr ? "error" : ""}
+            state={passErr || formErr ? "error" : ""}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
@@ -119,9 +171,7 @@ export default function SignIn() {
             </Link>
           </div>
           <span className="text-red-500">
-            {
-              emailErr ? emailErr : passErr
-            }
+            {formErr || emailErr || passErr}
           </span>
           <button
             onClick={userLogin}

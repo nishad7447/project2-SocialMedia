@@ -13,6 +13,14 @@ export default function ForgotPass() {
   const [emailErr, setEmailErr] = useState('')
   const [passErr, setPassErr] = useState('')
   const nav=useNavigate()
+  
+  useEffect(() => {
+    if (localStorage.getItem('jwtToken')) {
+      nav('/');
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const userForgotPass = () => {
     if(password !== repassword){
         return setPassErr("Passwords don't match ")
@@ -24,7 +32,7 @@ export default function ForgotPass() {
         console.log(res.data.message)
 
         if (res.data.message==="Reset Password Success") {
-          nav('/')
+          nav('/signin')
         }
       })
       .catch((err) => {

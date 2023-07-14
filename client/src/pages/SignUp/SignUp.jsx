@@ -13,16 +13,59 @@ export default function SignUp() {
     const [password, setPassword] = useState('')
     const [name, setName] = useState('')
     const [username, setUsername] = useState('')
+
+
     const [emailErr, setEmailErr] = useState('')
+    const [passErr, setPassErr] = useState('')
     const [usernameErr, setUsernameErr] = useState('')
+    const [formErr, setFormErr] = useState('');
+
     const nav = useNavigate()
+
+
+    const validateEmail = (email) => {
+        // Use a regular expression for email validation
+        // eslint-disable-next-line no-useless-escape
+        const emailRegex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+        return emailRegex.test(email);
+    };
+
+    const validatePasswordStrength = (password) => {
+        // Check password strength, requiring a minimum length of 3 characters
+        return password.length >= 3;
+    };
+
+    useEffect(() => {
+        if (localStorage.getItem('jwtToken')) {
+          nav('/');
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+      }, []);
+      
     const userSignup = () => {
-        // console.log(email, password, name, username);
+
+
+        // Check if any field is empty
+        if (!email || !password || !name || !username) {
+            setFormErr('Please fill in all fields');
+            return;
+        }
+        // Validate email format
+        if (!validateEmail(email)) {
+            setEmailErr('Invalid email address');
+            return;
+        }
+        // Validate password strength
+        if (!validatePasswordStrength(password)) {
+            setPassErr('Password must be at least 3 char');
+            return;
+        }
+
         axios.post(`${UserBaseURL}/auth/signup`, { Email: email, Password: password, Name: name, UserName: username })
             .then((res) => {
                 console.log(res.data.message)
 
-                if (res.data.message==="User signed up successfully") {
+                if (res.data.message === "User signed up successfully") {
                     console.log('succ')
                     nav('/')
                 }
@@ -48,11 +91,24 @@ export default function SignUp() {
 
     useEffect(() => {
         const timer = setTimeout(() => {
+          setPassErr('');
+        }, 3000);
+        return () => clearTimeout(timer);
+      }, [passErr]);    
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
             setUsernameErr('');
         }, 3000);
         return () => clearTimeout(timer);
     }, [usernameErr]);
 
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setFormErr('');
+        }, 3000);
+        return () => clearTimeout(timer);
+    }, [formErr]);
 
     const handleGoogleSignup = (response) => {
         const { tokenId } = response;
@@ -97,15 +153,15 @@ export default function SignUp() {
                     <p className="mb-9 ml-1 text-base text-gray-600 dark:text-gray-400">
                         Welcome to OnlyFriends family
                     </p>
-                    
-                        <GoogleLogin
-                            className=" mb-6 flex h-[50px] w-full items-center justify-center gap-2 rounded-xl bg-gray-200 dark:bg-gray-700 hover:cursor-pointer"
-                            clientId="YOUR_GOOGLE_CLIENT_ID"
-                            buttonText="Sign up with Google"
-                            onSuccess={handleGoogleSignup}
-                            onFailure={handleGoogleSignup} // Handle failure cases if needed
-                            cookiePolicy="single_host_origin"
-                        />
+
+                    <GoogleLogin
+                        className=" mb-6 flex h-[50px] w-full items-center justify-center gap-2 rounded-xl bg-gray-200 dark:bg-gray-700 hover:cursor-pointer"
+                        clientId="YOUR_GOOGLE_CLIENT_ID"
+                        buttonText="Sign up with Google"
+                        onSuccess={handleGoogleSignup}
+                        onFailure={handleGoogleSignup} // Handle failure cases if needed
+                        cookiePolicy="single_host_origin"
+                    />
 
                     <div className="mb-6 flex items-center gap-3">
                         <div className="h-px w-full bg-gray-300 dark:bg-gray-600" />
@@ -124,6 +180,7 @@ export default function SignUp() {
                             placeholder="Full Name"
                             id="Name"
                             type="text"
+                            state={formErr ? "error" : ""}
                             value={name}
                             onChange={(e) => setName(e.target.value)}
                         />
@@ -136,7 +193,7 @@ export default function SignUp() {
                             placeholder="name_134"
                             id="email"
                             type="text"
-                            state={usernameErr ? "error" : ""}
+                            state={usernameErr || formErr ? "error" : ""}
                             value={username}
                             onChange={(e) => setUsername(e.target.value)}
                         />
@@ -151,7 +208,7 @@ export default function SignUp() {
                         placeholder="mail@simmmple.com"
                         id="email"
                         type="text"
-                        state={emailErr ? "error" : ""}
+                        state={emailErr || formErr ? "error" : ""}
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                     />
@@ -161,16 +218,15 @@ export default function SignUp() {
                         variant="auth"
                         extra="mb-3"
                         label="Password *"
-                        placeholder="Min. 8 characters"
+                        placeholder="Min. 3 characters"
                         id="password"
                         type="password"
+                        state={passErr || formErr ? "error" : ""}
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                     />
                     <span className="text-red-500">
-                        {
-                            emailErr ? emailErr : usernameErr
-                        }
+                        {formErr || emailErr || usernameErr || passErr}
                     </span>
                     <button
                         onClick={userSignup}
@@ -182,7 +238,7 @@ export default function SignUp() {
                             Already user?
                         </span>
                         <Link
-                            to="/"
+                            to="/signin"
                             className="ml-1 text-sm font-medium text-blue-500 hover:text-blue-600 dark:text-white"
                         >
                             Sign In
