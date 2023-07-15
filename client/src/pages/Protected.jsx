@@ -61,10 +61,10 @@ export default function Protected({ children }) {
   }
   console.log(token,user,"reduxil store cheytatha mole| err msg=>",message)
   return (
-    <>
-
-      <nav className="sticky top-4 z-40 flex flex-row flex-wrap items-center justify-between rounded-xl bg-white/10 p-2 backdrop-blur-xl dark:bg-[#0b14374d]">
-        <div className="ml-[6px]">
+      <div className={`flex flex-col min-h-screen  transition-all bg-gray-100 dark:bg-gray-900`}>
+     
+     <nav className="sticky top-4 z-40 flex flex-row flex-wrap items-center justify-between rounded-xl bg-white/10 p-2 backdrop-blur-xl dark:bg-[#0b14374d]">
+   <div className="ml-[6px]">
           <div className="h-6 w-[224px] pt-1">
             <a
               className="text-sm font-normal text-navy-700 hover:underline dark:text-white dark:hover:text-white"
@@ -82,12 +82,12 @@ export default function Protected({ children }) {
               brandText
             </Link>
           </div>
-          <p className="shrink text-[33px] capitalize text-navy-700 dark:text-white">
+          <p className="shrink text-[33px] capitalize text-blue-500">
             <Link
               to="#"
-              className="font-bold capitalize hover:text-navy-700 dark:hover:text-white"
+              className="font-bold capitalize hover:text-navy-700  dark:hover:text-white"
             >
-              {user?.Name}
+              OnlyFriends
             </Link>
           </p>
         </div>
@@ -225,7 +225,7 @@ export default function Protected({ children }) {
             button={
               <img
                 className="h-10 w-10 rounded-full"
-                src=""
+                src="https://via.placeholder.com/40"
                 alt="Elon Musk"
               />
             }
@@ -270,7 +270,8 @@ export default function Protected({ children }) {
 
       {children}
 
-    </>
+    </div>
+
 
   );
 }

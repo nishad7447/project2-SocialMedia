@@ -4,6 +4,14 @@ module.exports = {
   content: ["./src/**/*.{js,jsx,ts,tsx}"],
   theme: {
     extend: {
+      backdropBlur: {
+        'none': 'none',
+        'sm': '4px',
+        'md': '8px',
+        'lg': '12px',
+        'xl': '16px',
+        '2xl': '20px',
+      },
       fontWeight: {
         thin: '100',
         hairline: '100',
