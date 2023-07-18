@@ -7,6 +7,8 @@ import { Link, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { UserBaseURL } from "../../API";
 import { axiosInstance } from "../../axios";
+import { GoogleLogin } from "react-google-login";
+
 
 export default function SignIn() {
 
@@ -116,14 +118,27 @@ export default function SignIn() {
           <p className="mb-9 ml-1 text-base text-gray-600 dark:text-gray-400">
             Enter your email and password to sign in!
           </p>
-          <div className="mb-6 flex h-[50px] w-full items-center justify-center gap-2 rounded-xl bg-gray-200 dark:bg-gray-700 hover:cursor-pointer">
-            <div className="rounded-full text-xl">
-              <FcGoogle />
-            </div>
-            <h5 className="text-sm font-medium text-gray-900 dark:text-white">
-              Sign In with Google
-            </h5>
-          </div>
+          <GoogleLogin
+                            clientId="YOUR_GOOGLE_CLIENT_ID"
+                            buttonText="Sign up with Google"
+                            // onSuccess={handleGoogleSignup}
+                            // onFailure={handleGoogleSignup} // Handle failure cases if needed
+                            cookiePolicy="single_host_origin"
+                            render={renderProps => (
+                                
+                                <div 
+                                onClick={renderProps.onClick}
+                                className="mb-6 flex h-[50px] w-full items-center justify-center gap-2 rounded-xl bg-gray-200 dark:bg-gray-700 hover:cursor-pointer">
+                                    <div className="rounded-full text-xl">
+                                        <FcGoogle />
+                                    </div>
+                                    <h5 className="text-sm font-medium text-gray-900 dark:text-white">
+                                        Sign In with Google
+                                    </h5>
+                                </div>
+                                
+                            )}
+                        />
           <div className="mb-6 flex items-center gap-3">
             <div className="h-px w-full bg-gray-300 dark:bg-gray-600" />
             <p className="text-base text-gray-600 dark:text-gray-400">or</p>

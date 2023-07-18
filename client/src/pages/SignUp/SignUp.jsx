@@ -6,6 +6,7 @@ import { Link, useNavigate } from "react-router-dom";
 import React, { useEffect, useState } from 'react'
 import axios from 'axios'
 import { UserBaseURL } from "../../API"
+import { FcGoogle } from "react-icons/fc";
 
 export default function SignUp() {
 
@@ -13,10 +14,12 @@ export default function SignUp() {
     const [password, setPassword] = useState('')
     const [name, setName] = useState('')
     const [username, setUsername] = useState('')
+    const [mobile, setMobile] = useState('')
 
 
     const [emailErr, setEmailErr] = useState('')
     const [passErr, setPassErr] = useState('')
+    const [mobErr, setMobErr] = useState('')
     const [usernameErr, setUsernameErr] = useState('')
     const [formErr, setFormErr] = useState('');
 
@@ -29,6 +32,11 @@ export default function SignUp() {
         const emailRegex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
         return emailRegex.test(email);
     };
+    const validateMobile = (mobile) => {
+        // Use a regular expression for mobile number validation
+        const mobileRegex = /^[0-9]{10}$/;
+        return mobileRegex.test(mobile);
+    };
 
     const validatePasswordStrength = (password) => {
         // Check password strength, requiring a minimum length of 3 characters
@@ -37,11 +45,11 @@ export default function SignUp() {
 
     useEffect(() => {
         if (localStorage.getItem('jwtToken')) {
-          nav('/');
+            nav('/');
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-      }, []);
-      
+    }, []);
+
     const userSignup = () => {
 
 
@@ -55,13 +63,17 @@ export default function SignUp() {
             setEmailErr('Invalid email address');
             return;
         }
+        if (!validateMobile(mobile)) {
+            setMobErr('Invalid Mobile')
+            return;
+        }
         // Validate password strength
         if (!validatePasswordStrength(password)) {
             setPassErr('Password must be at least 3 char');
             return;
         }
 
-        axios.post(`${UserBaseURL}/auth/signup`, { Email: email, Password: password, Name: name, UserName: username })
+        axios.post(`${UserBaseURL}/auth/signup`, { Email: email, Password: password, Name: name, UserName: username, Mobile: mobile })
             .then((res) => {
                 console.log(res.data.message)
 
@@ -76,6 +88,8 @@ export default function SignUp() {
                     setEmailErr(err.response.data.message)
                 } else if (err?.response.data.message === "User name taken") {
                     setUsernameErr(err.response.data.message)
+                } else if (err?.response.data.message === "Mobile already Exist"){
+                    setMobErr(err.response.data.message)
                 }
                 // console.log(err,'login post error ')
             })
@@ -91,10 +105,10 @@ export default function SignUp() {
 
     useEffect(() => {
         const timer = setTimeout(() => {
-          setPassErr('');
+            setPassErr('');
         }, 3000);
         return () => clearTimeout(timer);
-      }, [passErr]);    
+    }, [passErr]);
 
     useEffect(() => {
         const timer = setTimeout(() => {
@@ -109,6 +123,13 @@ export default function SignUp() {
         }, 3000);
         return () => clearTimeout(timer);
     }, [formErr]);
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setMobErr('');
+        }, 3000);
+        return () => clearTimeout(timer);
+    }, [mobErr]);
 
     const handleGoogleSignup = (response) => {
         const { tokenId } = response;
@@ -154,14 +175,29 @@ export default function SignUp() {
                         Welcome to OnlyFriends family
                     </p>
 
-                    <GoogleLogin
-                        className=" mb-6 flex h-[50px] w-full items-center justify-center gap-2 rounded-xl bg-gray-200 dark:bg-gray-700 hover:cursor-pointer"
-                        clientId="YOUR_GOOGLE_CLIENT_ID"
-                        buttonText="Sign up with Google"
-                        onSuccess={handleGoogleSignup}
-                        onFailure={handleGoogleSignup} // Handle failure cases if needed
-                        cookiePolicy="single_host_origin"
-                    />
+                        <GoogleLogin
+                            clientId="YOUR_GOOGLE_CLIENT_ID"
+                            buttonText="Sign up with Google"
+                            onSuccess={handleGoogleSignup}
+                            onFailure={handleGoogleSignup} // Handle failure cases if needed
+                            cookiePolicy="single_host_origin"
+                            render={renderProps => (
+                                
+                                <div 
+                                onClick={renderProps.onClick}
+                                className="mb-6 flex h-[50px] w-full items-center justify-center gap-2 rounded-xl bg-gray-200 dark:bg-gray-700 hover:cursor-pointer">
+                                    <div className="rounded-full text-xl">
+                                        <FcGoogle />
+                                    </div>
+                                    <h5 className="text-sm font-medium text-gray-900 dark:text-white">
+                                        Sign In with Google
+                                    </h5>
+                                </div>
+                                
+                            )}
+                        />
+
+
 
                     <div className="mb-6 flex items-center gap-3">
                         <div className="h-px w-full bg-gray-300 dark:bg-gray-600" />
@@ -213,20 +249,37 @@ export default function SignUp() {
                         onChange={(e) => setEmail(e.target.value)}
                     />
 
-                    {/* Password */}
-                    <InputField
-                        variant="auth"
-                        extra="mb-3"
-                        label="Password *"
-                        placeholder="Min. 3 characters"
-                        id="password"
-                        type="password"
-                        state={passErr || formErr ? "error" : ""}
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                    />
+                    <div className="flex space-x-1">
+
+                        {/* Mob */}
+                        <InputField
+                            variant="auth"
+                            extra="mb-3"
+                            label="Mobile (+91) *"
+                            placeholder="mail@simmmple.com"
+                            id="mobile"
+                            type="text"
+                            state={mobErr || formErr ? "error" : ""}
+                            value={mobile}
+                            onChange={(e) => setMobile(e.target.value)}
+                        />
+
+                        {/* Password */}
+                        <InputField
+                            variant="auth"
+                            extra="mb-3"
+                            label="Password *"
+                            placeholder="Min. 3 characters"
+                            id="password"
+                            type="password"
+                            state={passErr || formErr ? "error" : ""}
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                        />
+
+                    </div>
                     <span className="text-red-500">
-                        {formErr || emailErr || usernameErr || passErr}
+                        {formErr || emailErr || usernameErr || passErr || mobErr}
                     </span>
                     <button
                         onClick={userSignup}

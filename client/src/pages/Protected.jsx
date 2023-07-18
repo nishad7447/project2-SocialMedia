@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import Dropdown from '../componets/Dropdown/Dropdown';
 import { FiAlignJustify } from "react-icons/fi";
 import { Link, useNavigate } from "react-router-dom";
-// import navbarimage from "assets/img/layout/Navbar.png";
 import { BsArrowBarUp } from "react-icons/bs";
 import { FiSearch } from "react-icons/fi";
 import { RiMoonFill, RiSunFill } from "react-icons/ri";
@@ -63,7 +62,7 @@ export default function Protected({ children }) {
   return (
       <div className={`flex flex-col min-h-screen  transition-all bg-gray-100 dark:bg-gray-900`}>
      
-     <nav className="sticky top-4 z-40 flex flex-row flex-wrap items-center justify-between rounded-xl bg-white/10 p-2 backdrop-blur-xl dark:bg-[#0b14374d]">
+     <nav  className="sticky top-4 z-40 flex flex-row flex-wrap items-center justify-between rounded-xl bg-white/10 p-2 backdrop-filter backdrop-blur-xl dark:bg-[#0b14374d]" style={{WebkitBackdropFilter: `blur(10px)`}}>
    <div className="ml-[6px]">
           <div className="h-6 w-[224px] pt-1">
             <a
