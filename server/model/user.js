@@ -21,13 +21,11 @@ const userSchema= new mongoose.Schema(
         },
         Mobile: {
             type: Number,
-            required: true,
             unique: true,
             max: 999999999999, 
           },          
         Password:{
             type:String,
-            required:true,
             min:5
         },
         ProfilePic:{
@@ -50,6 +48,9 @@ const userSchema= new mongoose.Schema(
         Blocked:Boolean,
         Location:String,
         Occupation:String,
+        jti: {
+            type: String,
+        },
      }
     ,{timestamps:true}
      )

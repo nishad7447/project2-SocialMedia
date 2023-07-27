@@ -11,12 +11,18 @@ import { UserBaseURL } from '../API';
 import { setLogin, setMessage } from '../redux/slice';
 import { useDispatch, useSelector } from 'react-redux'
 
-// import avatar from "assets/img/avatars/avatar4.png";
-
+const Spinner = () => {
+  return (
+    <div className="flex items-center justify-center h-screen">
+      <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500"></div>
+    </div>
+  );
+};
 export default function Protected({ children }) {
   const navigate = useNavigate()
   //   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [darkmode, setDarkmode] = useState(false);
+  const [loadingUser, setLoadingUser] = useState(true);
 
   const onOpenSidenav = () => {
     // Implement your logic for opening the sidenav here
@@ -40,6 +46,9 @@ export default function Protected({ children }) {
       })
       .catch((error) => {
         console.error(error.message, "/Base url err=>user not working");
+      })
+      .finally(() => {
+        setLoadingUser(false); // Set loadingUser to false once the user details are fetched or the API call completes
       });
   };
 
@@ -61,6 +70,11 @@ export default function Protected({ children }) {
   console.log(token,user,"reduxil store cheytatha mole| err msg=>",message)
   return (
       <div className={`flex flex-col min-h-screen  transition-all bg-gray-100 dark:bg-gray-900`}>
+      {loadingUser ? (
+        <Spinner />
+      ) : (
+       <>
+       
      
      <nav  className="sticky top-4 z-40 flex flex-row flex-wrap items-center justify-between rounded-xl bg-white/10 p-2 backdrop-filter backdrop-blur-xl dark:bg-[#0b14374d]" style={{WebkitBackdropFilter: `blur(10px)`}}>
    <div className="ml-[6px]">
@@ -224,8 +238,8 @@ export default function Protected({ children }) {
             button={
               <img
                 className="h-10 w-10 rounded-full"
-                src="https://via.placeholder.com/40"
-                alt="Elon Musk"
+                src={user?.ProfilePic}
+                alt={user?.UserName}
               />
             }
             children={
@@ -233,7 +247,7 @@ export default function Protected({ children }) {
                 <div className="mt-3 ml-4">
                   <div className="flex items-center gap-2">
                     <p className="text-sm font-bold text-navy-700 dark:text-white">
-                      👋 Hey, Adela
+                      👋 Hey, {user?.UserName}
                     </p>{" "}
                   </div>
                 </div>
@@ -268,8 +282,9 @@ export default function Protected({ children }) {
       </nav>
 
       {children}
-
-    </div>
+       </>
+      )}
+      </div>
 
 
   );

@@ -4,17 +4,25 @@ import SignUp from "./pages/SignUp/SignUp";
 import ForgotPass from "./pages/ForgotPass/ForgotPass";
 import Protected from "./pages/Protected";
 import Home from "./pages/Home/Home";
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import EmailNewPass from "./pages/ForgotPass/EmailNewPass";
+
 
 const App = () => {
   return (
+    <>
     <Router>
       <Routes>
         <Route path="/signin" element={<SignIn/>}/>
         <Route path="/signup" element={<SignUp/>}/>
         <Route path="/forgot-pass" element={<ForgotPass/>}/>
+        <Route path="/password-reset/:userId/:token" Component={EmailNewPass} />
         <Route path="/" element={<Protected><Home/></Protected>} />
       </Routes>
     </Router>
+    <ToastContainer className="dark:bg-gray-800" autoClose={3000}/>
+    </>
   );
 };
 

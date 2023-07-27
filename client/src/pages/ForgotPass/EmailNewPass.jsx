@@ -4,19 +4,29 @@ import FixedPlugin from "../../componets/FixedPlugin/FixedPlugin";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { UserBaseURL } from "../../API";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 
-export default function ForgotPass() {
+export default function EmailNewPass() {
+
+    const { userId, token } = useParams();
+
+    useEffect(() => {
+        fetch(`${UserBaseURL}/auth/password-reset/${userId}/${token}`)
+          .then((response) => response.json())
+          .then((data) => {
+            console.log(data);
+            setEmail(data.Email)
+          })
+          .catch((error) => {
+            console.log(error);
+          });
+      }, [userId, token]);
+
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [repassword, setRePassword] = useState('')
-  const [otp, setOTP] = useState('')
-
-  const [ShowOtpField, setShowOtpField] = useState(false)
-  const [ShowPassFields, setShowPassFields] = useState(false)
-
-  const [otpErr, setOtpErr] = useState('')
+  
   const [emailErr, setEmailErr] = useState('')
   const [passErr, setPassErr] = useState('')
   const nav = useNavigate()
@@ -28,55 +38,21 @@ export default function ForgotPass() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const sendOTP = () => {
-    axios.post(`${UserBaseURL}/auth/forgot-otpSend`, { Email: email })
-      .then((res) => {
-        console.log(res.data.message)
-        if(res.data.message!=='password reset link sent to your email account'){                                                                                                                                                                                                                                                                                                                                                                                                     
-          setShowOtpField(true)
-          toast.success('OTP send to mobile')
-        }else{
-          toast.success('Reset Password link send to Email successfully');
-        }
-      }).catch((err) => {
-        console.log(err?.response.data.message)
-        toast.error(err?.response.data.message)
-        if (err?.response.data.message === "User does not exist") {
-          setEmailErr(err?.response.data.message)
-        }else if (err?.response.data.message === "User dont have a mobile number"){
-          setEmailErr(err?.response.data.message)
-        }
-      })
-  }
-  const submitOTP = () => {
-    axios.post(`${UserBaseURL}/auth/forgot-otpSubmit`, { OTP: otp, Email: email })
-      .then((res) => {
-        console.log(res.data.message)
-        if (res.data.message === 'Verification success') {
-          toast.success(res.data.message)
-          setShowOtpField(false)
-          setShowPassFields(true)
-        }
-      }).catch((err) => {
-        console.log(err?.response.data.message, 'catch err')
-        if (err?.response.data.message === "Verification failed") {
-          toast.error(err?.response.data.message)
-          setOtpErr("Invalid OTP")
-        }
-      })
-  }
+  
   const userForgotPass = () => {
+
     if (password !== repassword) {
       return setPassErr("Passwords don't match ")
     } else {
       setRePassword('')
     }
+
     axios.post(`${UserBaseURL}/auth/forgot-pass`, { Email: email, Password: password })
       .then((res) => {
         console.log(res.data.message)
 
         if (res.data.message === "Reset Password Success") {
-          toast.success(res.data.message)
+            toast.success(res.data.message)
           nav('/signin')
         }
       })
@@ -86,17 +62,10 @@ export default function ForgotPass() {
         if (err?.response.data.message === "User does not exist") {
           setEmailErr(err.response.data.message)
         }
-        // console.log(err,'login post error ')
       })
   }
 
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setEmailErr('');
-    }, 3000);
-    return () => clearTimeout(timer);
-  }, [emailErr]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -105,12 +74,6 @@ export default function ForgotPass() {
     return () => clearTimeout(timer);
   }, [passErr]);
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setOtpErr('');
-    }, 3000);
-    return () => clearTimeout(timer);
-  }, [otpErr]);
 
   return (
     <div className="flex items-center justify-center h-screen bg-gray-100 dark:bg-gray-900">
@@ -124,7 +87,7 @@ export default function ForgotPass() {
             Forgot Password
           </h4>
           <p className="mb-9 ml-1 text-base text-gray-600 dark:text-gray-400">
-            Set new password with your email!
+            Set new password !
           </p>
 
           <div className="mb-6 flex items-center gap-3">
@@ -143,26 +106,10 @@ export default function ForgotPass() {
             state={emailErr ? "error" : ""}
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            disabled
           />
 
-          {ShowOtpField && (
-            <>
-              {/* OTP */}
-              <InputField
-                variant="auth"
-                extra="mb-3"
-                label="Enter OTP*"
-                placeholder="1234"
-                id="otp"
-                type="text"
-                state={otpErr ? "error" : ""}
-                value={otp}
-                onChange={(e) => setOTP(e.target.value)}
-              />
-            </>
-          )}
-
-          {ShowPassFields && (
+       
             <div className="flex space-x-1">
               {/* Password */}
               <InputField
@@ -190,30 +137,19 @@ export default function ForgotPass() {
                 onChange={(e) => setRePassword(e.target.value)}
               />
             </div>
-          )}
 
 
           <span className="text-red-500">
             {
-              emailErr || passErr || otpErr
+             passErr 
             }
           </span>
 
-          {
-            ShowPassFields ? (
+         
               <button onClick={userForgotPass} className="linear mt-2 w-full rounded-xl bg-blue-500 py-[12px] text-base font-medium text-white transition duration-200 hover:bg-blue-600 active:bg-blue-700">
                 Reset Password
               </button>
-            ) : ShowOtpField ? (
-              <button onClick={submitOTP} className="linear mt-2 w-full rounded-xl bg-blue-500 py-[12px] text-base font-medium text-white transition duration-200 hover:bg-blue-600 active:bg-blue-700">
-                Submit OTP
-              </button>
-            ) : (
-              <button onClick={sendOTP} className="linear mt-2 w-full rounded-xl bg-blue-500 py-[12px] text-base font-medium text-white transition duration-200 hover:bg-blue-600 active:bg-blue-700">
-                Send OTP
-              </button>
-            )
-          }
+            
 
         </div>
       </Card>
