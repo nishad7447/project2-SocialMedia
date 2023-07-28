@@ -1,5 +1,3 @@
-// postModel.js
-
 import mongoose from 'mongoose';
 
 const postSchema = new mongoose.Schema({
@@ -23,10 +21,10 @@ const postSchema = new mongoose.Schema({
         type:mongoose.Schema.Types.ObjectId,
         ref:'Likes',
       },
-      comments: {
+      comments: [{
         type:mongoose.Schema.Types.ObjectId,
         ref:'Comments'
-      }
+      }]
     },{timestamps:true});
 
     const Post = mongoose.model('Post', postSchema);

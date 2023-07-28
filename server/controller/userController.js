@@ -1,5 +1,7 @@
 import cloudinary from "../Utils/cloudinary.js";
+import Comments from "../model/comment.js";
 import Post from "../model/post.js";
+import User from "../model/user.js";
 
 const userController = {
   createPost: async (req, res) => {
@@ -80,13 +82,52 @@ const userController = {
         .sort({ createdAt: -1 })
         .populate("userId", "ProfilePic UserName Name")
         .exec();
-      console.log(posts, "poooosts");
-      res.status(200).json(posts);
+       
+        const userFields = ['ProfilePic', 'UserName'];
+        let users = await User.find().select(userFields.join(' '))
+        users = users.filter((users)=> users._id.toString() !== req.body.userId)
+        
+      res.status(200).json({posts,users});
     } catch (error) {
       console.log(error);
       res.status(500).json({ message: `Server error ${error}` });
     }
   },
+  commentPost: async (req, res) => {
+    try {
+      const { postId, comment, userId } = req.body;
+      const post = await Post.findById(postId);
+      if (!post) {
+        return res.status(404).json({ error: "Post not found" });
+      }
+      const newComment = new Comments({
+        postId,
+        content:comment,
+        userId,
+      });
+      await newComment.save();
+      post.comments.push(newComment._id);
+      await post.save()
+      return res.status(201).json({ message: "Comment added successfully" });
+
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ error: "Something went wrong" });
+    }
+  },
+  getAllComments: async (req,res)=>{
+    try {
+      const postId  = req.params.id;
+      const comments = await Comments.find({ postId }) .populate('userId', 'ProfilePic UserName').exec();
+      if (comments.length === 0) {
+        return res.status(200).json({ message: 'No comments found for this post' });
+      }  
+      return res.status(200).json({ comments });
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ error: 'Something went wrong' });
+    }
+  }
 };
 
 export default userController;

@@ -51,7 +51,7 @@ export default function CreatePost({setUpdateUI}) {
       formData.append('userId',user._id)
     }
     console.log('FormData:', formData);
-
+  
     axiosInstance
       .post(`${UserBaseURL}/post`, formData)
       .then((response) => {
