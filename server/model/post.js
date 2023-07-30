@@ -17,14 +17,18 @@ const postSchema = new mongoose.Schema({
         type: Date,
         default: Date.now,
       },
-      likes: {
+      likes: [{
         type:mongoose.Schema.Types.ObjectId,
-        ref:'Likes',
-      },
+        ref:'User',
+      }],
       comments: [{
         type:mongoose.Schema.Types.ObjectId,
         ref:'Comments'
-      }]
+      }],
+      savedBy: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+      }],
     },{timestamps:true});
 
     const Post = mongoose.model('Post', postSchema);

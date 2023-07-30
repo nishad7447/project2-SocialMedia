@@ -1,6 +1,7 @@
 import cloudinary from "../Utils/cloudinary.js";
 import Comments from "../model/comment.js";
 import Post from "../model/post.js";
+import SavedPost from "../model/savedPost.js";
 import User from "../model/user.js";
 
 const userController = {
@@ -127,7 +128,89 @@ const userController = {
       console.error(error);
       return res.status(500).json({ error: 'Something went wrong' });
     }
+  },
+  like: async (req,res)=>{
+    try {
+      const postId = req.params.id;
+      const { userId } = req.body;
+  
+      const post = await Post.findById(postId);
+      if (!post) {
+        return res.status(404).json({ error: 'Post not found' });
+      }
+  
+      const indexOfUser = post.likes.indexOf(userId);
+      if (indexOfUser !== -1) {
+        post.likes.splice(indexOfUser, 1);
+        await post.save();
+        return res.status(200).json({ message: 'unliked successfully' });
+      } else {
+        post.likes.push(userId);
+        await post.save();
+        return res.status(200).json({ message: 'Post liked' });
+      }
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ error: 'Something went wrong' });
+    }
+  },
+  savedpost: async (req, res) => {
+    try {
+      const postId = req.params.id;
+      const { userId } = req.body;
+
+      const existingUser = await SavedPost.findOne({userId:userId})
+
+      if(existingUser){
+        const existingSavedPost = existingUser.savedPosts.findIndex((savedPost)=>savedPost.postId.toString() === postId)
+        console.log(existingSavedPost,"ex post")
+        if (existingSavedPost !== -1) {
+             existingUser.savedPosts.splice(existingSavedPost, 1)
+              await existingUser.save();
+              await Post.findByIdAndUpdate(postId, { $pull: { savedBy: userId } });
+              console.log('Post unsaved successfully for existing user:', existingUser);
+              return res.status(200).json({ message: 'Post unsaved successfully' });
+          }else{
+              existingUser.savedPosts.push({postId:postId})
+              await existingUser.save()
+              await Post.findByIdAndUpdate(postId, { $push: { savedBy: userId } });
+              console.log('Post saved successfully for existing user:', existingSavedPost);
+              return res.status(200).json({ message: 'Post saved successfully' });
+          }
+      }else{
+        const newSavedPost = new SavedPost({
+              userId: userId,
+              savedPosts: [{ postId: postId }],
+            });
+            const savedPostResult = await newSavedPost.save();
+            console.log('Post saved successfully for new user:', savedPostResult);
+            return res.status(200).json({ message: 'Post saved successfully for new user' });
+      }
+    } catch (error) {
+      console.error('Error saving post:', error);
+      return res.status(500).json({ error: 'Internal server error' });
+    }
+  },
+  getAllSavedPosts: async(req,res)=>{
+    try {
+      const {userId} = req.body
+      
+      const savedPosts = await SavedPost.find({ userId })
+  .populate({
+    path: 'savedPosts.postId',
+    populate: {
+      path: 'userId',
+      select: 'UserName ProfilePic',
+    },
+  });
+      console.log(JSON.stringify(savedPosts))
+      res.status(200).json({ savedPosts });
+    } catch (error) {
+      console.error('Error fetching saved posts:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
   }
+  
 };
 
 export default userController;

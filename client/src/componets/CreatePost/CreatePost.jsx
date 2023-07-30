@@ -60,7 +60,7 @@ export default function CreatePost({setUpdateUI}) {
         setAttachedImage(null); 
         setAttachedVideo(null);
         setAttachedAudio(null);
-        toast.success(response.data.message)
+        toast.success(response?.data?.message)
         setUpdateUI((prevState)=> !prevState)
       })
       .catch((error) => {

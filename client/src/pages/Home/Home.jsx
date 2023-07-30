@@ -8,6 +8,9 @@ import { useSelector } from 'react-redux';
 import { axiosInstance } from '../../axios';
 import { UserBaseURL } from '../../API';
 import CommentModal from '../../componets/CommentModal/CommentModal';
+import { toast } from 'react-toastify';
+import { AiFillHeart } from 'react-icons/ai';
+import { GoBookmark, GoBookmarkFill } from 'react-icons/go';
 
 
 const Spinner = () => {
@@ -22,8 +25,8 @@ export default function Home() {
   const user = useSelector((state) => state.auth.user)
   const [loadingUser, setLoadingUser] = useState(true);
   const [posts, setPosts] = useState([]);
-  const [suggestedUsers,setSuggestedUsers]=useState([])
-  const [updateUI,setUpdateUI]=useState(false)
+  const [suggestedUsers, setSuggestedUsers] = useState([])
+  const [updateUI, setUpdateUI] = useState(false)
 
 
   useEffect(() => {
@@ -41,16 +44,64 @@ export default function Home() {
       });
   }, [updateUI])
 
-  const [clickedPostId, setClickedPostId] = useState(null); 
-  
+  // comment
+  const [clickedPostId, setClickedPostId] = useState(null);
+
   const handleCommentClick = (postId) => {
     setClickedPostId(postId);
   };
-  
+
   const closeModal = () => {
     setClickedPostId(null);
   };
 
+
+  //like
+  const handleLikeClick = (postId) => {
+    axiosInstance.get(`${UserBaseURL}/like/${postId}`)
+      .then((res) => {
+        console.log(res.data)
+        toast.success(res?.data.message)
+        setUpdateUI((prevState) => !prevState)
+      })
+      .catch((err) => {
+        console.log(err, "Error clicking like")
+        toast.error(err?.data?.message)
+      })
+  }
+  const renderLikeInfo = (post) => {
+    const likeCount = post.likes.length;
+    const userLiked = post.likes.includes(user?._id);
+
+    if (likeCount === 0) {
+      return '';
+    }
+
+    if (userLiked) {
+      if (likeCount === 1) {
+        return ' You liked this post';
+      } else {
+        return ` You and ${likeCount - 1} others `;
+      }
+    } else {
+      return ` ${likeCount} likes`;
+    }
+  };
+
+
+  //savedpost
+  const handleSavedClick = (postId) => {
+    axiosInstance.get(`${UserBaseURL}/savedpost/${postId}`)
+      .then((res) => {
+        console.log(res.data)
+        toast.success(res?.data.message)
+        setUpdateUI((prevState) => !prevState)
+      })
+      .catch((err) => {
+        console.log(err, "Error clicking like")
+        toast.error(err?.data?.message)
+      })
+  }
 
   const friends = [
     {
@@ -66,7 +117,7 @@ export default function Home() {
     // Add more friends here...
   ];
 
-  
+
 
   return (
     <>
@@ -139,48 +190,58 @@ export default function Home() {
                     {/* <img className="w-full h-auto rounded-lg mb-4" src="https://via.placeholder.com/800x400" alt="Post Image" /> */}
                     {/* Conditional rendering based on the file extension */}
                     {(() => {
-                     if(post?.fileUrl){
-                      const extension = post?.fileUrl.split('.').pop().toLowerCase();
-                      if (['jpg', 'jpeg', 'png', 'gif'].includes(extension)) {
-                        return <img className="w-full h-auto rounded-lg mb-4" src={post?.fileUrl} alt="Post " />;
-                      } else if (extension === 'mp4') {
-                        return (
-                          <video className="w-full h-auto rounded-lg mb-4" controls>
-                            <source src={post?.fileUrl} type="video/mp4" />
-                            Your browser does not support the video tag.
-                          </video>
-                        );
-                      } else if (extension === 'mp3') {
-                        return (
-                          <audio className="w-full" controls>
-                            <source src={post?.fileUrl} type="audio/mp3" />
-                            Your browser does not support the audio element.
-                          </audio>
-                        );
-                      } else {
-                        return <p>Unsupported file format</p>;
+                      if (post?.fileUrl) {
+                        const extension = post?.fileUrl.split('.').pop().toLowerCase();
+                        if (['jpg', 'jpeg', 'png', 'gif'].includes(extension)) {
+                          return <img className="w-full h-auto rounded-lg mb-4" src={post?.fileUrl} alt="Post " />;
+                        } else if (extension === 'mp4') {
+                          return (
+                            <video className="w-full h-auto rounded-lg mb-4" controls>
+                              <source src={post?.fileUrl} type="video/mp4" />
+                              Your browser does not support the video tag.
+                            </video>
+                          );
+                        } else if (extension === 'mp3') {
+                          return (
+                            <audio className="w-full" controls>
+                              <source src={post?.fileUrl} type="audio/mp3" />
+                              Your browser does not support the audio element.
+                            </audio>
+                          );
+                        } else {
+                          return <p>Unsupported file format</p>;
+                        }
                       }
-                     }
                     })()}
                     <p className="text-sm mb-4">
-                    {post?.content}
+                      {post?.content}
                     </p>
                     <div className="flex justify-between items-center">
                       <div className="flex items-center">
-                        <button className="flex items-center text-gray-600 hover:text-blue-500 mr-4">
-                          <BiHeart />
-                          {/* <span>Like</span> */}
+                        <button onClick={() => handleLikeClick(post._id)} className="flex items-center text-gray-600 hover:text-blue-500 mr-4">
+                          {
+                            post.likes.includes(user?._id)
+                              ?
+                              <AiFillHeart style={{ fill: 'red' }} />
+                              :
+                              <BiHeart />
+                          }
+                          <span className='ml-1 text-xs'>{renderLikeInfo(post)}</span>
                         </button>
-                        <button className="flex items-center text-gray-600 hover:text-blue-500 mr-4">
-                          <BiCommentDots  onClick={() => handleCommentClick(post._id)}/>
+                        <button onClick={() => handleCommentClick(post._id)} className="flex items-center text-gray-600 hover:text-blue-500 mr-4">
+                          <BiCommentDots />
                           {/* <span>Comment</span> */}
                         </button>
                       </div>
                       <div className="flex items-center">
-                        <button className="flex items-center text-gray-600 hover:text-blue-500 mr-4">
-                          <svg className="w-4 h-4 mr-1" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M18 2H6C4.9 2 4 2.9 4 4V20L10 16H18C19.1 16 20 15.1 20 14V4C20 2.9 19.1 2 18 2M18 14H10.83L6 17.17V4H18V14Z" />
-                          </svg>
+                        <button onClick={() => handleSavedClick(post._id)} className="flex items-center text-gray-600 hover:text-blue-500 mr-4">
+                          {
+                            post.savedBy?.includes(user?._id)
+                              ?
+                              <GoBookmarkFill style={{ fill: 'black' }} />
+                              :
+                              <GoBookmark />
+                          }
                           {/* <span>Save</span> */}
                         </button>
                         <button className="flex items-center text-gray-600 hover:text-blue-500">
@@ -240,7 +301,7 @@ export default function Home() {
           </div>
         )
       }
-       {clickedPostId && (
+      {clickedPostId && (
         <CommentModal postId={clickedPostId} closeModal={closeModal} />
       )}
     </>

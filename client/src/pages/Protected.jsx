@@ -5,11 +5,12 @@ import { Link, useNavigate } from "react-router-dom";
 import { BsArrowBarUp } from "react-icons/bs";
 import { FiSearch } from "react-icons/fi";
 import { RiMoonFill, RiSunFill } from "react-icons/ri";
-import { IoMdNotificationsOutline, IoMdInformationCircleOutline } from "react-icons/io";
+import { IoMdNotificationsOutline } from "react-icons/io";
 import { axiosInstance } from '../axios';
 import { UserBaseURL } from '../API';
 import { setLogin, setMessage } from '../redux/slice';
 import { useDispatch, useSelector } from 'react-redux'
+import {TiArrowBack} from 'react-icons/ti'
 
 const Spinner = () => {
   return (
@@ -19,6 +20,7 @@ const Spinner = () => {
   );
 };
 export default function Protected({ children }) {
+  const nav=useNavigate()
   const navigate = useNavigate()
   //   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [darkmode, setDarkmode] = useState(false);
@@ -80,20 +82,13 @@ export default function Protected({ children }) {
    <div className="ml-[6px]">
           <div className="h-6 w-[224px] pt-1">
             <a
-              className="text-sm font-normal text-navy-700 hover:underline dark:text-white dark:hover:text-white"
+              className=" flex text-navy-700 hover:underline dark:text-white dark:hover:text-white"
               href=" "
+              onClick={()=>{nav(-1)}}
             >
-              Pages
-              <span className="mx-1 text-sm text-navy-700 hover:text-navy-700 dark:text-white">
-                /
-              </span>
+              Back<TiArrowBack className='mt-1' />
             </a>
-            <Link
-              className="text-sm font-normal capitalize text-navy-700 hover:underline dark:text-white dark:hover:text-white"
-              to="#"
-            >
-              brandText
-            </Link>
+
           </div>
           <p className="shrink text-[33px] capitalize text-blue-500">
             <Link
@@ -126,7 +121,7 @@ export default function Protected({ children }) {
           <Dropdown
             button={
               <p className="cursor-pointer">
-                <IoMdNotificationsOutline className="h-4 w-4 text-gray-600 dark:text-white" />
+                <IoMdNotificationsOutline className="ml-3 h-4 w-4 text-gray-600 dark:text-white" />
               </p>
             }
             animation="origin-[65%_0%] md:origin-top-right transition-all duration-300 ease-in-out"
@@ -172,49 +167,7 @@ export default function Protected({ children }) {
             }
             classNames={"py-2 top-4 -left-[230px] md:-left-[440px] w-max"}
           />
-          {/* start Horizon PRO */}
-          <Dropdown
-            button={
-              <p className="cursor-pointer">
-                <IoMdInformationCircleOutline className="h-4 w-4 text-gray-600 dark:text-white" />
-              </p>
-            }
-            children={
-              <div className="flex w-[350px] flex-col gap-2 rounded-[20px] bg-white p-4 shadow-xl shadow-shadow-500 dark:!bg-navy-700 dark:text-white dark:shadow-none">
-                <div
-                  style={{
-                    backgroundImage: "",
-                    backgroundRepeat: "no-repeat",
-                    backgroundSize: "cover",
-                  }}
-                  className="mb-2 aspect-video w-full rounded-lg"
-                />
-                <a
-                  target="blank"
-                  href="https://horizon-ui.com/pro?ref=live-free-tailwind-react"
-                  className="px-full linear flex cursor-pointer items-center justify-center rounded-xl bg-brand-500 py-[11px] font-bold text-white transition duration-200 hover:bg-brand-600 hover:text-white active:bg-brand-700 dark:bg-brand-400 dark:hover:bg-brand-300 dark:active:bg-brand-200"
-                >
-                  Buy Horizon UI PRO
-                </a>
-                <a
-                  target="blank"
-                  href="https://horizon-ui.com/docs-tailwind/docs/react/installation?ref=live-free-tailwind-react"
-                  className="px-full linear flex cursor-pointer items-center justify-center rounded-xl border py-[11px] font-bold text-navy-700 transition duration-200 hover:bg-gray-200 hover:text-navy-700 dark:!border-white/10 dark:text-white dark:hover:bg-white/20 dark:hover:text-white dark:active:bg-white/10"
-                >
-                  See Documentation
-                </a>
-                <a
-                  target="blank"
-                  href="https://horizon-ui.com/?ref=live-free-tailwind-react"
-                  className="hover:bg-black px-full linear flex cursor-pointer items-center justify-center rounded-xl py-[11px] font-bold text-navy-700 transition duration-200 hover:text-navy-700 dark:text-white dark:hover:text-white"
-                >
-                  Try Horizon Free
-                </a>
-              </div>
-            }
-            classNames={"py-2 top-6 -left-[250px] md:-left-[330px] w-max"}
-            animation="origin-[75%_0%] md:origin-top-right transition-all duration-300 ease-in-out"
-          />
+          
           <div
             className="cursor-pointer text-gray-600"
             onClick={() => {
@@ -260,12 +213,12 @@ export default function Protected({ children }) {
                   >
                     Profile Settings
                   </a>
-                  <a
-                    href=" "
+                  <Link
+                    to="/savedposts"
                     className="mt-3 text-sm text-gray-800 dark:text-white hover:dark:text-white"
                   >
-                    Newsletter Settings
-                  </a>
+                    Saved Posts
+                  </Link>
                   <a
                     href=" "
                     className="mt-3 text-sm font-medium text-red-500 hover:text-red-500"
