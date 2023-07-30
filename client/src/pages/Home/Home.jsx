@@ -11,6 +11,7 @@ import CommentModal from '../../componets/CommentModal/CommentModal';
 import { toast } from 'react-toastify';
 import { AiFillHeart } from 'react-icons/ai';
 import { GoBookmark, GoBookmarkFill } from 'react-icons/go';
+import { useNavigate } from 'react-router-dom';
 
 
 const Spinner = () => {
@@ -21,7 +22,7 @@ const Spinner = () => {
   );
 };
 export default function Home() {
-
+  const nav=useNavigate()
   const user = useSelector((state) => state.auth.user)
   const [loadingUser, setLoadingUser] = useState(true);
   const [posts, setPosts] = useState([]);
@@ -140,11 +141,11 @@ export default function Home() {
                   </div>
                   <p className="mb-4">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce ultricies facilisis justo, sit amet aliquam odio congue vitae.</p>
                   <div className="flex justify-between">
-                    <div>
+                    <div onClick={()=>nav('/followers')}>
                       <h3 className="text-lg font-bold">1200</h3>
                       <p className="text-gray-600">Followers</p>
                     </div>
-                    <div>
+                    <div onClick={()=>nav('/following')}>
                       <h3 className="text-lg font-bold">800</h3>
                       <p className="text-gray-600">Following</p>
                     </div>
