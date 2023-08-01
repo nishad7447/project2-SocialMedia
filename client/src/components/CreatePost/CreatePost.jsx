@@ -186,6 +186,7 @@ export default function CreatePost({setUpdateUI}) {
               className="hidden"
               accept="audio/*"
               onChange={handleAudioChange}
+              disabled
             />
           </label>
           <button

@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import SignIn from "./pages/SignIn/SignIn";
 import SignUp from "./pages/SignUp/SignUp";
 import ForgotPass from "./pages/ForgotPass/ForgotPass";
@@ -10,6 +10,7 @@ import EmailNewPass from "./pages/ForgotPass/EmailNewPass";
 import SavedPosts from "./pages/SavedPosts/SavedPosts";
 import Followers from "./pages/Followers/Followers";
 import Following from "./pages/Following/Following";
+import ErrPage from "./pages/ErrPage/ErrPage";
 
 
 const App = () => {
@@ -25,6 +26,9 @@ const App = () => {
         <Route path="/savedposts" element={<Protected><SavedPosts/></Protected>} />
         <Route path="/followers" element={<Protected><Followers/></Protected>} />
         <Route path="/following" element={<Protected><Following/></Protected>} />
+
+        <Route path="*" element={<Navigate to="/404" />} />
+        <Route path="/404" element={<Protected><ErrPage/></Protected>}/>
       </Routes>
     </Router>
     <ToastContainer className="dark:bg-gray-800" autoClose={3000}/>

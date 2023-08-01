@@ -1,7 +1,7 @@
-import InputField from "../../componets/IniputField/InputField";
-import Checkbox from "../../componets/Checkbox/Checkbox";
-import Card from "../../componets/Card/Card";
-import FixedPlugin from "../../componets/FixedPlugin/FixedPlugin";
+import InputField from "../../components/IniputField/InputField";
+import Checkbox from "../../components/Checkbox/Checkbox";
+import Card from "../../components/Card/Card";
+import FixedPlugin from "../../components/FixedPlugin/FixedPlugin";
 import { Link, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { UserBaseURL } from "../../API";

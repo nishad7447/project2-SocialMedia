@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import Dropdown from '../componets/Dropdown/Dropdown';
+import Dropdown from '../components/Dropdown/Dropdown';
 import { FiAlignJustify } from "react-icons/fi";
 import { Link, useNavigate } from "react-router-dom";
 import { BsArrowBarUp } from "react-icons/bs";

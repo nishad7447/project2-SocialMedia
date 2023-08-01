@@ -2,12 +2,12 @@ import React, { useEffect, useState } from 'react';
 import { BiHeart, BiCommentDots, BiSolidShareAlt } from "react-icons/bi";
 import { SiGooglemessages } from 'react-icons/si'
 import { FaUserPlus } from "react-icons/fa";
-import Card from '../../componets/Card/Card';
-import CreatePost from '../../componets/CreatePost/CreatePost';
+import Card from '../../components/Card/Card';
+import CreatePost from '../../components/CreatePost/CreatePost';
 import { useSelector } from 'react-redux';
 import { axiosInstance } from '../../axios';
 import { UserBaseURL } from '../../API';
-import CommentModal from '../../componets/CommentModal/CommentModal';
+import CommentModal from '../../components/CommentModal/CommentModal';
 import { toast } from 'react-toastify';
 import { AiFillHeart } from 'react-icons/ai';
 import { GoBookmark, GoBookmarkFill } from 'react-icons/go';

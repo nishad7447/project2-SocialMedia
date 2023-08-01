@@ -1,6 +1,6 @@
-import InputField from "../../componets/IniputField/InputField";
-import Card from "../../componets/Card/Card";
-import FixedPlugin from "../../componets/FixedPlugin/FixedPlugin";
+import InputField from "../../components/IniputField/InputField";
+import Card from "../../components/Card/Card";
+import FixedPlugin from "../../components/FixedPlugin/FixedPlugin";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { UserBaseURL } from "../../API";

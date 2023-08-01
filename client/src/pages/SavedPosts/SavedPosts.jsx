@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import Card from '../../componets/Card/Card';
+import Card from '../../components/Card/Card';
 import { GoBookmark, GoBookmarkFill } from 'react-icons/go';
 import { AiFillHeart } from 'react-icons/ai';
 import { BiCommentDots, BiSolidShareAlt, BiHeart } from 'react-icons/bi';
@@ -7,7 +7,7 @@ import { useSelector } from 'react-redux';
 import { axiosInstance } from '../../axios';
 import { UserBaseURL } from '../../API';
 import { toast } from 'react-toastify';
-import CommentModal from '../../componets/CommentModal/CommentModal';
+import CommentModal from '../../components/CommentModal/CommentModal';
 
 const Spinner = () => {
     return (

@@ -10,14 +10,14 @@ const Followers = () => {
     { id: 4, name: 'Emily Brown', profilePic: 'https://via.placeholder.com/150' },
     // Add more followers as needed
   ];
-
+  
   // Filter followers based on search query
   const filteredFollowers = followers.filter((follower) =>
     follower.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 py-8" >
       <h1 className="text-3xl font-bold mt-5 mb-4 dark:text-white">Followers</h1>
       <div className="flex justify-center items-center mb-7">
       <input

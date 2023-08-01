@@ -1,7 +1,7 @@
-import InputField from "../../componets/IniputField/InputField";
+import InputField from "../../components/IniputField/InputField";
 import { GoogleLogin, GoogleOAuthProvider} from "@react-oauth/google";
-import Card from "../../componets/Card/Card";
-import FixedPlugin from "../../componets/FixedPlugin/FixedPlugin";
+import Card from "../../components/Card/Card";
+import FixedPlugin from "../../components/FixedPlugin/FixedPlugin";
 import { Link, useNavigate } from "react-router-dom";
 import React, { useEffect, useState } from "react";
 import axios from "axios";
