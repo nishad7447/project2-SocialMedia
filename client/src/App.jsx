@@ -11,6 +11,9 @@ import SavedPosts from "./pages/SavedPosts/SavedPosts";
 import Followers from "./pages/Followers/Followers";
 import Following from "./pages/Following/Following";
 import ErrPage from "./pages/ErrPage/ErrPage";
+import AdminProtected from "./pages/Admin/AdminProtected";
+import Dashboard from "./pages/Admin/Index";
+import AdminLogin from "./pages/Admin/AdminLogin";
 
 
 const App = () => {
@@ -26,6 +29,10 @@ const App = () => {
         <Route path="/savedposts" element={<Protected><SavedPosts/></Protected>} />
         <Route path="/followers" element={<Protected><Followers/></Protected>} />
         <Route path="/following" element={<Protected><Following/></Protected>} />
+
+        {/* Admin */}
+        <Route path="/admin-login" element={<AdminLogin/>} />
+        <Route path="/admin" element={<AdminProtected><Dashboard/></AdminProtected>} />
 
         <Route path="*" element={<Navigate to="/404" />} />
         <Route path="/404" element={<Protected><ErrPage/></Protected>}/>

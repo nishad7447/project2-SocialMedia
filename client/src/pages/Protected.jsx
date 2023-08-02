@@ -81,13 +81,13 @@ export default function Protected({ children }) {
      <nav  className="sticky top-4 z-40 flex flex-row flex-wrap items-center justify-between rounded-xl bg-white/10 p-2 backdrop-filter backdrop-blur-xl dark:bg-[#0b14374d]" style={{WebkitBackdropFilter: `blur(10px)`}}>
    <div className="ml-[6px]">
           <div className="h-6 w-[224px] pt-1">
-            <a
+            <Link
               className=" flex text-navy-700 hover:underline dark:text-white dark:hover:text-white"
-              href=" "
-              onClick={()=>{nav(-1)}}
+              onClick ={()=> nav(-1)}
+              // onClick={()=>{window.history.back()}}
             >
               Back<TiArrowBack className='mt-1' />
-            </a>
+            </Link>
 
           </div>
           <p className="shrink text-[33px] capitalize text-blue-500">
