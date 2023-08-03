@@ -17,8 +17,7 @@ export default function AdminLogin() {
   const nav = useNavigate();
 
   useEffect(() => {
-    if (localStorage.getItem("jwtToken")) {
-     
+    if (localStorage.getItem("adminToken")&&localStorage.getItem('role')) {
       nav("/admin");
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -58,8 +57,8 @@ export default function AdminLogin() {
       .then((res) => {
         console.log(res.data, "data");
         if (res.data.message === "Login Success") {
-          localStorage.setItem("jwtToken", JSON.stringify(res.data.token));
-          localStorage.setItem("user", JSON.stringify(res.data.user));
+          localStorage.setItem("adminToken", JSON.stringify(res.data.token));
+          localStorage.setItem("role", JSON.stringify(res.data.role));
           window.location.href = "/admin";
         }
         if (res.data.success) {

@@ -206,13 +206,13 @@ export const getUser = async (req, res) => {
   try {
     const user = await User.findById({ _id: req.body.userId });
     user.Password = "";
-    res.send({
+    res.status(200).send({
       success: true,
       message: "user fetched success",
       data: user,
     });
   } catch (err) {
-    res.send({
+    res.status(400).send({
       success: false,
       message: err.message,
     });

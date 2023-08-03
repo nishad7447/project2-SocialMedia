@@ -7,6 +7,20 @@ const adminCredentials = {
   };
 
 const adminController={
+    verifyAdmin:async(req,res)=>{
+        try{
+            res.status(200).send({ 
+                success: true,
+                message: "user fetched success",
+                role:req.userRole
+            })
+        }catch(err){
+            res.status(400).send({
+                success: false,
+                message: err.message,
+              });
+        }
+    },
     login:async(req,res)=>{
         try {
             const { Email, Password } = req.body;
