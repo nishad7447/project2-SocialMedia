@@ -1,7 +1,8 @@
 
 import jwt from 'jsonwebtoken'
+import User from '../model/user.js';
 
-export const auth = (req, res, next)=>{
+export const auth = async (req, res, next)=>{
     try{
         let token = req.header('authorization').split(' ')[1];
         token = token.replaceAll('"', '');
@@ -10,12 +11,25 @@ export const auth = (req, res, next)=>{
         if (decryptedToken.role === 'admin') {
 
             req.userRole = 'admin';
+            next()
+
           } else {
 
             req.userRole = 'user';
             req.body.userId = decryptedToken.id;
+
+            await User.findById(req.body.userId)
+            .then((res)=>{
+                if (res.Blocked){
+                    
+                    throw new Error("jwt expired");
+                }else{
+                    next()
+                }
+            })
+            
           }
-        next()
+       
     }catch(err){
         console.log(err,"Error in auth midware")
         res.send({

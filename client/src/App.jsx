@@ -14,6 +14,7 @@ import ErrPage from "./pages/ErrPage/ErrPage";
 import AdminProtected from "./pages/Admin/AdminProtected";
 import Dashboard from "./pages/Admin/Index";
 import AdminLogin from "./pages/Admin/AdminLogin";
+import UserManagement from "./pages/Admin/UserManagement/UserManagement";
 
 
 const App = () => {
@@ -33,6 +34,7 @@ const App = () => {
         {/* Admin */}
         <Route path="/admin-login" element={<AdminLogin/>} />
         <Route path="/admin" element={<AdminProtected><Dashboard/></AdminProtected>} />
+        <Route path="/usermanage" element={<AdminProtected><UserManagement/></AdminProtected>}/>
 
         <Route path="*" element={<Navigate to="/404" />} />
         <Route path="/404" element={<Protected><ErrPage/></Protected>}/>

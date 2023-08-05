@@ -7,6 +7,7 @@ const initialState = {
   message:null,
   admin: null,
   adminToken: null,
+  online:false
 };
 
 export const authSlice = createSlice({
@@ -28,15 +29,19 @@ export const authSlice = createSlice({
     setLogout: (state) => {
       state.user = null;
       state.token = null;
+      state.online=false
     },
    
     setMessage:(state,action)=>{
       state.message=action.payload
+    },
+    setOnline:(state,action) =>{
+      state.online = action.payload
     }
   },
 });
 
-export const { setMode, setLogin, setLogout, setMessage, setAdminLogin } =
+export const { setMode, setLogin, setLogout, setMessage, setAdminLogin, setOnline } =
   authSlice.actions;
 export default authSlice.reducer;
 

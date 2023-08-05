@@ -13,4 +13,5 @@ authRoutes.get("/password-reset/:userId/:token",emailResetPass)
 authRoutes.post('/googleSignUp',googleSignUp)
 authRoutes.post('/googleSignIn',googleSignIn)
 
+
 export default authRoutes;

@@ -17,4 +17,7 @@ userRoutes.get('/like/:id',auth,userController.like)
 //SavedPost
 userRoutes.get('/savedpost/:id',auth,userController.savedpost)
 userRoutes.get('/getAllSavedPosts',auth,userController.getAllSavedPosts)
+
+//logout
+userRoutes.get('/logout/:id',userController.logout)
 export default userRoutes 

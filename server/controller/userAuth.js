@@ -43,21 +43,23 @@ export const register = async (req, res) => {
       "https://cdn.pixabay.com/photo/2014/03/24/13/49/avatar-294480_1280.png",
       "https://cdn.pixabay.com/photo/2012/04/26/19/43/profile-42914_1280.png",
       "https://cdn.pixabay.com/photo/2016/11/08/15/21/user-1808597_1280.png",
-      "https://cdn.pixabay.com/photo/2017/11/10/05/48/user-2935527_1280.png"
+      "https://cdn.pixabay.com/photo/2017/11/10/05/48/user-2935527_1280.png",
     ];
-    
+
     // Select a random profile picture URL
-    const randomProfilePic = profilePics[Math.floor(Math.random() * profilePics.length)];
-    
+    const randomProfilePic =
+      profilePics[Math.floor(Math.random() * profilePics.length)];
+
     const newUser = new User({
       Name,
       UserName,
       Email,
       Password: passwordHash,
       Mobile,
-      ProfilePic: randomProfilePic // Add the selected profile picture URL to the newUser object
+      ProfilePic: randomProfilePic, // Add the selected profile picture URL to the newUser object
+      Blocked:false
     });
-    
+
     await newUser.save();
 
     res.json({ message: "User signed up successfully" });
@@ -81,10 +83,19 @@ export const login = async (req, res) => {
         .json({ message: "Password is wrong, Try google login" });
     }
 
+    if(user.Blocked){
+      return res
+        .status(400)
+        .json({message: "User is blocked"})
+    }
     const isMatch = await bcrypt.compare(Password, user.Password);
     if (!isMatch) {
       return res.status(400).json({ message: "Incorrect credentials" });
     }
+
+    user.Online = true;
+    await user.save();
+
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
       expiresIn: "1hr",
     });
@@ -131,32 +142,29 @@ export const forgotOtpSend = async (req, res) => {
   }
 };
 
-export const emailResetPass= async (req, res) => {
+export const emailResetPass = async (req, res) => {
   try {
     const { userId, token } = req.params;
 
     // Find the user based on the userId
-    const user = await User.findById({_id:userId});
+    const user = await User.findById({ _id: userId });
     console.log(user, "user here with token");
 
-    if (!user)
-      return res.status(400).send("Invalid password reset link");
+    if (!user) return res.status(400).send("Invalid password reset link");
 
     // Find the token associated with the user
     const resetToken = await Token.findOne({ userId, token });
     console.log(resetToken, "here with token");
 
-    if (!resetToken)
-      return res.status(400).send("Invalid password reset link");
+    if (!resetToken) return res.status(400).send("Invalid password reset link");
 
     // Send the response to the server
-    res.json({ Email:user.Email,userId, token });
-
+    res.json({ Email: user.Email, userId, token });
   } catch (error) {
     res.status(500).send("An error occurred");
     console.log(error);
   }
-}
+};
 
 export const forgotOtpSubmit = async (req, res) => {
   try {
@@ -235,6 +243,7 @@ export const googleSignUp = async (req, res) => {
     ProfilePic: picture,
     jti,
     UserName: given_name,
+    Blocked:false
   });
 
   newUser
@@ -259,8 +268,17 @@ export const googleSignIn = async (req, res) => {
     const user = await User.findOne({ Email: email });
 
     if (!user) {
-      res.status(400).json({ message: "User does not exist" });
+     return res.json({success:false, message: "User does not exist" });
     } else {
+
+      if(user.Blocked){
+        return res
+          .json({success:false,message: "User is blocked"})
+      }
+
+      user.Online = true;
+      await user.save()
+
       const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
         expiresIn: "1hr",
       });
@@ -272,5 +290,3 @@ export const googleSignIn = async (req, res) => {
     res.status(500).send("Internal server error");
   }
 };
-
-

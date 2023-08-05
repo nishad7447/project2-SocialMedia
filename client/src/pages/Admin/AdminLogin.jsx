@@ -6,7 +6,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { AdminBaseURL } from "../../API";
-import { axiosInstance } from "../../axios";
+import { axiosAdminInstance } from "../../axios";
 
 export default function AdminLogin() {
   const [email, setEmail] = useState("");
@@ -52,7 +52,7 @@ export default function AdminLogin() {
       return;
     }
 
-    axiosInstance
+    axiosAdminInstance
       .post(`${AdminBaseURL}/login`, { Email: email, Password: password })
       .then((res) => {
         console.log(res.data, "data");

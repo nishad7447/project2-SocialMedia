@@ -209,6 +209,19 @@ const userController = {
       console.error('Error fetching saved posts:', error);
       res.status(500).json({ error: 'Internal server error' });
     }
+  },
+  logout:async(req,res)=>{
+    try {
+      const userId = req.params.id;
+      const user = await User.findById(userId);
+       user.Online = false;
+       console.log(userId,user)
+      await user.save();
+      res.status(200).json({ message: "Logout success" });
+    } catch (err) {
+      console.log(err);
+      res.status(500).json({ error: "Internal server error" });
+    }
   }
   
 };

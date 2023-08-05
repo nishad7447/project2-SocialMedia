@@ -73,6 +73,8 @@ export default function SignIn() {
           setPassErr(err.response.data.message);
         } else if (err?.response.data.message==="Password is wrong, Try google login"){
           setPassErr(err.response.data.message)
+        } else if (err?.response.data.message === "User is blocked"){
+          setFormErr(err?.response.data.message)
         }
         // console.log(err,'login post error ')
       });
@@ -123,7 +125,13 @@ export default function SignIn() {
                       credentialResponse
                     )
                     .then((res) => {
-                      console.log(res, "loged in");
+                      if(!res.data.success){
+                        if(res.data.message === "User does not exist" ){
+                          setEmailErr(res.data.message)
+                        }else if(res.data.message === "User is blocked"){
+                          setEmailErr(res.data.message)
+                        }
+                      }
                       if (res.data.message === "Login Success") {
                         localStorage.setItem(
                           "jwtToken",
@@ -137,7 +145,7 @@ export default function SignIn() {
                       }
                     })
                     .catch((err) => {
-                      console.log("login error");
+                      console.log(err,"login error");
                       if (
                         err?.message === "Request failed with status code 400"
                       ) {

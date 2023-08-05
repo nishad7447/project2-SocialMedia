@@ -92,7 +92,7 @@ export default function ComplexTable(props) {
     debugTable: true
   })
 
-  const ROWS_PER_PAGE = 5;
+  const ROWS_PER_PAGE = 7;
     const [currentPage, setCurrentPage] = useState(0);
     const totalPages = Math.ceil(data.length / ROWS_PER_PAGE);
     const startIndex = currentPage * ROWS_PER_PAGE;
