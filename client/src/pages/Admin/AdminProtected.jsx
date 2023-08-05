@@ -94,13 +94,13 @@ const AdminNavbar = ({ children }) => {
       </li>
       <li className="relative">
         <Link to="/usermanage" className="flex hover:underline dark:text-white">
-          <FaUsers size={24} className=' mr-1'/>  User
+          <FaUsers size={24} className=' mr-1'/>  Users
         </Link>
       </li>
       <li>
-        <a href="/" className="flex hover:underline dark:text-white">
-         <CgFeed size={24} className=' mr-1'/> Post 
-        </a>
+        <Link to="/postmanage" className="flex hover:underline dark:text-white">
+         <CgFeed size={24} className=' mr-1'/> Posts 
+        </Link>
       </li>
       <li>
         <a href="/" className="flex hover:underline dark:text-white">

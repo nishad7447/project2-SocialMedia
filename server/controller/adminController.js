@@ -1,5 +1,6 @@
 import jwt from "jsonwebtoken";
 import User from "../model/user.js";
+import Post from "../model/post.js";
 
 const adminCredentials = {
   Email: "admin@gmail.com",
@@ -67,6 +68,21 @@ const adminController = {
         .json({ message: "error users block or unblock users", error });
     }
   },
+  allposts:async(req,res)=>{
+    try {
+
+      const posts = await Post.find()
+        .sort({ createdAt: -1 })
+        .populate("userId", "ProfilePic UserName Name")
+        .exec();
+      res.status(200).json({success:true, posts})
+    } catch (error) {
+      console.log(error, " fetching all posts failed");
+      res
+        .status(400)
+        .json({ message: "fetching all posts failed", error });
+    }
+  }
 };
 
 export default adminController;

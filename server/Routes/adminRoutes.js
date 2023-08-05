@@ -10,6 +10,7 @@ adminRoutes.post('/login',adminController.login)
 //UserManagement
 adminRoutes.get('/allUsers',auth,adminController.allUsers)
 adminRoutes.put('/userBlockOrUnblock',auth,adminController.userBlockOrUnblock)
+adminRoutes.get('/allposts',auth,adminController.allposts)
 
 
 export default adminRoutes
