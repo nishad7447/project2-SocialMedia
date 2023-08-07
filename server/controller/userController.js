@@ -284,6 +284,35 @@ const userController = {
       console.log(error);
       res.status(500).json({ error: "Internal server error in reportPost" });
     }
+  },
+  userProfile: async (req, res) => {
+    try {
+      const userId=req.params.id
+      const posts = await Post.find({ userId: userId })
+        .sort({ createdAt: -1 })
+        .populate("userId", "ProfilePic UserName Name")
+        .exec();
+
+      const userFields = ["ProfilePic", "UserName"];
+      let users = await User.find().select(userFields.join(" "));
+      users = users.filter((users) => users._id.toString() !== userId);
+
+      res.status(200).json({ posts, users });
+    } catch (error) {
+      console.log(error);
+      res.status(500).json({ message: `Server error ${error}` });
+    }
+  },
+  userDetail:async(req,res)=>{
+    try{
+      const userId=req.params.id
+      const user=await User.findById(userId)
+      user.Password=""
+      res.status(200).json({user,message:"user fetched successfully"})
+    }catch (error){
+      console.log(error,'user fetched failed')
+      res.status(400).json({message:"user fetched failed",error})
+    }
   }
 };
 

@@ -7,7 +7,7 @@ const Following = () => {
   const followers = [
     { id: 1, name: 'John Doe', profilePic: 'https://via.placeholder.com/150' },
     { id: 2, name: 'Jane Smith', profilePic: 'https://via.placeholder.com/150' },
-    { id: 3, name: 'Mike Johnson', profilePic: 'https://via.placeholder.com/150' },
+    { id: 3, name: 'MiSearchke Johnson', profilePic: 'https://via.placeholder.com/150' },
     { id: 4, name: 'Emily Brown', profilePic: 'https://via.placeholder.com/150' },
     // Add more followers as needed
   ];

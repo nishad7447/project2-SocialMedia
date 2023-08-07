@@ -24,6 +24,10 @@ userRoutes.delete('/deletePost/:id',auth,userController.deletePost)
 //reportPost
 userRoutes.put('/reportPost',auth,userController.reportPost)
 
+//userProfile
+userRoutes.get('/userProfile/:id',auth,userController.userProfile)
+userRoutes.get('/userDetail/:id',auth,userController.userDetail)
+
 //logout
 userRoutes.get('/logout/:id',userController.logout)
 export default userRoutes 

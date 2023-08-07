@@ -26,13 +26,19 @@ const Spinner = () => {
 };
 export default function Home() {
   const nav = useNavigate()
-  const user = useSelector((state) => state.auth.user)
+  const {user,search} = useSelector((state) => state.auth)
   const [loadingUser, setLoadingUser] = useState(true);
   const [posts, setPosts] = useState([]);
   const [suggestedUsers, setSuggestedUsers] = useState([])
   const [updateUI, setUpdateUI] = useState(false)
 
-
+  useEffect(()=>{
+    if(search===''){
+      setUpdateUI((prev)=>!prev)
+    }
+    setPosts(posts.filter((post)=>post.content.toLowerCase().includes(search.toLowerCase())))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  },[search])
   useEffect(() => {
     axiosInstance.get(`${UserBaseURL}/getAllPosts`)
       .then((res) => {
@@ -144,72 +150,78 @@ export default function Home() {
 
 
   //deleteMODAL
-  const [deleteModal,setDeleteModal]=useState(false)
-  const [deletePostId,setDeletePostId]=useState(null)
+  const [deleteModal, setDeleteModal] = useState(false)
+  const [deletePostId, setDeletePostId] = useState(null)
 
-  const showDeleteModal=(postId)=>{
+  const showDeleteModal = (postId) => {
     setDeletePostId(postId)
     setDeleteModal(true)
   }
 
-  const deleteModalConfirm=()=>{
+  const deleteModalConfirm = () => {
     setDeleteModal(false)
     axiosInstance.delete(`${UserBaseURL}/deletePost/${deletePostId}`)
-    .then((res) => {
-      console.log(res,"delete post res")
-      if (res.data.success) {
-        setUpdateUI((prev) => !prev);
-        toast.success(res.data.message);
-      }
-    })
-    .catch((err) => {
-      toast.error(err.data.message);
-      console.log(err, "delete post error");
-    });
+      .then((res) => {
+        console.log(res, "delete post res")
+        if (res.data.success) {
+          setUpdateUI((prev) => !prev);
+          toast.success(res.data.message);
+        }
+      })
+      .catch((err) => {
+        toast.error(err.data.message);
+        console.log(err, "delete post error");
+      });
   }
 
-  const deleteModalCancel=()=>{
+  const deleteModalCancel = () => {
     setDeleteModal(false)
   }
 
   //reportMODAL
-  const [reportModal,setReportModal] = useState(false)
-  const [reportPostId,setReportPostId]=useState(null)
-  const showReportModal=(postId)=>{
+  const [reportModal, setReportModal] = useState(false)
+  const [reportPostId, setReportPostId] = useState(null)
+  const showReportModal = (postId) => {
     setReportPostId(postId)
     setReportModal(true)
   }
-  const reportModalCancel=()=>{
+  const reportModalCancel = () => {
     setReportModal(false)
   }
-  
-   const reportOptions = [
+
+  const reportOptions = [
     { label: 'Inappropriate content', value: 'inappropriate' },
     { label: 'Spam', value: 'spam' },
     { label: 'Hate speech', value: 'hate_speech' },
     // Add more report options as needed
   ];
 
-  const [selectedOpt,setSelecetedOpt] = useState(null)
-  const selectedReason=(reason)=>{
+  const [selectedOpt, setSelecetedOpt] = useState(null)
+  const selectedReason = (reason) => {
     setSelecetedOpt(reason)
   }
 
-  const reportModalConfirm=()=>{
+  const reportModalConfirm = () => {
     setReportModal(false)
-    axiosInstance.put(`${UserBaseURL}/reportPost`,{postId:reportPostId,reason:selectedOpt})
-    .then((res) => {
-      console.log(res,"report post res")
-      if (res.data.success) {
-        setUpdateUI((prev) => !prev);
-        toast.success(res.data.message);
-      }
-    })
-    .catch((err) => {
-      console.log(err, "report post error");
-      toast.error(err?.data?.message);
-    });
+    axiosInstance.put(`${UserBaseURL}/reportPost`, { postId: reportPostId, reason: selectedOpt })
+      .then((res) => {
+        console.log(res, "report post res")
+        if (res.data.success) {
+          setUpdateUI((prev) => !prev);
+          toast.success(res.data.message);
+        }
+      })
+      .catch((err) => {
+        console.log(err, "report post error");
+        toast.error(err?.data?.message);
+      });
   }
+
+  const handleGoToUser =(userId)=>{
+    nav(`/profile/${userId}`)
+  }
+
+  
 
   return (
     <>
@@ -217,64 +229,70 @@ export default function Home() {
         loadingUser ? (
           <Spinner />
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-12 ml-4 mr-4">
+          <div className=" grid grid-cols-1 md:grid-cols-4 gap-4 mt-12 ml-4 mr-4">
 
             {/* First Card - 1/4 of the row */}
             <div className="col-span-1">
-              <Card>
-                <div className="p-4">
-                  <div className="flex items-center mb-4">
-                    <img className="w-12 h-12 rounded-full mr-4" src={user?.ProfilePic} alt="User Avatar" />
-                    <div>
-                      <h2 className="text-xl font-bold">{user?.Name}</h2>
-                      <p className="text-gray-600">@{user?.UserName}</p>
-                    </div>
-                  </div>
-                  <p className="mb-4">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce ultricies facilisis justo, sit amet aliquam odio congue vitae.</p>
-                  <div className="flex justify-between">
-                    <div onClick={() => nav('/followers')}>
-                      <h3 className="text-lg font-bold">1200</h3>
-                      <p className="text-gray-600">Followers</p>
-                    </div>
-                    <div onClick={() => nav('/following')}>
-                      <h3 className="text-lg font-bold">800</h3>
-                      <p className="text-gray-600">Following</p>
-                    </div>
-                    <div>
-                      <h3 className="text-lg font-bold">250</h3>
-                      <p className="text-gray-600">Posts</p>
-                    </div>
-                  </div>
-                </div>
-              </Card>
-
-              {/* Friend Suggestion Card */}
-              <Card extra="mt-4">
-                <div className="p-4">
-                  <h2 className="text-lg font-bold mb-2">Friend Suggestions</h2>
-                  {/* Display the list of friend suggestions */}
-                  {suggestedUsers.map((friend) => (
-                    <div key={friend?._id} className="flex items-center justify-between mb-4">
-                      <div className="flex items-center">
-                        <img className="w-10 h-10 rounded-full mr-2" src={friend?.ProfilePic} alt="Friend Avatar" />
-                        <h3 className="text-sm font-bold">{friend?.UserName}</h3>
+              <div className="sticky top-36">
+                <Card>
+                  <div className="p-4">
+                    <div className="flex items-center mb-4">
+                      <img className="w-12 h-12 rounded-full mr-4" src={user?.ProfilePic} alt="User Avatar" />
+                      <div>
+                        <h2 className="text-xl font-bold">{user?.Name}</h2>
+                        <p className="text-gray-600">@{user?.UserName}</p>
                       </div>
-                      <FaUserPlus className="w-5 h-5 text-blue-500 hover:text-blue-600" />
                     </div>
-                  ))}
-                </div>
-              </Card>
+                    <p className="mb-4">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce ultricies facilisis justo, sit amet aliquam odio congue vitae.</p>
+                    <div className="flex justify-between">
+                      <div onClick={() => nav('/followers')}>
+                        <h3 className="text-lg font-bold">1200</h3>
+                        <p className="text-gray-600">Followers</p>
+                      </div>
+                      <div onClick={() => nav('/following')}>
+                        <h3 className="text-lg font-bold">800</h3>
+                        <p className="text-gray-600">Following</p>
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-bold">250</h3>
+                        <p className="text-gray-600">Posts</p>
+                      </div>
+                    </div>
+                  </div>
+                </Card>
+
+                {/* Friend Suggestion Card */}
+                <Card extra="mt-4">
+                  <div className="p-4">
+                    <h2 className="text-lg font-bold mb-2">Friend Suggestions</h2>
+                    {/* Display the list of friend suggestions */}
+                    {suggestedUsers.map((friend) => (
+                      <div key={friend?._id} className="flex items-center justify-between mb-4">
+                        <div className="flex items-center">
+                          <img className="w-10 h-10 rounded-full mr-2" src={friend?.ProfilePic} alt="Friend Avatar" />
+                          <h3 className="text-sm font-bold">{friend?.UserName}</h3>
+                        </div>
+                        <FaUserPlus className="w-5 h-5 text-blue-500 hover:text-blue-600" />
+                      </div>
+                    ))}
+                  </div>
+                </Card>
+              </div>
             </div>
             {/* Second Card - 1/2 of the row */}
             <div className="col-span-1 md:col-span-2 overflow-y-auto ">
               <CreatePost setUpdateUI={setUpdateUI} />
-              {posts.map((post) => (
+              {
+              posts.length === 0 ?
+              <p className='text-xl font-semibold flex justify-center mt-48'>No posts</p>
+              :
+              posts.map((post) => (
                 <Card key={post.id} extra='mb-4'>
                   <div className="p-4">
                     <div className="flex relative items-center mb-4">
                       <img className="w-10 h-10 rounded-full mr-2" src={post?.userId?.ProfilePic} alt="User Avatar" />
                       <div>
-                        <h3 className="text-sm font-bold">{post?.userId?.UserName}</h3>
+                        <h3 className="text-sm font-bold" onClick={()=>handleGoToUser(post.userId._id)}>{post?.userId?.UserName}</h3>
                         <p className="text-xs text-gray-600">{new Date(post?.createdAt).toLocaleString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
                       </div>
                       <SlOptionsVertical
@@ -287,9 +305,9 @@ export default function Home() {
                           <ul>
                             {
                               post?.userId?.UserName === user.UserName ?
-                                <li onClick={()=>showDeleteModal(post._id)} className='flex p-2 text-sm'><MdDeleteForever className='text-red-500 mr-1 ' size={20} /> Delete</li>
+                                <li onClick={() => showDeleteModal(post._id)} className='flex p-2 text-sm'><MdDeleteForever className='text-red-500 mr-1 ' size={20} /> Delete</li>
                                 :
-                                <li onClick={()=>showReportModal(post._id)} className='flex p-2 text-sm'><MdReportProblem className='text-yellow-500 mr-1 ' size={20} /> Report</li>
+                                <li onClick={() => showReportModal(post._id)} className='flex p-2 text-sm'><MdReportProblem className='text-yellow-500 mr-1 ' size={20} /> Report</li>
                             }
                             {/* Other options related to the current user's post */}
                           </ul>
@@ -365,49 +383,50 @@ export default function Home() {
               ))}
             </div>
             {/* Third Card - 1/4 of the row */}
-            <div className="col-span-1">
-              <Card>
-                <div className="p-4">
-                  <div className="flex justify-between items-center">
-                    <h2 className="text-lg font-bold mb-2">Sponsored Ad</h2>
-                    <a className="text-gray-500 text-sm font-bold" href="https://www.example.com/create-ad" target="_blank" rel="noopener noreferrer">
-                      Create Ad
-                    </a>
-                  </div>
-                  {/* eslint-disable-next-line jsx-a11y/img-redundant-alt */}
-                  <img className="w-full h-auto rounded-lg mb-4" src="https://via.placeholder.com/800x400" alt="Ad Image" />
-                  <div className="flex justify-between">
-
-                    <div className="flex items-center mb-2">
-                      <p className="text-sm text-gray-500">Sponsored</p>
+            <div className="col-span-1  sticky top-36">
+              <div className="sticky top-36">
+                <Card>
+                  <div className="p-4">
+                    <div className="flex justify-between items-center">
+                      <h2 className="text-lg font-bold mb-2">Sponsored Ad</h2>
+                      <a className="text-gray-500 text-sm font-bold" href="https://www.example.com/create-ad" target="_blank" rel="noopener noreferrer">
+                        Create Ad
+                      </a>
                     </div>
-                    <div className="flex items-center mb-2">
-                      <a className="text-sm text-blue-500" href="https://www.example.com" target="_blank" rel="noopener noreferrer">Example.com</a>
-                    </div>
+                    {/* eslint-disable-next-line jsx-a11y/img-redundant-alt */}
+                    <img className="w-full h-auto rounded-lg mb-4" src="https://via.placeholder.com/800x400" alt="Ad Image" />
+                    <div className="flex justify-between">
 
-                  </div>
-                  <p className="mb-4 text-sm">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce ultricies facilisis justo, sit amet aliquam odio congue vitae.</p>
-
-                </div>
-              </Card>
-
-              <Card extra="mt-4">
-                <div className="p-4">
-                  <h2 className="text-lg font-bold mb-2">Friends List</h2>
-                  {/* Display the list of friends */}
-                  {friends.map((friend) => (
-                    <div key={friend.id} className="flex items-center justify-between mb-4">
-                      <div className="flex items-center">
-                        <img className="w-10 h-10 rounded-full mr-2" src={friend.avatar} alt="Friend Avatar" />
-                        <h3 className="text-sm font-bold">{friend.name}</h3>
+                      <div className="flex items-center mb-2">
+                        <p className="text-sm text-gray-500">Sponsored</p>
                       </div>
-                      <SiGooglemessages className="w-5 h-5 text-blue-500 hover:text-blue-600" />
-                    </div>
-                  ))}
-                </div>
-              </Card>
-            </div>
+                      <div className="flex items-center mb-2">
+                        <a className="text-sm text-blue-500" href="https://www.example.com" target="_blank" rel="noopener noreferrer">Example.com</a>
+                      </div>
 
+                    </div>
+                    <p className="mb-4 text-sm">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce ultricies facilisis justo, sit amet aliquam odio congue vitae.</p>
+
+                  </div>
+                </Card>
+
+                <Card extra="mt-4">
+                  <div className="p-4">
+                    <h2 className="text-lg font-bold mb-2">Friends List</h2>
+                    {/* Display the list of friends */}
+                    {friends.map((friend) => (
+                      <div key={friend.id} className="flex items-center justify-between mb-4">
+                        <div className="flex items-center">
+                          <img className="w-10 h-10 rounded-full mr-2" src={friend.avatar} alt="Friend Avatar" />
+                          <h3 className="text-sm font-bold">{friend.name}</h3>
+                        </div>
+                        <SiGooglemessages className="w-5 h-5 text-blue-500 hover:text-blue-600" />
+                      </div>
+                    ))}
+                  </div>
+                </Card>
+              </div>
+            </div>
           </div>
         )
       }
@@ -415,15 +434,15 @@ export default function Home() {
         <CommentModal postId={clickedPostId} closeModal={closeModal} />
       )}
       {deleteModal && (
-         <Modal
+        <Modal
           Heading={"Delete Post"}
           content={"Are you sure to delete this post ?"}
-           onCancel={deleteModalCancel}
-           onConfirm={deleteModalConfirm}
-         />
+          onCancel={deleteModalCancel}
+          onConfirm={deleteModalConfirm}
+        />
       )}
       {reportModal && (
-         <Modal
+        <Modal
           Heading={"Report Post"}
           content={
             <div>
@@ -435,7 +454,7 @@ export default function Home() {
                       name="reportOption"
                       value={option.value}
                       className="mr-1"
-                      onClick={()=>selectedReason(option.label)}
+                      onClick={() => selectedReason(option.label)}
                     />
                     {option.label}
                   </label>
@@ -443,9 +462,9 @@ export default function Home() {
               ))}
             </div>
           }
-           onCancel={reportModalCancel}
-           onConfirm={reportModalConfirm}
-         />
+          onCancel={reportModalCancel}
+          onConfirm={reportModalConfirm}
+        />
       )}
     </>
   );

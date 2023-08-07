@@ -8,7 +8,7 @@ import { RiMoonFill, RiSunFill } from "react-icons/ri";
 import { IoMdNotificationsOutline } from "react-icons/io";
 import { axiosInstance } from '../axios';
 import { UserBaseURL } from '../API';
-import { setLogin, setLogout, setMessage, setOnline } from '../redux/slice';
+import { setLogin, setLogout, setMessage, setOnline, setSearch } from '../redux/slice';
 import { useDispatch, useSelector } from 'react-redux'
 import { TiArrowBack } from 'react-icons/ti'
 import axios from 'axios';
@@ -79,6 +79,8 @@ export default function Protected({ children }) {
     .catch((err)=>{console.log(err)})
   }
   console.log(token, user, "<=reduxil stored | err msg=>", message)
+
+  const {search}=useSelector((state)=>state.auth)
   return (
     <div className={`flex flex-col min-h-screen  transition-all bg-gray-100 dark:bg-gray-900`}>
       {loadingUser ? (
@@ -101,7 +103,7 @@ export default function Protected({ children }) {
               </div>
               <p className="shrink text-[33px] capitalize text-blue-500">
                 <Link
-                  to="#"
+                  to="/"
                   className="font-bold capitalize hover:text-navy-700  dark:hover:text-white"
                 >
                   OnlyFriends
@@ -118,6 +120,8 @@ export default function Protected({ children }) {
                   type="text"
                   placeholder="Search..."
                   className="block h-full w-full rounded-full bg-lightPrimary text-sm font-medium text-navy-700 outline-none placeholder:!text-gray-400 dark:bg-navy-900 dark:text-white dark:placeholder:!text-white sm:w-fit"
+                  value={search}
+                  onChange={(e)=> dispatch(setSearch(e.target.value))}
                 />
               </div>
               <span
@@ -216,12 +220,12 @@ export default function Protected({ children }) {
                     <div className="mt-3 h-px w-full bg-gray-200 dark:bg-white/20 " />
 
                     <div className="mt-3 ml-4 flex flex-col">
-                      <a
-                        href=" "
+                      <Link
+                        to="/profile"
                         className="text-sm text-gray-800 dark:text-white hover:dark:text-white"
                       >
                         Profile Settings
-                      </a>
+                      </Link>
                       <Link
                         to="/savedposts"
                         className="mt-3 text-sm text-gray-800 dark:text-white hover:dark:text-white"
