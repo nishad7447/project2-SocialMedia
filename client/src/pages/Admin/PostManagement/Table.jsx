@@ -1,8 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import CardMenu from "../../../components/Card/CardMenu";
 import Card from "../../../components/Card/Card";
-import {  MdChevronLeft, MdChevronRight } from "react-icons/md";
-import { CgOptions } from 'react-icons/cg'
+import { MdChevronLeft, MdChevronRight, MdOutlineDeleteForever } from "react-icons/md";
 import { AdminBaseURL } from "../../../API";
 import { toast } from 'react-toastify';
 import { axiosAdminInstance } from "../../../axios";
@@ -55,22 +54,46 @@ export default function Table({ tableData, setUpdateUI }) {
   const sortedData = sortData(tableData, sorting.columnId, sorting.order);
 
   const [showConfirmationModal, setShowConfirmationModal] = useState(false);
-  const [userToBlock, setUserToBlockOrUnblock] = useState(null);
+  const [postId, setPostId] = useState(null)
+  const [reports, setReports] = useState([]);
 
 
-  const handleReportClick = (postId) => {
-    // Here you can store the postId in a state and open the confirmation modal
-    setUserToBlockOrUnblock(postId); // Replace `postId` with your post ID property
+  const handleReportClick = (postId, reports) => {
+    setPostId(postId);
+    setReports(reports)
     setShowConfirmationModal(true);
   };
 
   const handleCancel = () => {
-
+    setPostId(null)
     setShowConfirmationModal(false);
   };
 
-  const handleConfirm =()=>{
-    console.log()
+//delete posts
+  const [showDelModal,setDelModal]=useState(false)
+
+  const handleDeleteModal=(postId)=>{
+    setPostId(postId)
+    setDelModal(true)
+  }
+  const handleDelCancel=()=>{
+    setPostId(null)
+    setDelModal(false)
+  }
+  const handleConfirm = () => {
+    setDelModal(false)
+    axiosAdminInstance.delete(`${AdminBaseURL}/deletePost/${postId}`)
+    .then((res) => {
+      console.log(res,"delete post res")
+      if (res.data.success) {
+        setUpdateUI((prev) => !prev);
+        toast.success(res.data.message);
+      }
+    })
+    .catch((err) => {
+      toast.error(err.data.message);
+      console.log(err, "delete post error");
+    });
   }
 
 
@@ -184,15 +207,18 @@ export default function Table({ tableData, setUpdateUI }) {
 
                 </td>
                 <td className="min-w-[150px] border-white/0 py-3 pr-4">
-                <p
-                    onClick={() => handleReportClick(row._id)} 
+                  <p
+                    onClick={() => handleReportClick(row._id, row.reports)}
                     className="ml-1 cursor-pointer text-sm font-bold text-navy-700 dark:text-white"
                   >
-                    {row.reportCount} Reports
+                    <span className="text-red-500 mr-2">
+                      {row.reports.length}
+                    </span>
+                    - &nbsp; Reports
                   </p>
                 </td>
                 <td className="min-w-[150px] border-white/0 py-3 pr-4">
-                <CgOptions />
+                  <MdOutlineDeleteForever className="text-red-500 ml-3" size={24} onClick={()=>handleDeleteModal(row._id)} />
                 </td>
               </tr>
             ))}
@@ -234,16 +260,76 @@ export default function Table({ tableData, setUpdateUI }) {
       </div>
       {showConfirmationModal && (
         <ConfirmationModal
+          reports={reports}
           onCancel={handleCancel}
+        />
+      )}
+      {showDelModal && (
+        <DelModal
           onConfirm={handleConfirm}
+          onCancel={handleDelCancel}
         />
       )}
     </Card>
   );
 }
+// delete modal
+const DelModal=({ onCancel, onConfirm }) =>{
+  
+  const modalRef = useRef();
 
-function ConfirmationModal({ onCancel, onConfirm }) {
+  const handleOutsideClick = (event) => {
+    if (modalRef.current && !modalRef.current.contains(event.target)) {
+      onCancel();
+    }
+  };
 
+  useEffect(() => {
+    document.addEventListener('mousedown', handleOutsideClick);
+    return () => {
+      document.removeEventListener('mousedown', handleOutsideClick);
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-700 bg-opacity-40">
+  <div ref={modalRef} className="bg-white rounded-lg p-4 pt-2 dark:bg-navy-700">
+    <div className="flex justify-between items-center mb-2 ">
+      <p className="text-xl font-semibold ">Confirmation</p>
+      <button
+        className="text-white bg-red-500 p-2 rounded-3xl"
+        onClick={onCancel}
+      >
+        <FaTimes />
+      </button>
+    </div>
+    <div className="flex items-center mb-4">
+          <hr className="w-full border-gray-300" />
+        </div>
+    <p className="text-lg font-semibold mb-4">
+      Are you sure you want to delete this post?
+    </p>
+    <div className="flex justify-end space-x-4">
+      <button
+        className="px-4 py-2 bg-gray-200 rounded-md dark:text-black dark:bg-gray-800"
+        onClick={onCancel}
+      >
+        Cancel
+      </button>
+      <button
+        className="px-4 py-2 bg-red-500 text-white rounded-md"
+        onClick={onConfirm}
+      >
+        Confirm
+      </button>
+    </div>
+  </div>
+</div>
+  );
+}
+//report modal
+function ConfirmationModal({ reports, onCancel }) {
+  console.log(reports)
   const modalRef = useRef();
 
   const handleOutsideClick = (event) => {
@@ -263,7 +349,7 @@ function ConfirmationModal({ onCancel, onConfirm }) {
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-700 bg-opacity-40">
       <div ref={modalRef} className="bg-white rounded-lg p-4 pt-2 dark:bg-navy-700">
         <div className="flex justify-between items-center mb-2 ">
-          <p className="text-xl font-semibold ">Confirmation</p>
+          <p className="text-xl font-semibold ">All reports</p>
           <button
             className="text-white bg-red-500 p-2 rounded-3xl"
             onClick={onCancel}
@@ -274,9 +360,32 @@ function ConfirmationModal({ onCancel, onConfirm }) {
         <div className="flex items-center mb-4">
           <hr className="w-full border-gray-300" />
         </div>
-        <p className="text-lg font-semibold mb-4">
-          Are you sure you want to block or unblock this user?
-        </p>
+
+        {reports.length === 0 ? (
+          <p className="text-lg font-light mb-4">
+            No report yet
+          </p>
+        ) : (
+          <ul>
+            {reports.reduce((uniqueReasons, report) => {
+              const existingReason = uniqueReasons.find(reason => reason.reason === report.reason);
+              if (existingReason) {
+                existingReason.count++;
+              } else {
+                uniqueReasons.push({ reason: report.reason, count: 1 });
+              }
+              return uniqueReasons;
+            }, []).map((reason, index) => (
+              <li key={index}>
+                <p className="text-lg font-light mb-4">
+                  {reason.reason} ({reason.count} times)
+                </p>
+              </li>
+            ))}
+          </ul>
+        )}
+
+
         <div className="flex justify-end space-x-4">
           <button
             className="px-4 py-2 bg-gray-200 rounded-md dark:text-black dark:bg-gray-800"
@@ -284,14 +393,10 @@ function ConfirmationModal({ onCancel, onConfirm }) {
           >
             Cancel
           </button>
-          <button
-            className="px-4 py-2 bg-red-500 text-white rounded-md"
-            onClick={onConfirm}
-          >
-            Block/Unblock
-          </button>
         </div>
       </div>
     </div>
   );
 }
+
+ 

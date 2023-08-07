@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { BiHeart, BiCommentDots, BiSolidShareAlt } from "react-icons/bi";
 import { SiGooglemessages } from 'react-icons/si'
 import { FaUserPlus } from "react-icons/fa";
@@ -11,7 +11,10 @@ import CommentModal from '../../components/CommentModal/CommentModal';
 import { toast } from 'react-toastify';
 import { AiFillHeart } from 'react-icons/ai';
 import { GoBookmark, GoBookmarkFill } from 'react-icons/go';
+import { SlOptionsVertical } from 'react-icons/sl'
 import { useNavigate } from 'react-router-dom';
+import { MdDeleteForever, MdReportProblem } from 'react-icons/md';
+import Modal from '../../components/Modal/Modal';
 
 
 const Spinner = () => {
@@ -22,7 +25,7 @@ const Spinner = () => {
   );
 };
 export default function Home() {
-  const nav=useNavigate()
+  const nav = useNavigate()
   const user = useSelector((state) => state.auth.user)
   const [loadingUser, setLoadingUser] = useState(true);
   const [posts, setPosts] = useState([]);
@@ -118,7 +121,95 @@ export default function Home() {
     // Add more friends here...
   ];
 
+  //post settings
+  const [openDropdowns, setOpenDropdowns] = useState({});
+  const handleDropdownToggle = (postId) => {
+    setOpenDropdowns((prevOpenDropdowns) => ({
+      ...prevOpenDropdowns,
+      [postId]: !prevOpenDropdowns[postId]
+    }));
+  };
+  const dropdownRef = useRef(null);
+  useEffect(() => {
+    const handleOutsideClick = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setOpenDropdowns({});
+      }
+    };
+    document.addEventListener('mousedown', handleOutsideClick);
+    return () => {
+      document.removeEventListener('mousedown', handleOutsideClick);
+    };
+  }, []);
 
+
+  //deleteMODAL
+  const [deleteModal,setDeleteModal]=useState(false)
+  const [deletePostId,setDeletePostId]=useState(null)
+
+  const showDeleteModal=(postId)=>{
+    setDeletePostId(postId)
+    setDeleteModal(true)
+  }
+
+  const deleteModalConfirm=()=>{
+    setDeleteModal(false)
+    axiosInstance.delete(`${UserBaseURL}/deletePost/${deletePostId}`)
+    .then((res) => {
+      console.log(res,"delete post res")
+      if (res.data.success) {
+        setUpdateUI((prev) => !prev);
+        toast.success(res.data.message);
+      }
+    })
+    .catch((err) => {
+      toast.error(err.data.message);
+      console.log(err, "delete post error");
+    });
+  }
+
+  const deleteModalCancel=()=>{
+    setDeleteModal(false)
+  }
+
+  //reportMODAL
+  const [reportModal,setReportModal] = useState(false)
+  const [reportPostId,setReportPostId]=useState(null)
+  const showReportModal=(postId)=>{
+    setReportPostId(postId)
+    setReportModal(true)
+  }
+  const reportModalCancel=()=>{
+    setReportModal(false)
+  }
+  
+   const reportOptions = [
+    { label: 'Inappropriate content', value: 'inappropriate' },
+    { label: 'Spam', value: 'spam' },
+    { label: 'Hate speech', value: 'hate_speech' },
+    // Add more report options as needed
+  ];
+
+  const [selectedOpt,setSelecetedOpt] = useState(null)
+  const selectedReason=(reason)=>{
+    setSelecetedOpt(reason)
+  }
+
+  const reportModalConfirm=()=>{
+    setReportModal(false)
+    axiosInstance.put(`${UserBaseURL}/reportPost`,{postId:reportPostId,reason:selectedOpt})
+    .then((res) => {
+      console.log(res,"report post res")
+      if (res.data.success) {
+        setUpdateUI((prev) => !prev);
+        toast.success(res.data.message);
+      }
+    })
+    .catch((err) => {
+      console.log(err, "report post error");
+      toast.error(err?.data?.message);
+    });
+  }
 
   return (
     <>
@@ -141,11 +232,11 @@ export default function Home() {
                   </div>
                   <p className="mb-4">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce ultricies facilisis justo, sit amet aliquam odio congue vitae.</p>
                   <div className="flex justify-between">
-                    <div onClick={()=>nav('/followers')}>
+                    <div onClick={() => nav('/followers')}>
                       <h3 className="text-lg font-bold">1200</h3>
                       <p className="text-gray-600">Followers</p>
                     </div>
-                    <div onClick={()=>nav('/following')}>
+                    <div onClick={() => nav('/following')}>
                       <h3 className="text-lg font-bold">800</h3>
                       <p className="text-gray-600">Following</p>
                     </div>
@@ -175,17 +266,35 @@ export default function Home() {
               </Card>
             </div>
             {/* Second Card - 1/2 of the row */}
-            <div className="col-span-1 md:col-span-2 overflow-y-auto">
+            <div className="col-span-1 md:col-span-2 overflow-y-auto ">
               <CreatePost setUpdateUI={setUpdateUI} />
               {posts.map((post) => (
                 <Card key={post.id} extra='mb-4'>
                   <div className="p-4">
-                    <div className="flex items-center mb-4">
+                    <div className="flex relative items-center mb-4">
                       <img className="w-10 h-10 rounded-full mr-2" src={post?.userId?.ProfilePic} alt="User Avatar" />
                       <div>
                         <h3 className="text-sm font-bold">{post?.userId?.UserName}</h3>
                         <p className="text-xs text-gray-600">{new Date(post?.createdAt).toLocaleString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
                       </div>
+                      <SlOptionsVertical
+                        className="absolute right-0 cursor-pointer"
+                        onClick={() => handleDropdownToggle(post._id)}
+                      />
+                      {openDropdowns[post._id] && (
+                        <div ref={dropdownRef} className="absolute top-10 right-0 bg-white border rounded shadow-xl dark:bg-navy-700">
+                          {/* Options for the dropdown go here */}
+                          <ul>
+                            {
+                              post?.userId?.UserName === user.UserName ?
+                                <li onClick={()=>showDeleteModal(post._id)} className='flex p-2 text-sm'><MdDeleteForever className='text-red-500 mr-1 ' size={20} /> Delete</li>
+                                :
+                                <li onClick={()=>showReportModal(post._id)} className='flex p-2 text-sm'><MdReportProblem className='text-yellow-500 mr-1 ' size={20} /> Report</li>
+                            }
+                            {/* Other options related to the current user's post */}
+                          </ul>
+                        </div>
+                      )}
                     </div>
                     {/* eslint-disable-next-line jsx-a11y/img-redundant-alt */}
                     {/* <img className="w-full h-auto rounded-lg mb-4" src="https://via.placeholder.com/800x400" alt="Post Image" /> */}
@@ -304,6 +413,39 @@ export default function Home() {
       }
       {clickedPostId && (
         <CommentModal postId={clickedPostId} closeModal={closeModal} />
+      )}
+      {deleteModal && (
+         <Modal
+          Heading={"Delete Post"}
+          content={"Are you sure to delete this post ?"}
+           onCancel={deleteModalCancel}
+           onConfirm={deleteModalConfirm}
+         />
+      )}
+      {reportModal && (
+         <Modal
+          Heading={"Report Post"}
+          content={
+            <div>
+              {reportOptions.map((option) => (
+                <div key={option.value}>
+                  <label className="text-sm font-thin">
+                    <input
+                      type="radio"
+                      name="reportOption"
+                      value={option.value}
+                      className="mr-1"
+                      onClick={()=>selectedReason(option.label)}
+                    />
+                    {option.label}
+                  </label>
+                </div>
+              ))}
+            </div>
+          }
+           onCancel={reportModalCancel}
+           onConfirm={reportModalConfirm}
+         />
       )}
     </>
   );

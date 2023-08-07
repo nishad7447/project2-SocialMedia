@@ -83,12 +83,12 @@ const userController = {
         .sort({ createdAt: -1 })
         .populate("userId", "ProfilePic UserName Name")
         .exec();
-       
-        const userFields = ['ProfilePic', 'UserName'];
-        let users = await User.find().select(userFields.join(' '))
-        users = users.filter((users)=> users._id.toString() !== req.body.userId)
-        
-      res.status(200).json({posts,users});
+
+      const userFields = ["ProfilePic", "UserName"];
+      let users = await User.find().select(userFields.join(" "));
+      users = users.filter((users) => users._id.toString() !== req.body.userId);
+
+      res.status(200).json({ posts, users });
     } catch (error) {
       console.log(error);
       res.status(500).json({ message: `Server error ${error}` });
@@ -103,55 +103,58 @@ const userController = {
       }
       const newComment = new Comments({
         postId,
-        content:comment,
+        content: comment,
         userId,
       });
       await newComment.save();
       post.comments.push(newComment._id);
-      await post.save()
+      await post.save();
       return res.status(201).json({ message: "Comment added successfully" });
-
     } catch (error) {
       console.error(error);
       return res.status(500).json({ error: "Something went wrong" });
     }
   },
-  getAllComments: async (req,res)=>{
+  getAllComments: async (req, res) => {
     try {
-      const postId  = req.params.id;
-      const comments = await Comments.find({ postId }) .populate('userId', 'ProfilePic UserName').exec();
+      const postId = req.params.id;
+      const comments = await Comments.find({ postId })
+        .populate("userId", "ProfilePic UserName")
+        .exec();
       if (comments.length === 0) {
-        return res.status(200).json({ message: 'No comments found for this post' });
-      }  
+        return res
+          .status(200)
+          .json({ message: "No comments found for this post" });
+      }
       return res.status(200).json({ comments });
     } catch (error) {
       console.error(error);
-      return res.status(500).json({ error: 'Something went wrong' });
+      return res.status(500).json({ error: "Something went wrong" });
     }
   },
-  like: async (req,res)=>{
+  like: async (req, res) => {
     try {
       const postId = req.params.id;
       const { userId } = req.body;
-  
+
       const post = await Post.findById(postId);
       if (!post) {
-        return res.status(404).json({ error: 'Post not found' });
+        return res.status(404).json({ error: "Post not found" });
       }
-  
+
       const indexOfUser = post.likes.indexOf(userId);
       if (indexOfUser !== -1) {
         post.likes.splice(indexOfUser, 1);
         await post.save();
-        return res.status(200).json({ message: 'unliked successfully' });
+        return res.status(200).json({ message: "unliked successfully" });
       } else {
         post.likes.push(userId);
         await post.save();
-        return res.status(200).json({ message: 'Post liked' });
+        return res.status(200).json({ message: "Post liked" });
       }
     } catch (error) {
       console.error(error);
-      return res.status(500).json({ error: 'Something went wrong' });
+      return res.status(500).json({ error: "Something went wrong" });
     }
   },
   savedpost: async (req, res) => {
@@ -159,71 +162,129 @@ const userController = {
       const postId = req.params.id;
       const { userId } = req.body;
 
-      const existingUser = await SavedPost.findOne({userId:userId})
+      const existingUser = await SavedPost.findOne({ userId: userId });
 
-      if(existingUser){
-        const existingSavedPost = existingUser.savedPosts.findIndex((savedPost)=>savedPost.postId.toString() === postId)
-        console.log(existingSavedPost,"ex post")
+      if (existingUser) {
+        const existingSavedPost = existingUser.savedPosts.findIndex(
+          (savedPost) => savedPost.postId.toString() === postId
+        );
+        console.log(existingSavedPost, "ex post");
         if (existingSavedPost !== -1) {
-             existingUser.savedPosts.splice(existingSavedPost, 1)
-              await existingUser.save();
-              await Post.findByIdAndUpdate(postId, { $pull: { savedBy: userId } });
-              console.log('Post unsaved successfully for existing user:', existingUser);
-              return res.status(200).json({ message: 'Post unsaved successfully' });
-          }else{
-              existingUser.savedPosts.push({postId:postId})
-              await existingUser.save()
-              await Post.findByIdAndUpdate(postId, { $push: { savedBy: userId } });
-              console.log('Post saved successfully for existing user:', existingSavedPost);
-              return res.status(200).json({ message: 'Post saved successfully' });
-          }
-      }else{
+          existingUser.savedPosts.splice(existingSavedPost, 1);
+          await existingUser.save();
+          await Post.findByIdAndUpdate(postId, { $pull: { savedBy: userId } });
+          console.log(
+            "Post unsaved successfully for existing user:",
+            existingUser
+          );
+          return res.status(200).json({ message: "Post unsaved successfully" });
+        } else {
+          existingUser.savedPosts.push({ postId: postId });
+          await existingUser.save();
+          await Post.findByIdAndUpdate(postId, { $push: { savedBy: userId } });
+          console.log(
+            "Post saved successfully for existing user:",
+            existingSavedPost
+          );
+          return res.status(200).json({ message: "Post saved successfully" });
+        }
+      } else {
         const newSavedPost = new SavedPost({
-              userId: userId,
-              savedPosts: [{ postId: postId }],
-            });
-            const savedPostResult = await newSavedPost.save();
-            console.log('Post saved successfully for new user:', savedPostResult);
-            return res.status(200).json({ message: 'Post saved successfully for new user' });
+          userId: userId,
+          savedPosts: [{ postId: postId }],
+        });
+        const savedPostResult = await newSavedPost.save();
+        console.log("Post saved successfully for new user:", savedPostResult);
+        return res
+          .status(200)
+          .json({ message: "Post saved successfully for new user" });
       }
     } catch (error) {
-      console.error('Error saving post:', error);
-      return res.status(500).json({ error: 'Internal server error' });
+      console.error("Error saving post:", error);
+      return res.status(500).json({ error: "Internal server error" });
     }
   },
-  getAllSavedPosts: async(req,res)=>{
+  getAllSavedPosts: async (req, res) => {
     try {
-      const {userId} = req.body
-      
-      const savedPosts = await SavedPost.find({ userId })
-  .populate({
-    path: 'savedPosts.postId',
-    populate: {
-      path: 'userId',
-      select: 'UserName ProfilePic',
-    },
-  });
-      console.log(JSON.stringify(savedPosts))
+      const { userId } = req.body;
+
+      const savedPosts = await SavedPost.find({ userId }).populate({
+        path: "savedPosts.postId",
+        populate: {
+          path: "userId",
+          select: "UserName ProfilePic",
+        },
+      });
+      console.log(JSON.stringify(savedPosts));
       res.status(200).json({ savedPosts });
     } catch (error) {
-      console.error('Error fetching saved posts:', error);
-      res.status(500).json({ error: 'Internal server error' });
+      console.error("Error fetching saved posts:", error);
+      res.status(500).json({ error: "Internal server error" });
     }
   },
-  logout:async(req,res)=>{
+  logout: async (req, res) => {
     try {
       const userId = req.params.id;
       const user = await User.findById(userId);
-       user.Online = false;
-       console.log(userId,user)
+      user.Online = false;
+      console.log(userId, user);
       await user.save();
       res.status(200).json({ message: "Logout success" });
     } catch (err) {
       console.log(err);
       res.status(500).json({ error: "Internal server error" });
     }
-  }
+  },
+  deletePost: async (req, res) => {
+    try {
+      const postId = req.params.id;
+      await Post.findByIdAndDelete(postId);
+      res.status(200).json({success:true, message: "Post deleted success" });
+    } catch (error) {
+      console.log(error);
+      res.status(500).json({ error: "Internal server error in deletePost" });
+    }
+  },
+  reportPost: async (req,res)=>{
+    try {
+      const { postId, reason, userId } = req.body;
+      // Find the post by postId
+      const post = await Post.findById(postId);
   
+      if (!post) {
+        return res.status(404).json({ error: 'Post not found.' });
+      }
+  
+      // Check if the user has already reported the post
+      let existingReportIndex = -1;
+
+      for (let i = 0; i < post.reports.length; i++) {
+        if (post.reports[i].userId.toString() === userId) {
+          existingReportIndex = i;
+          break;
+        }
+      }      
+      console.log(existingReportIndex,'ext reportindx')
+      if (existingReportIndex !== -1) {
+        // If the user has already reported, update the reason if it's different
+        if (post.reports[existingReportIndex].reason !== reason) {
+          post.reports[existingReportIndex].reason = reason;
+          await post.save();
+          return res.status(200).json({success: true, message: 'Report updated successfully.' });
+        } else {
+          return res.status(200).json({success: true, message: 'You have already reported this post with the same reason.' });
+        }
+      } else {
+        // If the user is reporting for the first time, add their report to the reports array
+        post.reports.push({ userId, reason });
+        await post.save();
+        return res.status(200).json({success: true, message: 'Report submitted successfully.' });
+      }
+    } catch (error) {
+      console.log(error);
+      res.status(500).json({ error: "Internal server error in reportPost" });
+    }
+  }
 };
 
 export default userController;

@@ -21,7 +21,6 @@ export const auth = async (req, res, next)=>{
             await User.findById(req.body.userId)
             .then((res)=>{
                 if (res.Blocked){
-                    
                     throw new Error("jwt expired");
                 }else{
                     next()

@@ -18,6 +18,12 @@ userRoutes.get('/like/:id',auth,userController.like)
 userRoutes.get('/savedpost/:id',auth,userController.savedpost)
 userRoutes.get('/getAllSavedPosts',auth,userController.getAllSavedPosts)
 
+//deletePost
+userRoutes.delete('/deletePost/:id',auth,userController.deletePost)
+
+//reportPost
+userRoutes.put('/reportPost',auth,userController.reportPost)
+
 //logout
 userRoutes.get('/logout/:id',userController.logout)
 export default userRoutes 
