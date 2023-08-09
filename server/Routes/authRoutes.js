@@ -1,9 +1,10 @@
 import express from 'express';
-import { register,login,forgotOtpSend,forgotOtpSubmit ,forgotPass, getUser,googleSignUp,googleSignIn,emailResetPass} from '../controller/userAuth.js';
+import { register,login,forgotOtpSend,forgotOtpSubmit ,forgotPass, getUser,googleSignUp,googleSignIn,emailResetPass,signupOtpSend} from '../controller/userAuth.js';
 import {auth} from '../middleware/auth.js';
 const authRoutes = express.Router();
 
 authRoutes.get('/',auth,getUser)
+authRoutes.post('/signup-otpSend',signupOtpSend)
 authRoutes.post('/signup',register)
 authRoutes.post('/login',login)
 authRoutes.post('/forgot-otpSend',forgotOtpSend)

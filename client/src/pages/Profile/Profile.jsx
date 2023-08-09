@@ -14,6 +14,7 @@ import { SlOptionsVertical } from 'react-icons/sl'
 import { useNavigate, useParams } from 'react-router-dom';
 import { MdDeleteForever, MdReportProblem } from 'react-icons/md';
 import Modal from '../../components/Modal/Modal';
+import ShareModal from '../../components/ShareModal/ShareModal';
 
 const Spinner = () => {
     return (
@@ -212,7 +213,17 @@ const Profile = () => {
             });
     }
 
-
+ //share
+ const [showShareModal, setShowShareModal] = useState(false);
+ const [sharePostId,setSharePostId]=useState(null)
+   const toggleModal = (postId) => {
+       setShowShareModal(true);
+       setSharePostId(postId)
+   };
+   const closeShareModal = () => {
+     setShowShareModal(false)
+   }
+ 
 
 
     return (
@@ -305,7 +316,7 @@ const Profile = () => {
                             <p className='text-xl font-semibold flex justify-center mt-48'>No posts</p>
                             :
                             posts.map((post) => (
-                                <Card key={post.id} extra='mb-4'>
+                                <Card key={post.id} id={post._id} extra='mb-4'>
                                     <div className="p-4">
                                         <div className="flex relative items-center mb-4">
                                             <img className="w-10 h-10 rounded-full mr-2" src={post?.userId?.ProfilePic} alt="User Avatar" />
@@ -390,7 +401,7 @@ const Profile = () => {
                                                     }
                                                     {/* <span>Save</span> */}
                                                 </button>
-                                                <button className="flex items-center text-gray-600 hover:text-blue-500">
+                                                <button className="flex items-center text-gray-600 hover:text-blue-500" onClick={()=>toggleModal(post._id)}>
                                                     <BiSolidShareAlt />
                                                     {/* <span>Share</span> */}
                                                 </button>
@@ -440,6 +451,9 @@ const Profile = () => {
                     onConfirm={reportModalConfirm}
                 />
             )}
+            {showShareModal && (
+                <ShareModal isOpen={showShareModal} onClose={closeShareModal} id={sharePostId} />
+      )}
         </>
     );
 };

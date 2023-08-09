@@ -15,6 +15,7 @@ import { SlOptionsVertical } from 'react-icons/sl'
 import { useNavigate } from 'react-router-dom';
 import { MdDeleteForever, MdReportProblem } from 'react-icons/md';
 import Modal from '../../components/Modal/Modal';
+import ShareModal from '../../components/ShareModal/ShareModal';
 
 
 const Spinner = () => {
@@ -33,7 +34,7 @@ export default function Home() {
   const [updateUI, setUpdateUI] = useState(false)
 
   useEffect(()=>{
-    if(search===''){
+    if(search==='' || search===null){
       setUpdateUI((prev)=>!prev)
     }
     setPosts(posts.filter((post)=>post.content.toLowerCase().includes(search.toLowerCase())))
@@ -221,6 +222,17 @@ export default function Home() {
     nav(`/profile/${userId}`)
   }
 
+
+  //share
+  const [showShareModal, setShowShareModal] = useState(false);
+  const [sharePostId,setSharePostId]=useState(null)
+    const toggleModal = (postId) => {
+        setShowShareModal(true);
+        setSharePostId(postId)
+    };
+    const closeShareModal = () => {
+      setShowShareModal(false)
+    }
   
 
   return (
@@ -229,6 +241,7 @@ export default function Home() {
         loadingUser ? (
           <Spinner />
         ) : (
+          <>
           <div className=" grid grid-cols-1 md:grid-cols-4 gap-4 mt-12 ml-4 mr-4">
 
             {/* First Card - 1/4 of the row */}
@@ -287,7 +300,7 @@ export default function Home() {
               <p className='text-xl font-semibold flex justify-center mt-48'>No posts</p>
               :
               posts.map((post) => (
-                <Card key={post.id} extra='mb-4'>
+                <Card key={post.id} id={post._id} extra='mb-4'>
                   <div className="p-4">
                     <div className="flex relative items-center mb-4">
                       <img className="w-10 h-10 rounded-full mr-2" src={post?.userId?.ProfilePic} alt="User Avatar" />
@@ -372,11 +385,11 @@ export default function Home() {
                           }
                           {/* <span>Save</span> */}
                         </button>
-                        <button className="flex items-center text-gray-600 hover:text-blue-500">
+                        <button className="flex items-center text-gray-600 hover:text-blue-500 " onClick={()=>toggleModal(post._id)}>
                           <BiSolidShareAlt />
                           {/* <span>Share</span> */}
                         </button>
-                      </div>
+                        </div>
                     </div>
                   </div>
                 </Card>
@@ -428,6 +441,7 @@ export default function Home() {
               </div>
             </div>
           </div>
+          </>
         )
       }
       {clickedPostId && (
@@ -465,6 +479,9 @@ export default function Home() {
           onCancel={reportModalCancel}
           onConfirm={reportModalConfirm}
         />
+      )}
+      {showShareModal && (
+                <ShareModal isOpen={showShareModal} onClose={closeShareModal} id={sharePostId} />
       )}
     </>
   );

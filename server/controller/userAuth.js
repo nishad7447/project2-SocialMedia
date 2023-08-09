@@ -14,7 +14,7 @@ const authToken = process.env.TWILIO_AUTH_TOKEN;
 const serviceSID = process.env.TWILIO_SERVICE_SID;
 const client = twilio(accountSid, authToken);
 
-export const register = async (req, res) => {
+export const signupOtpSend=async(req,res)=>{
   try {
     let { Name, UserName, Email, Password, Mobile } = req.body;
     Mobile = Number(Mobile);
@@ -32,37 +32,87 @@ export const register = async (req, res) => {
     if (mobileExist) {
       return res.status(400).json({ message: "Mobile already Exist" });
     }
+    client.verify.v2
+    .services(serviceSID)
+    .verifications.create({ to: "+91" + Mobile, channel: "sms" })
+    .then((verification) =>
+      res.status(200).json({ message: "Otp send Verification Pending" })
+    );
 
-    const salt = await bcrypt.genSalt();
-    const passwordHash = await bcrypt.hash(Password, salt);
+    // res.json({ message: "User signed up successfully" });
+  } catch (error) {
+    console.log(error, "signup otp send error");
+    res.status(500).json({ error: error.message });
+  }
+}
 
-    const profilePics = [
-      "https://cdn.pixabay.com/photo/2016/04/01/10/11/avatar-1299805_1280.png",
-      "https://cdn.pixabay.com/photo/2012/04/01/18/22/user-23874_1280.png",
-      "https://cdn.pixabay.com/photo/2014/03/25/16/32/user-297330_1280.png",
-      "https://cdn.pixabay.com/photo/2014/03/24/13/49/avatar-294480_1280.png",
-      "https://cdn.pixabay.com/photo/2012/04/26/19/43/profile-42914_1280.png",
-      "https://cdn.pixabay.com/photo/2016/11/08/15/21/user-1808597_1280.png",
-      "https://cdn.pixabay.com/photo/2017/11/10/05/48/user-2935527_1280.png",
-    ];
+export const register = async (req, res) => {
+  try {
+    let { Name, UserName, Email, Password, Mobile,otp } = req.body;
+    Mobile = Number(Mobile);
+    otp=Number(otp)
+    
+    const user = await User.findOne({ Email: Email });
+    if (user) {
+      return res.status(400).json({ message: "User already Exist" });
+    }
+    
+    const usernameExist = await User.findOne({ UserName: UserName });
+    if (usernameExist) {
+      return res.status(400).json({ message: "User name taken" });
+    }
+    
+    const mobileExist = await User.findOne({ Mobile: Mobile });
+    if (mobileExist) {
+      return res.status(400).json({ message: "Mobile already Exist" });
+    }
 
-    // Select a random profile picture URL
-    const randomProfilePic =
-      profilePics[Math.floor(Math.random() * profilePics.length)];
-
-    const newUser = new User({
-      Name,
-      UserName,
-      Email,
-      Password: passwordHash,
-      Mobile,
-      ProfilePic: randomProfilePic, // Add the selected profile picture URL to the newUser object
-      Blocked:false
+    //verify Otp
+    client.verify.v2
+    .services(serviceSID)
+    .verificationChecks.create({ to: "+91" + Mobile, code: otp })
+    .then( async (response) => {
+      if (response.status === "approved") {
+        const salt = await bcrypt.genSalt();
+        const passwordHash = await bcrypt.hash(Password, salt);
+    
+        const profilePics = [
+          "https://cdn.pixabay.com/photo/2016/04/01/10/11/avatar-1299805_1280.png",
+          "https://cdn.pixabay.com/photo/2012/04/01/18/22/user-23874_1280.png",
+          "https://cdn.pixabay.com/photo/2014/03/25/16/32/user-297330_1280.png",
+          "https://cdn.pixabay.com/photo/2014/03/24/13/49/avatar-294480_1280.png",
+          "https://cdn.pixabay.com/photo/2012/04/26/19/43/profile-42914_1280.png",
+          "https://cdn.pixabay.com/photo/2016/11/08/15/21/user-1808597_1280.png",
+          "https://cdn.pixabay.com/photo/2017/11/10/05/48/user-2935527_1280.png",
+        ];
+    
+        // Select a random profile picture URL
+        const randomProfilePic =
+          profilePics[Math.floor(Math.random() * profilePics.length)];
+    
+        const newUser = new User({
+          Name,
+          UserName,
+          Email,
+          Password: passwordHash,
+          Mobile,
+          ProfilePic: randomProfilePic, // Add the selected profile picture URL to the newUser object
+          Blocked:false
+        });
+    
+        await newUser.save();
+    
+        
+       return res.status(200).json({ message: "Verification success" });
+      } else {
+        return res.status(400).json({ message: "Invalid OTP" });
+      }
+    })
+    .catch((err) => {
+      console.log(err, "otp verifaction err");
+      res.status(400).json({ message: "Invalid OTP" });
     });
-
-    await newUser.save();
-
-    res.json({ message: "User signed up successfully" });
+    
   } catch (error) {
     console.log(error, "signup catch error");
     res.status(500).json({ error: error.message });

@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import { UserBaseURL } from "../../API";
 import { GoogleLogin, GoogleOAuthProvider } from "@react-oauth/google";
 import axios from "axios";
+import { toast } from "react-toastify";
 
 export default function SignIn() {
   const [email, setEmail] = useState("");
@@ -59,6 +60,7 @@ export default function SignIn() {
         if (res.data.message === "Login Success") {
           localStorage.setItem("jwtToken", JSON.stringify(res.data.token));
           localStorage.setItem("user", JSON.stringify(res.data.user));
+          toast.success("Login success")
           window.location.href = "/";
         }
         if (res.data.success) {
@@ -66,14 +68,15 @@ export default function SignIn() {
         }
       })
       .catch((err) => {
-        console.log(err?.response.data.message);
-        if (err?.response.data.message === "User does not exist") {
+        console.log(err?.response?.data?.message);
+        toast.error(err?.response?.data?.message)
+        if (err?.response?.data?.message === "User does not exist") {
           setEmailErr(err.response.data.message);
-        } else if (err?.response.data.message === "Incorrect credentials") {
+        } else if (err?.response?.data?.message === "Incorrect credentials") {
           setPassErr(err.response.data.message);
-        } else if (err?.response.data.message==="Password is wrong, Try google login"){
+        } else if (err?.response?.data?.message==="Password is wrong, Try google login"){
           setPassErr(err.response.data.message)
-        } else if (err?.response.data.message === "User is blocked"){
+        } else if (err?.response?.data?.message === "User is blocked"){
           setFormErr(err?.response.data.message)
         }
         // console.log(err,'login post error ')
@@ -127,12 +130,15 @@ export default function SignIn() {
                     .then((res) => {
                       if(!res.data.success){
                         if(res.data.message === "User does not exist" ){
+                          toast.error(res.data.message)
                           setEmailErr(res.data.message)
                         }else if(res.data.message === "User is blocked"){
+                          toast.error(res.data.message)
                           setEmailErr(res.data.message)
                         }
                       }
                       if (res.data.message === "Login Success") {
+                        toast.success("Login success")
                         localStorage.setItem(
                           "jwtToken",
                           JSON.stringify(res.data.token)
@@ -146,6 +152,7 @@ export default function SignIn() {
                     })
                     .catch((err) => {
                       console.log(err,"login error");
+                      toast.error(err?.message)
                       if (
                         err?.message === "Request failed with status code 400"
                       ) {
