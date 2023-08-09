@@ -7,15 +7,19 @@ import { UserBaseURL } from '../../API';
 import { useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
 
-export default function CreatePost({setUpdateUI}) {
+export default function CreatePost({ setUpdateUI }) {
 
-  const user=useSelector((state)=>state.auth.user)
+  const user = useSelector((state) => state.auth.user)
 
   const [postText, setPostText] = useState('');
   const [attachedImage, setAttachedImage] = useState(null);
   const [attachedVideo, setAttachedVideo] = useState(null);
   const [attachedAudio, setAttachedAudio] = useState(null);
   const [uurl, setUrl] = useState(null);
+
+  const allowedImageExtensions = ['jpg', 'jpeg', 'png', 'gif'];
+  const allowedVideoExtensions = ['mp4', 'mov', 'avi'];
+
   const handlePostChange = (e) => {
     setPostText(e.target.value);
   };
@@ -33,11 +37,11 @@ export default function CreatePost({setUpdateUI}) {
     //   const imageDetailsArray = attachedImage.map((image, index) => ({
     //     [`file${index}`]: image,
     //   }));
-  
+
     //   formData.append('file', JSON.stringify(imageDetailsArray));
     // }
-    if(attachedImage){
-      formData.append('file',attachedImage)
+    if (attachedImage) {
+      formData.append('file', attachedImage)
     }
 
     if (attachedVideo) {
@@ -47,21 +51,21 @@ export default function CreatePost({setUpdateUI}) {
     if (attachedAudio) {
       formData.append('file', attachedAudio);
     }
-    if(user){
-      formData.append('userId',user._id)
+    if (user) {
+      formData.append('userId', user._id)
     }
     console.log('FormData:', formData);
-  
+
     axiosInstance
       .post(`${UserBaseURL}/post`, formData)
       .then((response) => {
         console.log('Response from backend:', response.data);
         setPostText('');
-        setAttachedImage(null); 
+        setAttachedImage(null);
         setAttachedVideo(null);
         setAttachedAudio(null);
         toast.success(response?.data?.message)
-        setUpdateUI((prevState)=> !prevState)
+        setUpdateUI((prevState) => !prevState)
       })
       .catch((error) => {
         toast.error(error?.data?.message)
@@ -77,15 +81,28 @@ export default function CreatePost({setUpdateUI}) {
   //   setAttachedImage(images);
   // };
 
-  const handleImageChange=(e)=>{
-    const image=e.target.files[0]
-    setAttachedImage(image)
+  const handleImageChange = (e) => {
+    const image = e.target.files[0]
+    if (image) {
+      const fileExtension = image.name.split('.').pop().toLowerCase();
+      if (allowedImageExtensions.includes(fileExtension)) {
+        setAttachedImage(image);
+      } else {
+        toast.error('Invalid image format. Please select a valid image file.');
+      }
+    }
   }
 
   const handleVideoChange = (e) => {
     const video = e.target.files[0];
-    setAttachedVideo(video);
-    console.log(attachedVideo,"atVdio")
+    if (video) {
+      const fileExtension = video.name.split('.').pop().toLowerCase();
+      if (allowedVideoExtensions.includes(fileExtension)) {
+        setAttachedVideo(video);
+      } else {
+        toast.error('Invalid video format. Please select a valid video file.');
+      }
+    }
   };
 
   const handleAudioChange = (e) => {
@@ -117,7 +134,7 @@ export default function CreatePost({setUpdateUI}) {
     //       ))}
     //     </div>
     //   );
-    if(attachedImage){
+    if (attachedImage) {
       return <img src={URL.createObjectURL(attachedImage)} alt={attachedImage.filename} className="w-3/4 h-1/2 max-h-fit mt-2  rounded-3xl" />
     } else if (attachedVideo) {
       return <video src={URL.createObjectURL(attachedVideo)} controls className="w-4/5 h-2/5 max-h-72 mt-2 " />;
