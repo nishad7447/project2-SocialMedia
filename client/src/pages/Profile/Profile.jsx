@@ -15,6 +15,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { MdDeleteForever, MdReportProblem } from 'react-icons/md';
 import Modal from '../../components/Modal/Modal';
 import ShareModal from '../../components/ShareModal/ShareModal';
+import moment from 'moment'
 
 const Spinner = () => {
     return (
@@ -28,29 +29,29 @@ const Profile = () => {
     const { userId } = useParams()
     const loggedInUser = useSelector((state) => state.auth.user);
     const search = useSelector((state) => state.auth.search);
-    const [user,setUser]=useState(loggedInUser)
+    const [user, setUser] = useState(loggedInUser)
     const [loadingUser, setLoadingUser] = useState(true);
     const [posts, setPosts] = useState([]);
     const [suggestedUsers, setSuggestedUsers] = useState([])
     const [updateUI, setUpdateUI] = useState(false)
 
-    useEffect(()=>{
-        if(search===''){
-          setUpdateUI((prev)=>!prev)
-        }
-        setPosts(posts.filter((post)=>post.content.toLowerCase().includes(search.toLowerCase())))
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-      },[search])
     useEffect(() => {
-        if(userId){
+        if (search === '') {
+            setUpdateUI((prev) => !prev)
+        }
+        setPosts(posts.filter((post) => post.content.toLowerCase().includes(search.toLowerCase())))
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [search])
+    useEffect(() => {
+        if (userId) {
             axiosInstance.get(`${UserBaseURL}/userDetail/${userId}`)
-            .then((res) => {
-                console.log(res)
-                setUser(res.data.user)
-            })
-            .catch((error) => {
-                console.error(error.message, "user fetch url err=>user not working");
-            })
+                .then((res) => {
+                    console.log(res)
+                    setUser(res.data.user)
+                })
+                .catch((error) => {
+                    console.error(error.message, "user fetch url err=>user not working");
+                })
         }
         axiosInstance.get(`${UserBaseURL}/userProfile/${userId ? userId : user._id}`)
             .then((res) => {
@@ -213,18 +214,37 @@ const Profile = () => {
             });
     }
 
- //share
- const [showShareModal, setShowShareModal] = useState(false);
- const [sharePostId,setSharePostId]=useState(null)
-   const toggleModal = (postId) => {
-       setShowShareModal(true);
-       setSharePostId(postId)
-   };
-   const closeShareModal = () => {
-     setShowShareModal(false)
-   }
- 
+    //share
+    const [showShareModal, setShowShareModal] = useState(false);
+    const [sharePostId, setSharePostId] = useState(null)
+    const toggleModal = (postId) => {
+        setShowShareModal(true);
+        setSharePostId(postId)
+    };
+    const closeShareModal = () => {
+        setShowShareModal(false)
+    }
 
+    //moment.js config
+    const formatPostDate = (date) => {
+        const now = moment();
+        const postDate = moment(date);
+      
+        if (now.diff(postDate, 'seconds') < 60) {
+          return 'Just now';
+        } else if (now.diff(postDate, 'days') === 0) {
+          return postDate.fromNow(); // Display "x minutes ago", "an hour ago", etc.
+        } else if (now.diff(postDate, 'days') === 1) {
+          return 'Yesterday';
+        } else if (now.diff(postDate, 'days') <= 4) {
+          return `${now.diff(postDate, 'days')} days ago`; // Display "X days ago" for posts within the last 4 days
+        } else if (now.diff(postDate, 'years') === 0) {
+          return postDate.format('MMMM D'); // Display "Month Day" for posts within the current year
+        } else {
+          return postDate.format('LL'); // Display "Month Day, Year" for posts older than a year
+        }
+      };
+      
 
     return (
         <>
@@ -308,108 +328,108 @@ const Profile = () => {
                         {/* Create Post and Posts */}
                         <div className=" col-span-1 md:col-span-3 overflow-y-hidden ">
                             {
-                                userId ? "" 
-                                : <CreatePost setUpdateUI={setUpdateUI} />
+                                userId ? ""
+                                    : <CreatePost setUpdateUI={setUpdateUI} />
                             }
                             {
-                            posts.length === 0 ?
-                            <p className='text-xl font-semibold flex justify-center mt-48'>No posts</p>
-                            :
-                            posts.map((post) => (
-                                <Card key={post.id} id={post._id} extra='mb-4'>
-                                    <div className="p-4">
-                                        <div className="flex relative items-center mb-4">
-                                            <img className="w-10 h-10 rounded-full mr-2" src={post?.userId?.ProfilePic} alt="User Avatar" />
-                                            <div>
-                                                <h3 className="text-sm font-bold">{post?.userId?.UserName}</h3>
-                                                <p className="text-xs text-gray-600">{new Date(post?.createdAt).toLocaleString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
-                                            </div>
-                                            <SlOptionsVertical
-                                                className="absolute right-0 cursor-pointer"
-                                                onClick={() => handleDropdownToggle(post._id)}
-                                            />
-                                            {openDropdowns[post._id] && (
-                                                <div ref={dropdownRef} className="absolute top-10 right-0 bg-white border rounded shadow-xl dark:bg-navy-700">
-                                                    {/* Options for the dropdown go here */}
-                                                    <ul>
-                                                        {
-                                                            post?.userId?.UserName === user.UserName ?
-                                                                <li onClick={() => showDeleteModal(post._id)} className='flex p-2 text-sm'><MdDeleteForever className='text-red-500 mr-1 ' size={20} /> Delete</li>
-                                                                :
-                                                                <li onClick={() => showReportModal(post._id)} className='flex p-2 text-sm'><MdReportProblem className='text-yellow-500 mr-1 ' size={20} /> Report</li>
-                                                        }
-                                                        {/* Other options related to the current user's post */}
-                                                    </ul>
+                                posts.length === 0 ?
+                                    <p className='text-xl font-semibold flex justify-center mt-48'>No posts</p>
+                                    :
+                                    posts.map((post) => (
+                                        <Card key={post.id} id={post._id} extra='mb-4'>
+                                            <div className="p-4">
+                                                <div className="flex relative items-center mb-4">
+                                                    <img className="w-10 h-10 rounded-full mr-2" src={post?.userId?.ProfilePic} alt="User Avatar" />
+                                                    <div>
+                                                        <h3 className="text-sm font-bold">{post?.userId?.UserName}</h3>
+                                                        <p className="text-xs text-gray-600">{formatPostDate(post?.createdAt)}</p>
+                                                    </div>
+                                                    <SlOptionsVertical
+                                                        className="absolute right-0 cursor-pointer"
+                                                        onClick={() => handleDropdownToggle(post._id)}
+                                                    />
+                                                    {openDropdowns[post._id] && (
+                                                        <div ref={dropdownRef} className="absolute top-10 right-0 bg-white border rounded shadow-xl dark:bg-navy-700">
+                                                            {/* Options for the dropdown go here */}
+                                                            <ul>
+                                                                {
+                                                                    post?.userId?.UserName === user.UserName ?
+                                                                        <li onClick={() => showDeleteModal(post._id)} className='flex p-2 text-sm'><MdDeleteForever className='text-red-500 mr-1 ' size={20} /> Delete</li>
+                                                                        :
+                                                                        <li onClick={() => showReportModal(post._id)} className='flex p-2 text-sm'><MdReportProblem className='text-yellow-500 mr-1 ' size={20} /> Report</li>
+                                                                }
+                                                                {/* Other options related to the current user's post */}
+                                                            </ul>
+                                                        </div>
+                                                    )}
                                                 </div>
-                                            )}
-                                        </div>
-                                        {/* eslint-disable-next-line jsx-a11y/img-redundant-alt */}
-                                        {/* <img className="w-full h-auto rounded-lg mb-4" src="https://via.placeholder.com/800x400" alt="Post Image" /> */}
-                                        {/* Conditional rendering based on the file extension */}
-                                        {(() => {
-                                            if (post?.fileUrl) {
-                                                const extension = post?.fileUrl.split('.').pop().toLowerCase();
-                                                if (['jpg', 'jpeg', 'png', 'gif'].includes(extension)) {
-                                                    return <img className="w-full h-auto rounded-lg mb-4" src={post?.fileUrl} alt="Post " />;
-                                                } else if (extension === 'mp4') {
-                                                    return (
-                                                        <video className="w-full h-auto rounded-lg mb-4" controls>
-                                                            <source src={post?.fileUrl} type="video/mp4" />
-                                                            Your browser does not support the video tag.
-                                                        </video>
-                                                    );
-                                                } else if (extension === 'mp3') {
-                                                    return (
-                                                        <audio className="w-full" controls>
-                                                            <source src={post?.fileUrl} type="audio/mp3" />
-                                                            Your browser does not support the audio element.
-                                                        </audio>
-                                                    );
-                                                } else {
-                                                    return <p>Unsupported file format</p>;
-                                                }
-                                            }
-                                        })()}
-                                        <p className="text-sm mb-4">
-                                            {post?.content}
-                                        </p>
-                                        <div className="flex justify-between items-center">
-                                            <div className="flex items-center">
-                                                <button onClick={() => handleLikeClick(post._id)} className="flex items-center text-gray-600 hover:text-blue-500 mr-4">
-                                                    {
-                                                        post.likes.includes(user?._id)
-                                                            ?
-                                                            <AiFillHeart style={{ fill: 'red' }} />
-                                                            :
-                                                            <BiHeart />
+                                                {/* eslint-disable-next-line jsx-a11y/img-redundant-alt */}
+                                                {/* <img className="w-full h-auto rounded-lg mb-4" src="https://via.placeholder.com/800x400" alt="Post Image" /> */}
+                                                {/* Conditional rendering based on the file extension */}
+                                                {(() => {
+                                                    if (post?.fileUrl) {
+                                                        const extension = post?.fileUrl.split('.').pop().toLowerCase();
+                                                        if (['jpg', 'jpeg', 'png', 'gif'].includes(extension)) {
+                                                            return <img className="w-full h-auto rounded-lg mb-4" src={post?.fileUrl} alt="Post " />;
+                                                        } else if (extension === 'mp4') {
+                                                            return (
+                                                                <video className="w-full h-auto rounded-lg mb-4" controls>
+                                                                    <source src={post?.fileUrl} type="video/mp4" />
+                                                                    Your browser does not support the video tag.
+                                                                </video>
+                                                            );
+                                                        } else if (extension === 'mp3') {
+                                                            return (
+                                                                <audio className="w-full" controls>
+                                                                    <source src={post?.fileUrl} type="audio/mp3" />
+                                                                    Your browser does not support the audio element.
+                                                                </audio>
+                                                            );
+                                                        } else {
+                                                            return <p>Unsupported file format</p>;
+                                                        }
                                                     }
-                                                    <span className='ml-1 text-xs'>{renderLikeInfo(post)}</span>
-                                                </button>
-                                                <button onClick={() => handleCommentClick(post._id)} className="flex items-center text-gray-600 hover:text-blue-500 mr-4">
-                                                    <BiCommentDots />
-                                                    {/* <span>Comment</span> */}
-                                                </button>
+                                                })()}
+                                                <p className="text-sm mb-4">
+                                                    {post?.content}
+                                                </p>
+                                                <div className="flex justify-between items-center">
+                                                    <div className="flex items-center">
+                                                        <button onClick={() => handleLikeClick(post._id)} className="flex items-center text-gray-600 hover:text-blue-500 mr-4">
+                                                            {
+                                                                post.likes.includes(user?._id)
+                                                                    ?
+                                                                    <AiFillHeart style={{ fill: 'red' }} />
+                                                                    :
+                                                                    <BiHeart />
+                                                            }
+                                                            <span className='ml-1 text-xs'>{renderLikeInfo(post)}</span>
+                                                        </button>
+                                                        <button onClick={() => handleCommentClick(post._id)} className="flex items-center text-gray-600 hover:text-blue-500 mr-4">
+                                                            <BiCommentDots />
+                                                            {/* <span>Comment</span> */}
+                                                        </button>
+                                                    </div>
+                                                    <div className="flex items-center">
+                                                        <button onClick={() => handleSavedClick(post._id)} className="flex items-center text-gray-600 hover:text-blue-500 mr-4">
+                                                            {
+                                                                post.savedBy?.includes(user?._id)
+                                                                    ?
+                                                                    <GoBookmarkFill style={{ fill: 'black' }} />
+                                                                    :
+                                                                    <GoBookmark />
+                                                            }
+                                                            {/* <span>Save</span> */}
+                                                        </button>
+                                                        <button className="flex items-center text-gray-600 hover:text-blue-500" onClick={() => toggleModal(post._id)}>
+                                                            <BiSolidShareAlt />
+                                                            {/* <span>Share</span> */}
+                                                        </button>
+                                                    </div>
+                                                </div>
                                             </div>
-                                            <div className="flex items-center">
-                                                <button onClick={() => handleSavedClick(post._id)} className="flex items-center text-gray-600 hover:text-blue-500 mr-4">
-                                                    {
-                                                        post.savedBy?.includes(user?._id)
-                                                            ?
-                                                            <GoBookmarkFill style={{ fill: 'black' }} />
-                                                            :
-                                                            <GoBookmark />
-                                                    }
-                                                    {/* <span>Save</span> */}
-                                                </button>
-                                                <button className="flex items-center text-gray-600 hover:text-blue-500" onClick={()=>toggleModal(post._id)}>
-                                                    <BiSolidShareAlt />
-                                                    {/* <span>Share</span> */}
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </Card>
-                            ))}
+                                        </Card>
+                                    ))}
 
                         </div>
                     </div>
@@ -453,7 +473,7 @@ const Profile = () => {
             )}
             {showShareModal && (
                 <ShareModal isOpen={showShareModal} onClose={closeShareModal} id={sharePostId} />
-      )}
+            )}
         </>
     );
 };

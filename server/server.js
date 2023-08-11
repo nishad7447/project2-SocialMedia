@@ -11,6 +11,8 @@ import authRoutes from './Routes/authRoutes.js'
 import userRoutes from './Routes/userRoutes.js'
 import errorHandler from './middleware/errorHandler.js'
 import adminRoutes from './Routes/adminRoutes.js'
+import chatRoutes from './Routes/chatRoutes.js'
+import messageRoutes from './Routes/messageRoutes.js'
 
 // config
 const __filename=fileURLToPath(import.meta.url)
@@ -29,6 +31,8 @@ app.use(errorHandler);
 app.use('/auth',authRoutes)
 app.use('/',userRoutes)
 app.use('/admin',adminRoutes)
+app.use('/chat',chatRoutes)
+app.use('/message',messageRoutes)
 
 //monogdb
 mongoose.connect(process.env.MONGO_URL,{

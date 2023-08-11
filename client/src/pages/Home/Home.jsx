@@ -16,6 +16,7 @@ import { useNavigate } from 'react-router-dom';
 import { MdDeleteForever, MdReportProblem } from 'react-icons/md';
 import Modal from '../../components/Modal/Modal';
 import ShareModal from '../../components/ShareModal/ShareModal';
+import moment from 'moment'
 
 
 const Spinner = () => {
@@ -27,19 +28,24 @@ const Spinner = () => {
 };
 export default function Home() {
   const nav = useNavigate()
-  const {user,search} = useSelector((state) => state.auth)
+  const { user, search } = useSelector((state) => state.auth)
   const [loadingUser, setLoadingUser] = useState(true);
   const [posts, setPosts] = useState([]);
   const [suggestedUsers, setSuggestedUsers] = useState([])
   const [updateUI, setUpdateUI] = useState(false)
 
-  useEffect(()=>{
-    if(search==='' || search===null){
-      setUpdateUI((prev)=>!prev)
+  useEffect(() => {
+    if (search === '' || search === null) {
+      setUpdateUI((prev) => !prev)
     }
-    setPosts(posts.filter((post)=>post.content.toLowerCase().includes(search.toLowerCase())))
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  },[search])
+    setPosts(posts.filter((post) =>
+    post.content.toLowerCase().includes(search.toLowerCase()) ||
+    post.userId.UserName.toLowerCase().includes(search.toLowerCase())
+  ));
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [search])
+
+
   useEffect(() => {
     axiosInstance.get(`${UserBaseURL}/getAllPosts`)
       .then((res) => {
@@ -218,22 +224,43 @@ export default function Home() {
       });
   }
 
-  const handleGoToUser =(userId)=>{
+  const handleGoToUser = (userId) => {
     nav(`/profile/${userId}`)
   }
 
 
   //share
   const [showShareModal, setShowShareModal] = useState(false);
-  const [sharePostId,setSharePostId]=useState(null)
-    const toggleModal = (postId) => {
-        setShowShareModal(true);
-        setSharePostId(postId)
-    };
-    const closeShareModal = () => {
-      setShowShareModal(false)
-    }
+  const [sharePostId, setSharePostId] = useState(null)
+  const toggleModal = (postId) => {
+    setShowShareModal(true);
+    setSharePostId(postId)
+  };
+  const closeShareModal = () => {
+    setShowShareModal(false)
+  }
+
+  //moment.js config
+  const formatPostDate = (date) => {
+    const now = moment();
+    const postDate = moment(date);
   
+    if (now.diff(postDate, 'seconds') < 60) {
+      return 'Just now';
+    } else if (now.diff(postDate, 'days') === 0) {
+      return postDate.fromNow(); // Display "x minutes ago", "an hour ago", etc.
+    } else if (now.diff(postDate, 'days') === 1) {
+      return 'Yesterday';
+    } else if (now.diff(postDate, 'days') <= 4) {
+      return `${now.diff(postDate, 'days')} days ago`; // Display "X days ago" for posts within the last 4 days
+    } else if (now.diff(postDate, 'years') === 0) {
+      return postDate.format('MMMM D'); // Display "Month Day" for posts within the current year
+    } else {
+      return postDate.format('LL'); // Display "Month Day, Year" for posts older than a year
+    }
+  };
+  
+
 
   return (
     <>
@@ -242,205 +269,205 @@ export default function Home() {
           <Spinner />
         ) : (
           <>
-          <div className=" grid grid-cols-1 md:grid-cols-4 gap-4 mt-12 ml-4 mr-4">
+            <div className=" grid grid-cols-1 md:grid-cols-4 gap-4 mt-12 ml-4 mr-4">
 
-            {/* First Card - 1/4 of the row */}
-            <div className="col-span-1">
-              <div className="sticky top-36">
-                <Card>
-                  <div className="p-4">
-                    <div className="flex items-center mb-4">
-                      <img className="w-12 h-12 rounded-full mr-4" src={user?.ProfilePic} alt="User Avatar" />
-                      <div>
-                        <h2 className="text-xl font-bold">{user?.Name}</h2>
-                        <p className="text-gray-600">@{user?.UserName}</p>
-                      </div>
-                    </div>
-                    <p className="mb-4">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce ultricies facilisis justo, sit amet aliquam odio congue vitae.</p>
-                    <div className="flex justify-between">
-                      <div onClick={() => nav('/followers')}>
-                        <h3 className="text-lg font-bold">1200</h3>
-                        <p className="text-gray-600">Followers</p>
-                      </div>
-                      <div onClick={() => nav('/following')}>
-                        <h3 className="text-lg font-bold">800</h3>
-                        <p className="text-gray-600">Following</p>
-                      </div>
-                      <div>
-                        <h3 className="text-lg font-bold">250</h3>
-                        <p className="text-gray-600">Posts</p>
-                      </div>
-                    </div>
-                  </div>
-                </Card>
-
-                {/* Friend Suggestion Card */}
-                <Card extra="mt-4">
-                  <div className="p-4">
-                    <h2 className="text-lg font-bold mb-2">Friend Suggestions</h2>
-                    {/* Display the list of friend suggestions */}
-                    {suggestedUsers.map((friend) => (
-                      <div key={friend?._id} className="flex items-center justify-between mb-4">
-                        <div className="flex items-center">
-                          <img className="w-10 h-10 rounded-full mr-2" src={friend?.ProfilePic} alt="Friend Avatar" />
-                          <h3 className="text-sm font-bold">{friend?.UserName}</h3>
+              {/* First Card - 1/4 of the row */}
+              <div className="col-span-1">
+                <div className="sticky top-36">
+                  <Card>
+                    <div className="p-4">
+                      <div className="flex items-center mb-4">
+                        <img className="w-12 h-12 rounded-full mr-4" src={user?.ProfilePic} alt="User Avatar" />
+                        <div>
+                          <h2 className="text-xl font-bold">{user?.Name}</h2>
+                          <p className="text-gray-600">@{user?.UserName}</p>
                         </div>
-                        <FaUserPlus className="w-5 h-5 text-blue-500 hover:text-blue-600" />
                       </div>
-                    ))}
-                  </div>
-                </Card>
+                      <p className="mb-4">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce ultricies facilisis justo, sit amet aliquam odio congue vitae.</p>
+                      <div className="flex justify-between">
+                        <div onClick={() => nav('/followers')}>
+                          <h3 className="text-lg font-bold">1200</h3>
+                          <p className="text-gray-600">Followers</p>
+                        </div>
+                        <div onClick={() => nav('/following')}>
+                          <h3 className="text-lg font-bold">800</h3>
+                          <p className="text-gray-600">Following</p>
+                        </div>
+                        <div>
+                          <h3 className="text-lg font-bold">250</h3>
+                          <p className="text-gray-600">Posts</p>
+                        </div>
+                      </div>
+                    </div>
+                  </Card>
+
+                  {/* Friend Suggestion Card */}
+                  <Card extra="mt-4">
+                    <div className="p-4">
+                      <h2 className="text-lg font-bold mb-2">Friend Suggestions</h2>
+                      {/* Display the list of friend suggestions */}
+                      {suggestedUsers.map((friend) => (
+                        <div key={friend?._id} className="flex items-center justify-between mb-4">
+                          <div className="flex items-center">
+                            <img className="w-10 h-10 rounded-full mr-2" src={friend?.ProfilePic} alt="Friend Avatar" />
+                            <h3 className="text-sm font-bold">{friend?.UserName}</h3>
+                          </div>
+                          <FaUserPlus className="w-5 h-5 text-blue-500 hover:text-blue-600" />
+                        </div>
+                      ))}
+                    </div>
+                  </Card>
+                </div>
               </div>
-            </div>
-            {/* Second Card - 1/2 of the row */}
-            <div className="col-span-1 md:col-span-2 overflow-y-auto ">
-              <CreatePost setUpdateUI={setUpdateUI} />
-              {
-              posts.length === 0 ?
-              <p className='text-xl font-semibold flex justify-center mt-48'>No posts</p>
-              :
-              posts.map((post) => (
-                <Card key={post.id} id={post._id} extra='mb-4'>
-                  <div className="p-4">
-                    <div className="flex relative items-center mb-4">
-                      <img className="w-10 h-10 rounded-full mr-2" src={post?.userId?.ProfilePic} alt="User Avatar" />
-                      <div>
-                        <h3 className="text-sm font-bold" onClick={()=>handleGoToUser(post.userId._id)}>{post?.userId?.UserName}</h3>
-                        <p className="text-xs text-gray-600">{new Date(post?.createdAt).toLocaleString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
-                      </div>
-                      <SlOptionsVertical
-                        className="absolute right-0 cursor-pointer"
-                        onClick={() => handleDropdownToggle(post._id)}
-                      />
-                      {openDropdowns[post._id] && (
-                        <div ref={dropdownRef} className="absolute top-10 right-0 bg-white border rounded shadow-xl dark:bg-navy-700">
-                          {/* Options for the dropdown go here */}
-                          <ul>
-                            {
-                              post?.userId?.UserName === user.UserName ?
-                                <li onClick={() => showDeleteModal(post._id)} className='flex p-2 text-sm'><MdDeleteForever className='text-red-500 mr-1 ' size={20} /> Delete</li>
-                                :
-                                <li onClick={() => showReportModal(post._id)} className='flex p-2 text-sm'><MdReportProblem className='text-yellow-500 mr-1 ' size={20} /> Report</li>
+              {/* Second Card - 1/2 of the row */}
+              <div className="col-span-1 md:col-span-2 overflow-y-auto ">
+                <CreatePost setUpdateUI={setUpdateUI} />
+                {
+                  posts.length === 0 ?
+                    <p className='text-xl font-semibold flex justify-center mt-48'>No posts</p>
+                    :
+                    posts.map((post) => (
+                      <Card key={post.id} id={post._id} extra='mb-4'>
+                        <div className="p-4">
+                          <div className="flex relative items-center mb-4">
+                            <img className="w-10 h-10 rounded-full mr-2" src={post?.userId?.ProfilePic} alt="User Avatar" />
+                            <div>
+                              <h3 className="text-sm font-bold" onClick={() => handleGoToUser(post.userId._id)}>{post?.userId?.UserName}</h3>
+                              <p className="text-xs text-gray-600">{formatPostDate(post?.createdAt)}</p>
+                            </div>
+                            <SlOptionsVertical
+                              className="absolute right-0 cursor-pointer"
+                              onClick={() => handleDropdownToggle(post._id)}
+                            />
+                            {openDropdowns[post._id] && (
+                              <div ref={dropdownRef} className="absolute top-10 right-0 bg-white border rounded shadow-xl dark:bg-navy-700">
+                                {/* Options for the dropdown go here */}
+                                <ul>
+                                  {
+                                    post?.userId?.UserName === user.UserName ?
+                                      <li onClick={() => showDeleteModal(post._id)} className='flex p-2 text-sm'><MdDeleteForever className='text-red-500 mr-1 ' size={20} /> Delete</li>
+                                      :
+                                      <li onClick={() => showReportModal(post._id)} className='flex p-2 text-sm'><MdReportProblem className='text-yellow-500 mr-1 ' size={20} /> Report</li>
+                                  }
+                                  {/* Other options related to the current user's post */}
+                                </ul>
+                              </div>
+                            )}
+                          </div>
+                          {/* eslint-disable-next-line jsx-a11y/img-redundant-alt */}
+                          {/* <img className="w-full h-auto rounded-lg mb-4" src="https://via.placeholder.com/800x400" alt="Post Image" /> */}
+                          {/* Conditional rendering based on the file extension */}
+                          {(() => {
+                            if (post?.fileUrl) {
+                              const extension = post?.fileUrl.split('.').pop().toLowerCase();
+                              if (['jpg', 'jpeg', 'png', 'gif'].includes(extension)) {
+                                return <img className="w-full h-auto rounded-lg mb-4" src={post?.fileUrl} alt="Post " />;
+                              } else if (extension === 'mp4') {
+                                return (
+                                  <video className="w-full h-auto rounded-lg mb-4" controls>
+                                    <source src={post?.fileUrl} type="video/mp4" />
+                                    Your browser does not support the video tag.
+                                  </video>
+                                );
+                              } else if (extension === 'mp3') {
+                                return (
+                                  <audio className="w-full" controls>
+                                    <source src={post?.fileUrl} type="audio/mp3" />
+                                    Your browser does not support the audio element.
+                                  </audio>
+                                );
+                              } else {
+                                return <p>Unsupported file format</p>;
+                              }
                             }
-                            {/* Other options related to the current user's post */}
-                          </ul>
+                          })()}
+                          <p className="text-sm mb-4">
+                            {post?.content}
+                          </p>
+                          <div className="flex justify-between items-center">
+                            <div className="flex items-center">
+                              <button onClick={() => handleLikeClick(post._id)} className="flex items-center text-gray-600 hover:text-blue-500 mr-4">
+                                {
+                                  post.likes.includes(user?._id)
+                                    ?
+                                    <AiFillHeart style={{ fill: 'red' }} />
+                                    :
+                                    <BiHeart />
+                                }
+                                <span className='ml-1 text-xs'>{renderLikeInfo(post)}</span>
+                              </button>
+                              <button onClick={() => handleCommentClick(post._id)} className="flex items-center text-gray-600 hover:text-blue-500 mr-4">
+                                <BiCommentDots />
+                                {/* <span>Comment</span> */}
+                              </button>
+                            </div>
+                            <div className="flex items-center">
+                              <button onClick={() => handleSavedClick(post._id)} className="flex items-center text-gray-600 hover:text-blue-500 mr-4">
+                                {
+                                  post.savedBy?.includes(user?._id)
+                                    ?
+                                    <GoBookmarkFill style={{ fill: 'black' }} />
+                                    :
+                                    <GoBookmark />
+                                }
+                                {/* <span>Save</span> */}
+                              </button>
+                              <button className="flex items-center text-gray-600 hover:text-blue-500 " onClick={() => toggleModal(post._id)}>
+                                <BiSolidShareAlt />
+                                {/* <span>Share</span> */}
+                              </button>
+                            </div>
+                          </div>
                         </div>
-                      )}
-                    </div>
-                    {/* eslint-disable-next-line jsx-a11y/img-redundant-alt */}
-                    {/* <img className="w-full h-auto rounded-lg mb-4" src="https://via.placeholder.com/800x400" alt="Post Image" /> */}
-                    {/* Conditional rendering based on the file extension */}
-                    {(() => {
-                      if (post?.fileUrl) {
-                        const extension = post?.fileUrl.split('.').pop().toLowerCase();
-                        if (['jpg', 'jpeg', 'png', 'gif'].includes(extension)) {
-                          return <img className="w-full h-auto rounded-lg mb-4" src={post?.fileUrl} alt="Post " />;
-                        } else if (extension === 'mp4') {
-                          return (
-                            <video className="w-full h-auto rounded-lg mb-4" controls>
-                              <source src={post?.fileUrl} type="video/mp4" />
-                              Your browser does not support the video tag.
-                            </video>
-                          );
-                        } else if (extension === 'mp3') {
-                          return (
-                            <audio className="w-full" controls>
-                              <source src={post?.fileUrl} type="audio/mp3" />
-                              Your browser does not support the audio element.
-                            </audio>
-                          );
-                        } else {
-                          return <p>Unsupported file format</p>;
-                        }
-                      }
-                    })()}
-                    <p className="text-sm mb-4">
-                      {post?.content}
-                    </p>
-                    <div className="flex justify-between items-center">
-                      <div className="flex items-center">
-                        <button onClick={() => handleLikeClick(post._id)} className="flex items-center text-gray-600 hover:text-blue-500 mr-4">
-                          {
-                            post.likes.includes(user?._id)
-                              ?
-                              <AiFillHeart style={{ fill: 'red' }} />
-                              :
-                              <BiHeart />
-                          }
-                          <span className='ml-1 text-xs'>{renderLikeInfo(post)}</span>
-                        </button>
-                        <button onClick={() => handleCommentClick(post._id)} className="flex items-center text-gray-600 hover:text-blue-500 mr-4">
-                          <BiCommentDots />
-                          {/* <span>Comment</span> */}
-                        </button>
-                      </div>
-                      <div className="flex items-center">
-                        <button onClick={() => handleSavedClick(post._id)} className="flex items-center text-gray-600 hover:text-blue-500 mr-4">
-                          {
-                            post.savedBy?.includes(user?._id)
-                              ?
-                              <GoBookmarkFill style={{ fill: 'black' }} />
-                              :
-                              <GoBookmark />
-                          }
-                          {/* <span>Save</span> */}
-                        </button>
-                        <button className="flex items-center text-gray-600 hover:text-blue-500 " onClick={()=>toggleModal(post._id)}>
-                          <BiSolidShareAlt />
-                          {/* <span>Share</span> */}
-                        </button>
-                        </div>
-                    </div>
-                  </div>
-                </Card>
-              ))}
-            </div>
-            {/* Third Card - 1/4 of the row */}
-            <div className="col-span-1  sticky top-36">
-              <div className="sticky top-36">
-                <Card>
-                  <div className="p-4">
-                    <div className="flex justify-between items-center">
-                      <h2 className="text-lg font-bold mb-2">Sponsored Ad</h2>
-                      <a className="text-gray-500 text-sm font-bold" href="https://www.example.com/create-ad" target="_blank" rel="noopener noreferrer">
-                        Create Ad
-                      </a>
-                    </div>
-                    {/* eslint-disable-next-line jsx-a11y/img-redundant-alt */}
-                    <img className="w-full h-auto rounded-lg mb-4" src="https://via.placeholder.com/800x400" alt="Ad Image" />
-                    <div className="flex justify-between">
-
-                      <div className="flex items-center mb-2">
-                        <p className="text-sm text-gray-500">Sponsored</p>
-                      </div>
-                      <div className="flex items-center mb-2">
-                        <a className="text-sm text-blue-500" href="https://www.example.com" target="_blank" rel="noopener noreferrer">Example.com</a>
-                      </div>
-
-                    </div>
-                    <p className="mb-4 text-sm">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce ultricies facilisis justo, sit amet aliquam odio congue vitae.</p>
-
-                  </div>
-                </Card>
-
-                <Card extra="mt-4">
-                  <div className="p-4">
-                    <h2 className="text-lg font-bold mb-2">Friends List</h2>
-                    {/* Display the list of friends */}
-                    {friends.map((friend) => (
-                      <div key={friend.id} className="flex items-center justify-between mb-4">
-                        <div className="flex items-center">
-                          <img className="w-10 h-10 rounded-full mr-2" src={friend.avatar} alt="Friend Avatar" />
-                          <h3 className="text-sm font-bold">{friend.name}</h3>
-                        </div>
-                        <SiGooglemessages className="w-5 h-5 text-blue-500 hover:text-blue-600" />
-                      </div>
+                      </Card>
                     ))}
-                  </div>
-                </Card>
+              </div>
+              {/* Third Card - 1/4 of the row */}
+              <div className="col-span-1  sticky top-36">
+                <div className="sticky top-36">
+                  <Card>
+                    <div className="p-4">
+                      <div className="flex justify-between items-center">
+                        <h2 className="text-lg font-bold mb-2">Sponsored Ad</h2>
+                        <a className="text-gray-500 text-sm font-bold" href="https://www.example.com/create-ad" target="_blank" rel="noopener noreferrer">
+                          Create Ad
+                        </a>
+                      </div>
+                      {/* eslint-disable-next-line jsx-a11y/img-redundant-alt */}
+                      <img className="w-full h-auto rounded-lg mb-4" src="https://via.placeholder.com/800x400" alt="Ad Image" />
+                      <div className="flex justify-between">
+
+                        <div className="flex items-center mb-2">
+                          <p className="text-sm text-gray-500">Sponsored</p>
+                        </div>
+                        <div className="flex items-center mb-2">
+                          <a className="text-sm text-blue-500" href="https://www.example.com" target="_blank" rel="noopener noreferrer">Example.com</a>
+                        </div>
+
+                      </div>
+                      <p className="mb-4 text-sm">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce ultricies facilisis justo, sit amet aliquam odio congue vitae.</p>
+
+                    </div>
+                  </Card>
+
+                  <Card extra="mt-4">
+                    <div className="p-4">
+                      <h2 className="text-lg font-bold mb-2">Friends List</h2>
+                      {/* Display the list of friends */}
+                      {friends.map((friend) => (
+                        <div key={friend.id} className="flex items-center justify-between mb-4">
+                          <div className="flex items-center">
+                            <img className="w-10 h-10 rounded-full mr-2" src={friend.avatar} alt="Friend Avatar" />
+                            <h3 className="text-sm font-bold">{friend.name}</h3>
+                          </div>
+                          <SiGooglemessages className="w-5 h-5 text-blue-500 hover:text-blue-600" />
+                        </div>
+                      ))}
+                    </div>
+                  </Card>
+                </div>
               </div>
             </div>
-          </div>
           </>
         )
       }
@@ -481,7 +508,7 @@ export default function Home() {
         />
       )}
       {showShareModal && (
-                <ShareModal isOpen={showShareModal} onClose={closeShareModal} id={sharePostId} />
+        <ShareModal isOpen={showShareModal} onClose={closeShareModal} id={sharePostId} />
       )}
     </>
   );

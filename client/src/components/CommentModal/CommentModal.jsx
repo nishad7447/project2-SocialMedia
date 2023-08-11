@@ -3,6 +3,7 @@ import { FiSend, FiX } from 'react-icons/fi'; // Import the send and X icons fro
 import { axiosInstance } from '../../axios';
 import { UserBaseURL } from '../../API';
 import { toast } from 'react-toastify';
+import moment from 'moment'
 
 const CommentModal = ({ postId, closeModal }) => {
   const [comment, setComment] = useState('');
@@ -58,6 +59,27 @@ const CommentModal = ({ postId, closeModal }) => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   },[updateUI])
 
+    //moment.js config
+    const formatPostDate = (date) => {
+      const now = moment();
+      const postDate = moment(date);
+    
+      if (now.diff(postDate, 'seconds') < 60) {
+        return 'Just now';
+      } else if (now.diff(postDate, 'days') === 0) {
+        return postDate.fromNow(); // Display "x minutes ago", "an hour ago", etc.
+      } else if (now.diff(postDate, 'days') === 1) {
+        return 'Yesterday';
+      } else if (now.diff(postDate, 'days') <= 4) {
+        return `${now.diff(postDate, 'days')} days ago`; // Display "X days ago" for posts within the last 4 days
+      } else if (now.diff(postDate, 'years') === 0) {
+        return postDate.format('MMMM D'); // Display "Month Day" for posts within the current year
+      } else {
+        return postDate.format('LL'); // Display "Month Day, Year" for posts older than a year
+      }
+    };
+    
+
   return (
     <div className="fixed top-0 left-0 w-full h-full bg-opacity-75 bg-gray-800 backdrop-blur flex justify-center items-center">
       <div ref={modalRef} className="p-4 rounded-lg bg-white dark:bg-gray-900 w-96">
@@ -78,7 +100,7 @@ const CommentModal = ({ postId, closeModal }) => {
               <div>
                 <p className="font-bold text-sm dark:text-white">{comment?.userId.UserName}</p> {/* Use dark:text-white to make text white in dark mode */}
                 <p className="text-sm dark:text-white">{comment?.content}</p> {/* Use dark:text-white to make text white in dark mode */}
-                <p className="text-xs text-gray-500 dark:text-white">{new Date(comment?.date).toLocaleString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p> {/* Use dark:text-white to make text white in dark mode */}
+                <p className="text-xs text-gray-500 dark:text-white">{formatPostDate(comment?.createdAt)}</p> {/* Use dark:text-white to make text white in dark mode */}
               </div>
             </div>
           )): <p className="flex justify-center font-bold text-sm dark:text-white">No comments yet </p>}

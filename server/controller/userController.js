@@ -106,9 +106,21 @@ const userController = {
         content: comment,
         userId,
       });
-      await newComment.save();
+      const commentPromise= newComment.save();
       post.comments.push(newComment._id);
-      await post.save();
+      const postPromise = post.save();
+      //added promise.allsettled
+      const [commentResult,postResult]=await Promise.allSettled([commentPromise,postPromise])
+      console.log(commentResult,"cmtRRRRR,,,,,ppostrRRRR",postResult)
+      if (commentResult.status === 'rejected') {
+        console.error(commentResult.reason);
+        return res.status(500).json({ error: "Error saving comment" });
+      }
+  
+      if (postResult.status === 'rejected') {
+        console.error(postResult.reason);
+        return res.status(500).json({ error: "Error saving post" });
+      }
       return res.status(201).json({ message: "Comment added successfully" });
     } catch (error) {
       console.error(error);
@@ -118,7 +130,7 @@ const userController = {
   getAllComments: async (req, res) => {
     try {
       const postId = req.params.id;
-      const comments = await Comments.find({ postId })
+      const comments = await Comments.find({ postId }).sort({ createdAt: -1 })
         .populate("userId", "ProfilePic UserName")
         .exec();
       if (comments.length === 0) {
