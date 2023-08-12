@@ -151,6 +151,25 @@ const chatController = {
     }else{
         res.status(201).send(remove)
     }
+  },
+  search: async (req,res)=>{
+      const { search,userId } = req.body; 
+
+      try {
+          const trimmedQuery = search.trim(); 
+  
+          if (trimmedQuery === "") {
+              return res.status(400).json({ error: "Search query is empty" });
+          }
+          const searchResults = await User.find({
+            UserName: { $regex: trimmedQuery, $options: 'i' },
+            _id: { $ne: userId }
+          }).select('UserName ProfilePic Email');
+          res.status(200).json({results:searchResults});
+      } catch (error) {
+          console.error(error, "Search error catch");
+          res.status(500).json({ error: "An error occurred while searching users" });
+      }
   }
 };
 

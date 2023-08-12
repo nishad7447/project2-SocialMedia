@@ -4,6 +4,7 @@ import chatController from '../controller/chatController.js'
 
 const chatRoutes=express.Router()
 
+chatRoutes.post('/search',chatController.search)
 chatRoutes.post('/',auth,chatController.accessChat )
 chatRoutes.get('/',auth,chatController.fetchChat )
 chatRoutes.post('/group',auth,chatController.createGroupChat )

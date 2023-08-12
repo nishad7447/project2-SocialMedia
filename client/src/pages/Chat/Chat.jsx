@@ -3,6 +3,13 @@ import React, { useEffect, useRef, useState } from 'react'
 import { useSelector } from 'react-redux'
 import Card from '../../components/Card/Card'
 import EmojiPicker from 'emoji-picker-react';
+import { RiChatNewFill } from 'react-icons/ri';
+import { FaTimes } from 'react-icons/fa';
+import { SiGooglemessages } from 'react-icons/si';
+import { axiosInstance } from '../../axios';
+import { UserBaseURL } from '../../API';
+import { toast } from 'react-toastify';
+import { MdPersonSearch } from 'react-icons/md';
 
 export default function Chat() {
   const { user } = useSelector((state) => state.auth)
@@ -59,10 +66,18 @@ export default function Chat() {
     // Scroll to the bottom after rendering messages
     containerRef.current.scrollTop = containerRef.current.scrollHeight;
   }, [messages]);
+
+  const [showAddUserModal, setAddUserModal] = useState(false)
+  const closeModal = () => {
+    setAddUserModal(false)
+  }
   return (
 
     <>
-
+      <button
+        className="border-px fixed bottom-[30px] left-[35px] !z-[99] flex h-[60px] w-[60px] items-center justify-center rounded-full shadow-xl border-[#6a53ff] dark:bg-gradient-to-br from-brandLinear to-blueSecondary p-0 bg-gray-300"
+        onClick={() => setAddUserModal(true)}
+      ><RiChatNewFill size={28} /></button>
       <Card extra="mt-10 m-4 rounded-xl shadow-lg bg-white dark:bg-gray-900 dark:text-white">
         <div className="flex h-screen antialiased rounded-xl shadow-lg  text-gray-800 dark:bg-navy-900 dark:text-white">
           <div className="flex sm:flex-row flex-col h-full w-full overflow-x-hidden">
@@ -222,7 +237,7 @@ export default function Chat() {
                         </svg>
                       </button>
                       {showEmojiPicker && (
-                        <div className="absolute z-50 right-0 bottom-10 w-44 sm:w-auto">
+                        <div className="absolute z-50 right-0 bottom-10 w-44 sm:w-auto">Modal
                           <EmojiPicker
                             emojis={emojis}
                             onEmojiClick={handleEmojiClick}
@@ -263,6 +278,96 @@ export default function Chat() {
           </div>
         </div>
       </Card>
+      {
+        showAddUserModal ?
+          <Modal onCancel={closeModal} /> : ""
+      }
     </>
   )
+}
+
+
+function Modal({ onCancel }) {
+  const modalRef = useRef();
+  const [searchQuery, setSearchQuery] = useState('')
+  const [searchResults, setSearchResults] = useState([])
+  const { user } = useSelector((state) => state.auth)
+
+  const handleOutsideClick = (event) => {
+    if (modalRef.current && !modalRef.current.contains(event.target)) {
+      onCancel();
+    }
+  };
+
+  useEffect(() => {
+    document.addEventListener('mousedown', handleOutsideClick);
+    return () => {
+      document.removeEventListener('mousedown', handleOutsideClick);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const searchUsers = (value) => {
+    axiosInstance.post(`${UserBaseURL}/chat/search`, { search: searchQuery })
+      .then((res) => {
+        var result=res.data.results
+        result=result.filter((users)=>users._id.toString()!==user._id)
+        setSearchResults(result);
+      })
+      .catch((err) => {
+        toast.error(err.message, "search user error")
+        console.log(err, "search user error")
+      })
+  }
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-700 bg-opacity-40 dark:text-white">
+      <div ref={modalRef} className="bg-white rounded-lg p-4 pt-2 dark:bg-navy-700">
+        <div className="flex justify-between items-center mb-2 ">
+          <p className="text-xl font-semibold ">Search User</p>
+          <button
+            className="text-white bg-red-500 p-2 rounded-3xl"
+            onClick={onCancel}
+          >
+            <FaTimes />
+          </button>
+        </div>
+        <div className="flex items-center mb-4">
+          <hr className="w-full border-gray-300" />
+        </div>
+
+        <div className="flex justify-center items-center mb-7">
+          <input
+            type="text"
+            placeholder="Search..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="h-full w-3/4 rounded-full bg-white border-gray-300 shadow-md text-sm font-medium text-navy-700 placeholder-gray-400 dark:bg-navy-900 dark:text-white dark:placeholder-white px-4 py-2"
+          />
+          {searchQuery.trim().length > 0 && (
+            <button
+              onClick={searchUsers}
+              className="text-white bg-blue-500 hover:bg-blue-600 rounded-3xl p-2 ml-2"
+            >
+              <MdPersonSearch size={18} />
+            </button>
+          )}
+        </div>
+
+        {
+          searchResults.length > 0 ? (searchResults.map((friend) => (
+            <div key={friend?._id} className="flex items-center justify-between mb-4">
+              <div className="flex items-center">
+                <img className="w-10 h-10 rounded-full mr-2" src={friend?.ProfilePic} alt="Friend Avatar" />
+                <h3 className="text-sm font-bold">{friend?.UserName}</h3>
+              </div>
+              <SiGooglemessages className="w-5 h-5 text-blue-500 hover:text-blue-600" />
+            </div>
+          )))
+            : <p className='text-xl font-semibold flex justify-center m-5'>No users found</p>
+
+        }
+
+      </div>
+    </div>
+  );
 }
