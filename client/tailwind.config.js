@@ -4,6 +4,11 @@ module.exports = {
   content: ["./src/**/*.{js,jsx,ts,tsx}"],
   theme: {
     extend: {
+      screens: {
+        'sm': '420px',   // Mobile view
+        'md': '768px',   // Tablet view
+        'lg': '1024px', //large view
+      },
       backdropBlur: {
         'none': 'none',
         'sm': '4px',
@@ -157,6 +162,7 @@ module.exports = {
       "4xl-max": { max: "1850px" },
     },
     colors: () => ({
+      black: "#000000",
       white: "#ffffff",
       lightPrimary: "#F4F7FE",
       blueSecondary: "#4318FF",

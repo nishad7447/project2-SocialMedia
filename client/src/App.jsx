@@ -17,6 +17,7 @@ import AdminLogin from "./pages/Admin/AdminLogin";
 import UserManagement from "./pages/Admin/UserManagement/UserManagement";
 import PostManagement from "./pages/Admin/PostManagement/PostManagement";
 import Profile from "./pages/Profile/Profile";
+import Chat from "./pages/Chat/Chat";
 
 
 
@@ -35,6 +36,7 @@ const App = () => {
         <Route path="/following" element={<Protected><Following/></Protected>} />
         <Route path="/profile" element={<Protected ><Profile />/</Protected>} />
         <Route path="/profile/:userId"  element={<Protected><Profile /></Protected>} />
+        <Route path='/chat' element ={<Protected><Chat /></Protected>} />
 
         {/* Admin */}
         <Route path="/admin-login" element={<AdminLogin/>} />
