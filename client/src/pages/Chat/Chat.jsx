@@ -13,6 +13,7 @@ import { MdPersonSearch } from 'react-icons/md';
 
 export default function Chat() {
   const { user } = useSelector((state) => state.auth)
+  const [updateUI,setUpdateUI]=useState(false)
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [inputMessage, setInputMessage] = useState('');
   const [emojis, setEmojis] = useState([])
@@ -22,6 +23,7 @@ export default function Chat() {
     // Add more messages here
 
   ]);
+  const [chatUsers, setChatUsers] = useState([])
 
   useEffect(() => {
     // Get the list of emojis from the emoji-picker library
@@ -71,6 +73,15 @@ export default function Chat() {
   const closeModal = () => {
     setAddUserModal(false)
   }
+
+  useEffect(() => {
+    axiosInstance.get(`${UserBaseURL}/chat/`)
+      .then((res) => setChatUsers(res.data))
+      .catch((err) => {
+        toast.error('error fetching chats', err.message)
+      })
+  }, [updateUI])
+  console.log(JSON.stringify(chatUsers))
   return (
 
     <>
@@ -112,61 +123,77 @@ export default function Chat() {
                   >
                 </div>
                 <div className="flex flex-col max-h-[580px] space-y-1 mt-4 -mx-2  overflow-y-auto">
-                  <button
-                    className="flex flex-row items-center hover:bg-gray-100 dark:hover:bg-navy-600 rounded-xl p-2"
-                  >
-                    <div
-                      className="flex items-center justify-center h-8 w-8 bg-indigo-200 rounded-full"
-                    >
-                      H
-                    </div>
-                    <div className="ml-2 text-sm font-semibold">Henry Boyd</div>
-                  </button>
-                  <button
-                    className="flex flex-row items-center hover:bg-gray-100 dark:hover:bg-navy-600 rounded-xl p-2"
-                  >
-                    <div
-                      className="flex items-center justify-center h-8 w-8 bg-gray-200 rounded-full"
-                    >
-                      M
-                    </div>
-                    <div className="ml-2 text-sm font-semibold">Marta Curtis</div>
-                    <div
-                      className="flex items-center justify-center ml-auto text-xs text-white bg-red-500 h-4 w-4 rounded leading-none"
-                    >
-                      2
-                    </div>
-                  </button>
-                  <button
-                    className="flex flex-row items-center hover:bg-gray-100 dark:hover:bg-navy-600 rounded-xl p-2"
-                  >
-                    <div
-                      className="flex items-center justify-center h-8 w-8 bg-orange-200 rounded-full"
-                    >
-                      P
-                    </div>
-                    <div className="ml-2 text-sm font-semibold">Philip Tucker</div>
-                  </button>
-                  <button
-                    className="flex flex-row items-center hover:bg-gray-100 dark:hover:bg-navy-600 rounded-xl p-2"
-                  >
-                    <div
-                      className="flex items-center justify-center h-8 w-8 bg-pink-200 rounded-full"
-                    >
-                      C
-                    </div>
-                    <div className="ml-2 text-sm font-semibold">Christine Reid</div>
-                  </button>
-                  <button
-                    className="flex flex-row items-center hover:bg-gray-100 dark:hover:bg-navy-600 rounded-xl p-2"
-                  >
-                    <div
-                      className="flex items-center justify-center h-8 w-8 bg-purple-200 rounded-full"
-                    >
-                      J
-                    </div>
-                    <div className="ml-2 text-sm font-semibold">Jerry Guzman</div>
-                  </button>
+                  {
+                    chatUsers.length === 0
+                      ?
+                      <p className='text-xl font-semibold flex justify-center m-5'>No users found</p>
+                      :
+                      chatUsers.map((chatUsers) => (
+                        chatUsers.isGroupChat ?
+                        <button
+                        className="flex  items-start hover:bg-gray-100 dark:hover:bg-navy-600 rounded-xl p-2"
+                      >
+                              <div
+                              className="flex items-center text-black justify-center h-8 w-8 bg-gray-200 rounded-full"
+                            >
+                              G
+                            </div>
+                                <div className="flex flex-col">
+                                  <div className="ml-2 text-sm font-semibold">{chatUsers.chatName}</div>
+                                  <div
+                                    className=" text-[10px] ml-2 text-gray-500"
+                                  >
+                                   {
+                                    chatUsers.latestMessage  ? 
+                                    ` ${chatUsers.latestMessage?.sender?.UserName === user.UserName ? "You" : chatUsers.latestMessage?.sender?.UserName } : ${chatUsers.latestMessage?.content}`
+                                    : ''
+                                   }
+                                  </div>
+                                </div>
+                                <div
+                                  className="flex items-center justify-center ml-auto text-xs text-white bg-red-500 h-4 w-4 rounded leading-none"
+                                >
+                                  2
+                                </div>
+                      </button>
+                        : 
+                        <button
+                          className="flex  items-start hover:bg-gray-100 dark:hover:bg-navy-600 rounded-xl p-2"
+                        >
+                          {
+                            chatUsers.users.filter((users) => users._id.toString() !== user._id).map((user) => {
+                              return (
+                                <>
+                                  <img
+                                    src={user.ProfilePic}
+                                    alt="User Avatar"
+                                    className="h-8 w-8 rounded-full bg-gray-200"
+                                  />
+                                  <div className="flex flex-col">
+                                    <div className="ml-2 text-sm font-semibold">{user.UserName}</div>
+                                    <div
+                                      className=" text-[10px] ml-2 text-gray-500"
+                                    >
+                                     {
+                                      chatUsers.latestMessage  ? 
+                                      ` ${chatUsers.latestMessage?.sender?.UserName === user.UserName ? "You" : chatUsers.latestMessage?.sender?.UserName } : ${chatUsers.latestMessage?.content}`
+                                      : ''
+                                     }
+                                    </div>
+                                  </div>
+                                  <div
+                                    className="flex items-center justify-center ml-auto text-xs text-white bg-red-500 h-4 w-4 rounded leading-none"
+                                  >
+                                    2
+                                  </div>
+                                </>
+                              )
+                            })
+                          }
+                        </button>
+                      ))
+
+                  }
                 </div>
               </div>
             </div>
@@ -280,14 +307,14 @@ export default function Chat() {
       </Card>
       {
         showAddUserModal ?
-          <Modal onCancel={closeModal} /> : ""
+          <Modal onCancel={closeModal} setUpdateUI={setUpdateUI}/> : ""
       }
     </>
   )
 }
 
 
-function Modal({ onCancel }) {
+function Modal({ onCancel ,setUpdateUI}) {
   const modalRef = useRef();
   const [searchQuery, setSearchQuery] = useState('')
   const [searchResults, setSearchResults] = useState([])
@@ -310,8 +337,8 @@ function Modal({ onCancel }) {
   const searchUsers = (value) => {
     axiosInstance.post(`${UserBaseURL}/chat/search`, { search: searchQuery })
       .then((res) => {
-        var result=res.data.results
-        result=result.filter((users)=>users._id.toString()!==user._id)
+        var result = res.data.results
+        result = result.filter((users) => users._id.toString() !== user._id)
         setSearchResults(result);
       })
       .catch((err) => {
@@ -319,6 +346,19 @@ function Modal({ onCancel }) {
         console.log(err, "search user error")
       })
   }
+
+  const handleChatAccess = (oppUserId) => {
+    axiosInstance.post(`${UserBaseURL}/chat/`, { oppUserId })
+      .then((res) => {
+        setUpdateUI((prev)=>!prev)
+        onCancel()
+        console.log(res, "user chat access and fetch") })
+      .catch((err) => {
+        toast.error(err.message, "user chat access and fetch error")
+        console.log(err, "user chat access and fetch error")
+      })
+  }
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-700 bg-opacity-40 dark:text-white">
       <div ref={modalRef} className="bg-white rounded-lg p-4 pt-2 dark:bg-navy-700">
@@ -354,13 +394,13 @@ function Modal({ onCancel }) {
         </div>
 
         {
-          searchResults.length > 0 ? (searchResults.map((friend) => (
-            <div key={friend?._id} className="flex items-center justify-between mb-4">
+          searchResults.length > 0 ? (searchResults.map((oppUser) => (
+            <div key={oppUser?._id} className="flex items-center justify-between mb-4">
               <div className="flex items-center">
-                <img className="w-10 h-10 rounded-full mr-2" src={friend?.ProfilePic} alt="Friend Avatar" />
-                <h3 className="text-sm font-bold">{friend?.UserName}</h3>
+                <img className="w-10 h-10 rounded-full mr-2" src={oppUser?.ProfilePic} alt="oppUser Avatar" />
+                <h3 className="text-sm font-bold">{oppUser?.UserName}</h3>
               </div>
-              <SiGooglemessages className="w-5 h-5 text-blue-500 hover:text-blue-600" />
+              <SiGooglemessages onClick={() => handleChatAccess(oppUser?._id)} className="w-5 h-5 text-blue-500 hover:text-blue-600" />
             </div>
           )))
             : <p className='text-xl font-semibold flex justify-center m-5'>No users found</p>

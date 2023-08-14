@@ -325,6 +325,16 @@ const userController = {
       console.log(error,'user fetched failed')
       res.status(400).json({message:"user fetched failed",error})
     }
+  },
+  editPost: async(req,res)=>{
+    try{
+      const {userId,postId,content}=req.body
+      await Post.findByIdAndUpdate(postId, { content: content})
+      res.status(200).json({message:"edit post successfully"})
+    }catch(error){
+      console.log(error,'edit post failed')
+      res.status(400).json({message:"edit post failed",error})
+    }
   }
 };
 

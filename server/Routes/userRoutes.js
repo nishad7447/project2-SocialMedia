@@ -28,6 +28,9 @@ userRoutes.put('/reportPost',auth,userController.reportPost)
 userRoutes.get('/userProfile/:id',auth,userController.userProfile)
 userRoutes.get('/userDetail/:id',auth,userController.userDetail)
 
+//userEditPost
+userRoutes.post('/editPost',auth,userController.editPost)
+
 //logout
 userRoutes.get('/logout/:id',userController.logout)
 export default userRoutes 
