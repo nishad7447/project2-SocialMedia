@@ -37,11 +37,12 @@ export default function Home() {
   useEffect(() => {
     if (search === '' || search === null) {
       setUpdateUI((prev) => !prev)
-    }
-    setPosts(posts.filter((post) =>
+    }else{
+      setPosts(posts.filter((post) =>
     post.content.toLowerCase().includes(search.toLowerCase()) ||
     post.userId.UserName.toLowerCase().includes(search.toLowerCase())
-  ));
+    ));
+    }
       // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [search])
 
@@ -363,14 +364,10 @@ export default function Home() {
                                       :
                                       <li onClick={() => showReportModal(post._id)} className='flex p-2 text-sm'><MdReportProblem className='text-yellow-500 mr-1 ' size={20} /> Report</li>
                                   }
-                                  {/* Other options related to the current user's post */}
                                 </ul>
                               </div>
                             )}
                           </div>
-                          {/* eslint-disable-next-line jsx-a11y/img-redundant-alt */}
-                          {/* <img className="w-full h-auto rounded-lg mb-4" src="https://via.placeholder.com/800x400" alt="Post Image" /> */}
-                          {/* Conditional rendering based on the file extension */}
                           {(() => {
                             if (post?.fileUrl) {
                               const extension = post?.fileUrl.split('.').pop().toLowerCase();
@@ -395,7 +392,7 @@ export default function Home() {
                               }
                             }
                           })()}
-                          <p className="text-sm mb-4">
+                          <p className="text-sm mb-4 max-w-[100%] break-words">
                             {post?.content}
                           </p>
                           <div className="flex justify-between items-center">

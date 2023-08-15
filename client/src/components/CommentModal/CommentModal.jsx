@@ -5,14 +5,17 @@ import { UserBaseURL } from '../../API';
 import { toast } from 'react-toastify';
 import moment from 'moment'
 import EmojiPicker from 'emoji-picker-react';
+import { BiSolidCommentX } from 'react-icons/bi';
+import Modal from '../Modal/Modal'
+import { useSelector } from 'react-redux';
 
 
 const CommentModal = ({ postId, closeModal }) => {
   const [comment, setComment] = useState('');
   const [fetchedComments, setFetchedComments] = useState([])
   const [updateUI, setUpdateUI] = useState(false)
+  const { user } = useSelector((state) => state.auth)
   const modalRef = useRef();
-
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [emojis, setEmojis] = useState([])
   useEffect(() => {
@@ -39,6 +42,7 @@ const CommentModal = ({ postId, closeModal }) => {
   };
 
   useEffect(() => {
+    console.log('clicked outside')
     document.addEventListener('mousedown', handleOutsideClick);
     return () => {
       document.removeEventListener('mousedown', handleOutsideClick);
@@ -53,7 +57,6 @@ const CommentModal = ({ postId, closeModal }) => {
   const handleCommentSubmit = () => {
     axiosInstance.post(`${UserBaseURL}/commentPost`, { comment, postId })
       .then((res) => {
-        console.log(res)
         toast.success(res.data.message)
         setUpdateUI((prevState) => !prevState)
         setComment('')
@@ -68,7 +71,6 @@ const CommentModal = ({ postId, closeModal }) => {
     axiosInstance.get(`${UserBaseURL}/getAllComments/${postId}`)
       .then((res) => {
         setFetchedComments(res.data.comments)
-        console.log(fetchedComments)
       })
       .catch((err) => {
         console.log(err)
@@ -96,6 +98,35 @@ const CommentModal = ({ postId, closeModal }) => {
     }
   };
 
+  //deleteCommmentMODAL
+  const [delCommentModal, setDelCommentModal] = useState(false)
+  const [delCommentId, setDelCommentId] = useState(null)
+
+  const showDelCommentModal = (Id) => {
+    setDelCommentId(Id)
+    setDelCommentModal(true)
+  }
+
+  const delCommentModalConfirm = () => {
+    axiosInstance.delete(`${UserBaseURL}/deleteComment/${delCommentId}`)
+      .then((res) => {
+        console.log(res, "deleteComment  res")
+        if (res.data.success) {
+          setUpdateUI((prev) => !prev);
+          delCommentModalCancel()
+          toast.success(res.data.message);
+        }
+      })
+      .catch((err) => {
+        toast.error(err.data.message);
+        console.log(err, "deleteComment error");
+      });
+  }
+
+  const delCommentModalCancel = () => {
+    setDelCommentModal(false)
+  }
+
 
   return (
     <div className="fixed top-0 left-0 w-full h-full bg-opacity-75 bg-gray-800 backdrop-blur flex justify-center items-center">
@@ -106,69 +137,91 @@ const CommentModal = ({ postId, closeModal }) => {
             <FiX size={18} />
           </button>
         </div>
-        <div className="mb-2 h-60 overflow-y-auto"> {/* Set the fixed height and make it scrollable */}
-          {fetchedComments ? fetchedComments.map((comment, index) => (
-            <div key={index} className="mb-2 flex items-center">
+        <div className="mb-2 h-60 overflow-y-auto">
+          {fetchedComments ? fetchedComments.map((comment, index) =>
+
+          (
+            <div key={index} className="mb-2 flex  relative ">
               <img
                 src={comment?.userId.ProfilePic}
                 alt={comment?.userId.UserName}
                 className="w-8 h-8 rounded-full mr-2"
               />
-              <div>
-                <p className="font-bold text-sm dark:text-white">{comment?.userId.UserName}</p> {/* Use dark:text-white to make text white in dark mode */}
-                <p className="text-sm dark:text-white">{comment?.content}</p> {/* Use dark:text-white to make text white in dark mode */}
-                <p className="text-xs text-gray-500 dark:text-white">{formatPostDate(comment?.createdAt)}</p> {/* Use dark:text-white to make text white in dark mode */}
+              <div className="max-w-[70%]">
+                <p className="font-bold text-sm dark:text-white">{comment?.userId.UserName}</p>
+                <p className="text-sm dark:text-white  break-words">{comment?.content}</p>
+                <p className="text-xs text-gray-500 dark:text-white">{formatPostDate(comment?.createdAt)}</p>
               </div>
+              {
+                comment?.userId._id === user?._id && (
+                  <div className='absolute right-0'>
+                    <button
+                      className="text-red-500 p-1 rounded-3xl"
+                      onClick={() => showDelCommentModal(comment?._id)}
+                    >
+                      <BiSolidCommentX />
+                    </button>
+                  </div>
+                )
+              }
             </div>
           )) : <p className="flex justify-center font-bold text-sm dark:text-white">No comments yet </p>}
         </div>
-       <div className="flex items-center relative"> {/* Use flex container to place textarea and button in a row */}
-  <textarea
-    className="flex-grow px-3 py-2 text-sm border rounded-3xl resize-none focus:outline-none focus:shadow-outline bg-lightPrimary text-navy-700 dark:bg-navy-900 dark:text-white "
-    placeholder="Write your comment..."
-    rows={1} // Set rows to 1 to make it a single line
-    value={comment}
-    onChange={handleCommentChange}
-    onInput={autoSizeTextarea}
-  />
-  <button
-    onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-    className="absolute mr-4 flex items-center justify-center h-full w-12 right-4 top-0 text-gray-400 hover:text-gray-600"
-  >
-    <svg
-      className="w-6 h-6"
-      fill="none"
-      stroke="currentColor"
-      viewBox="0 0 24 24"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth="2"
-        d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-      ></path>
-    </svg>
-  </button>
-  {showEmojiPicker && (
-    <div className="absolute z-50 right-0 bottom-10 w-44 sm:w-auto"> {/* Modal */}
-      <EmojiPicker
-        emojis={emojis}
-        onEmojiClick={handleEmojiClick}
-        className="EmojiPicker"
-      />
-    </div>
-  )}
-  {comment.trim().length > 0 && (
-    <button
-      onClick={handleCommentSubmit}
-      className="text-white bg-blue-500 hover:bg-blue-600 rounded-3xl p-2 ml-2"
-    >
-      <FiSend size={18} />
-    </button>
-  )}
-</div>
+        <div className="flex items-center relative"> {/* Use flex container to place textarea and button in a row */}
+          <textarea
+            className="flex-grow px-3 py-2 text-sm border rounded-3xl resize-none focus:outline-none focus:shadow-outline bg-lightPrimary text-navy-700 dark:bg-navy-900 dark:text-white "
+            placeholder="Write your comment..."
+            rows={1} // Set rows to 1 to make it a single line
+            value={comment}
+            onChange={handleCommentChange}
+            onInput={autoSizeTextarea}
+          />
+          <button
+            onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+            className="absolute mr-4 flex items-center justify-center h-full w-12 right-4 top-0 text-gray-400 hover:text-gray-600"
+          >
+            <svg
+              className="w-6 h-6"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              ></path>
+            </svg>
+          </button>
+          {showEmojiPicker && (
+            <div className="absolute z-50 right-0 bottom-10 w-44 sm:w-auto"> {/* Modal */}
+              <EmojiPicker
+                emojis={emojis}
+                onEmojiClick={handleEmojiClick}
+                className="EmojiPicker"
+              />
+            </div>
+          )}
+          {comment.trim().length > 0 && (
+            <button
+              onClick={handleCommentSubmit}
+              className="text-white bg-blue-500 hover:bg-blue-600 rounded-3xl p-2 ml-2"
+            >
+              <FiSend size={18} />
+            </button>
+          )}
+        </div>
 
+        {delCommentModal && (
+          <Modal
+            onCancel={delCommentModalCancel}
+            onConfirm={delCommentModalConfirm}
+            Heading={'Delete comment'}
+            content={'Are you sure to DELETE'}
+          />
+        )}
       </div>
     </div>
   );

@@ -335,6 +335,16 @@ const userController = {
       console.log(error,'edit post failed')
       res.status(400).json({message:"edit post failed",error})
     }
+  },
+  deleteComment: async (req,res)=>{
+    try {
+      const commentId=req.params.id
+      await Comments.findByIdAndDelete(commentId)
+      res.status(200).json({message:"delete comment successfully",success:true})
+    } catch (error) {
+      console.log(error,'delete comment failed')
+      res.status(400).json({message:"delete comment failed",error})
+    }
   }
 };
 

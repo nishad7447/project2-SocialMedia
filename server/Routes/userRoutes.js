@@ -10,6 +10,7 @@ userRoutes.get('/getAllPosts',auth,userController.getAllPosts)
 //Comment
 userRoutes.post('/commentPost',auth,userController.commentPost)
 userRoutes.get('/getAllComments/:id',auth,userController.getAllComments)
+userRoutes.delete('/deleteComment/:id',auth,userController.deleteComment)
 
 //Like
 userRoutes.get('/like/:id',auth,userController.like)
@@ -30,6 +31,7 @@ userRoutes.get('/userDetail/:id',auth,userController.userDetail)
 
 //userEditPost
 userRoutes.post('/editPost',auth,userController.editPost)
+
 
 //logout
 userRoutes.get('/logout/:id',userController.logout)
