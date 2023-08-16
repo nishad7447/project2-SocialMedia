@@ -281,25 +281,29 @@ const Profile = () => {
                                                     <p className="text-gray-600">@{users?.UserName}</p>
                                                 </div>
                                             </div>
-                                            <div className="flex items-center ">
-                                                <span className="text-gray-600 hover:text-blue-500 cursor-pointer">
-                                                    <FaCog /> {/* Assuming FaCog is the icon for user settings */}
-                                                </span>
-                                            </div>
+                                            {
+                                                loggedInUser.UserName === users.UserName && (
+                                                    <div className="flex items-center ">
+                                                        <span className="text-gray-600 hover:text-blue-500 cursor-pointer" onClick={() => nav('/settings')}>
+                                                            <FaCog />
+                                                        </span>
+                                                    </div>
+                                                )
+                                            }
                                         </div>
-                                        <p className="mb-4">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce ultricies facilisis justo, sit amet aliquam odio congue vitae.</p>
+                                        <p className="mb-4">{users?.Bio}</p>
                                         <hr className="border-gray-300 mb-4" />
                                         <div className="flex items-center mb-2">
                                             <span className="text-gray-600 mr-2">
                                                 <BiBriefcase />
                                             </span>
-                                            <p className="text-gray-600">Occupation</p>
+                                            <p className="text-gray-600">{users?.Occupation}</p>
                                         </div>
                                         <div className="flex items-center">
                                             <span className="text-gray-600 mr-2">
                                                 <BiMap />
                                             </span>
-                                            <p className="text-gray-600">Place</p>
+                                            <p className="text-gray-600">{users?.Location}</p>
                                         </div>
                                         <div className="flex justify-between mt-4">
                                             <div onClick={() => nav('/followers')}>
@@ -527,7 +531,7 @@ function EditModal({ onCancel, setUpdateUI, editPostId, editPostContent }) {
         axiosInstance.post(`${UserBaseURL}/editPost`, { postId: editPostId, content: editContent })
             .then((res) => {
                 toast.success("Post Edited success")
-                setUpdateUI((prev)=>!prev)
+                setUpdateUI((prev) => !prev)
                 onCancel()
             })
             .catch((err) => {

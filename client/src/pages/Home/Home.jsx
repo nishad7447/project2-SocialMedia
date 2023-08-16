@@ -296,7 +296,7 @@ export default function Home() {
                           <p className="text-gray-600">@{user?.UserName}</p>
                         </div>
                       </div>
-                      <p className="mb-4">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce ultricies facilisis justo, sit amet aliquam odio congue vitae.</p>
+                      <p className="mb-4">{user?.Bio}</p>
                       <div className="flex justify-between">
                         <div onClick={() => nav('/followers')}>
                           <h3 className="text-lg font-bold">1200</h3>

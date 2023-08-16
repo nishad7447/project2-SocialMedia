@@ -3,6 +3,7 @@ import Comments from "../model/comment.js";
 import Post from "../model/post.js";
 import SavedPost from "../model/savedPost.js";
 import User from "../model/user.js";
+import bcrypt from "bcrypt";
 
 const userController = {
   createPost: async (req, res) => {
@@ -106,18 +107,21 @@ const userController = {
         content: comment,
         userId,
       });
-      const commentPromise= newComment.save();
+      const commentPromise = newComment.save();
       post.comments.push(newComment._id);
       const postPromise = post.save();
       //added promise.allsettled
-      const [commentResult,postResult]=await Promise.allSettled([commentPromise,postPromise])
-      console.log(commentResult,"cmtRRRRR,,,,,ppostrRRRR",postResult)
-      if (commentResult.status === 'rejected') {
+      const [commentResult, postResult] = await Promise.allSettled([
+        commentPromise,
+        postPromise,
+      ]);
+      console.log(commentResult, "cmtRRRRR,,,,,ppostrRRRR", postResult);
+      if (commentResult.status === "rejected") {
         console.error(commentResult.reason);
         return res.status(500).json({ error: "Error saving comment" });
       }
-  
-      if (postResult.status === 'rejected') {
+
+      if (postResult.status === "rejected") {
         console.error(postResult.reason);
         return res.status(500).json({ error: "Error saving post" });
       }
@@ -130,7 +134,8 @@ const userController = {
   getAllComments: async (req, res) => {
     try {
       const postId = req.params.id;
-      const comments = await Comments.find({ postId }).sort({ createdAt: -1 })
+      const comments = await Comments.find({ postId })
+        .sort({ createdAt: -1 })
         .populate("userId", "ProfilePic UserName")
         .exec();
       if (comments.length === 0) {
@@ -251,22 +256,22 @@ const userController = {
     try {
       const postId = req.params.id;
       await Post.findByIdAndDelete(postId);
-      res.status(200).json({success:true, message: "Post deleted success" });
+      res.status(200).json({ success: true, message: "Post deleted success" });
     } catch (error) {
       console.log(error);
       res.status(500).json({ error: "Internal server error in deletePost" });
     }
   },
-  reportPost: async (req,res)=>{
+  reportPost: async (req, res) => {
     try {
       const { postId, reason, userId } = req.body;
       // Find the post by postId
       const post = await Post.findById(postId);
-  
+
       if (!post) {
-        return res.status(404).json({ error: 'Post not found.' });
+        return res.status(404).json({ error: "Post not found." });
       }
-  
+
       // Check if the user has already reported the post
       let existingReportIndex = -1;
 
@@ -275,22 +280,32 @@ const userController = {
           existingReportIndex = i;
           break;
         }
-      }      
-      console.log(existingReportIndex,'ext reportindx')
+      }
+      console.log(existingReportIndex, "ext reportindx");
       if (existingReportIndex !== -1) {
         // If the user has already reported, update the reason if it's different
         if (post.reports[existingReportIndex].reason !== reason) {
           post.reports[existingReportIndex].reason = reason;
           await post.save();
-          return res.status(200).json({success: true, message: 'Report updated successfully.' });
+          return res
+            .status(200)
+            .json({ success: true, message: "Report updated successfully." });
         } else {
-          return res.status(200).json({success: true, message: 'You have already reported this post with the same reason.' });
+          return res
+            .status(200)
+            .json({
+              success: true,
+              message:
+                "You have already reported this post with the same reason.",
+            });
         }
       } else {
         // If the user is reporting for the first time, add their report to the reports array
         post.reports.push({ userId, reason });
         await post.save();
-        return res.status(200).json({success: true, message: 'Report submitted successfully.' });
+        return res
+          .status(200)
+          .json({ success: true, message: "Report submitted successfully." });
       }
     } catch (error) {
       console.log(error);
@@ -299,7 +314,7 @@ const userController = {
   },
   userProfile: async (req, res) => {
     try {
-      const userId=req.params.id
+      const userId = req.params.id;
       const posts = await Post.find({ userId: userId })
         .sort({ createdAt: -1 })
         .populate("userId", "ProfilePic UserName Name")
@@ -315,35 +330,114 @@ const userController = {
       res.status(500).json({ message: `Server error ${error}` });
     }
   },
-  userDetail:async(req,res)=>{
-    try{
-      const userId=req.params.id
-      const user=await User.findById(userId)
-      user.Password=""
-      res.status(200).json({user,message:"user fetched successfully"})
-    }catch (error){
-      console.log(error,'user fetched failed')
-      res.status(400).json({message:"user fetched failed",error})
-    }
-  },
-  editPost: async(req,res)=>{
-    try{
-      const {userId,postId,content}=req.body
-      await Post.findByIdAndUpdate(postId, { content: content})
-      res.status(200).json({message:"edit post successfully"})
-    }catch(error){
-      console.log(error,'edit post failed')
-      res.status(400).json({message:"edit post failed",error})
-    }
-  },
-  deleteComment: async (req,res)=>{
+  userDetail: async (req, res) => {
     try {
-      const commentId=req.params.id
-      await Comments.findByIdAndDelete(commentId)
-      res.status(200).json({message:"delete comment successfully",success:true})
+      const userId = req.params.id;
+      const user = await User.findById(userId);
+      user.Password = "";
+      res.status(200).json({ user, message: "user fetched successfully" });
     } catch (error) {
-      console.log(error,'delete comment failed')
-      res.status(400).json({message:"delete comment failed",error})
+      console.log(error, "user fetched failed");
+      res.status(400).json({ message: "user fetched failed", error });
+    }
+  },
+  editPost: async (req, res) => {
+    try {
+      const { userId, postId, content } = req.body;
+      await Post.findByIdAndUpdate(postId, { content: content });
+      res.status(200).json({ message: "edit post successfully" });
+    } catch (error) {
+      console.log(error, "edit post failed");
+      res.status(400).json({ message: "edit post failed", error });
+    }
+  },
+  deleteComment: async (req, res) => {
+    try {
+      const commentId = req.params.id;
+      await Comments.findByIdAndDelete(commentId);
+      res
+        .status(200)
+        .json({ message: "delete comment successfully", success: true });
+    } catch (error) {
+      console.log(error, "delete comment failed");
+      res.status(400).json({ message: "delete comment failed", error });
+    }
+  },
+  editUser: async (req, res) => {
+    try {
+      const { Name, Email, Bio, Location, Occupation } = req.body;
+      const user = await User.findOne({ Email });
+
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      // Update user's profile information
+      user.Name = Name;
+      user.Bio = Bio;
+      user.Location = Location;
+      user.Occupation = Occupation;
+
+      if (req.files.length > 0) {
+        console.log(JSON.stringify(req.files), "json,req.files");
+        const uploadedFile = await cloudinary.uploader.upload(
+          req.files[0].path,
+          { resource_type: "image" }
+        );
+
+        user.ProfilePic = uploadedFile.url;
+      }
+
+      await user.save();
+      user.Password = "";
+      res
+        .status(200)
+        .json({ user, success: true, message: "Profile updated successfully" });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: "An error occurred" });
+    }
+  },
+  editUserPass: async (req, res) => {
+    try {
+      const { CurrentPass, NewPass, userId } = req.body;
+      const user = await User.findById(userId);
+      const isMatch = await bcrypt.compare(CurrentPass, user.Password);
+      if (!isMatch) {
+        return res.status(400).json({ message: "Incorrect Password" });
+      } else if (CurrentPass===NewPass){
+        return res.status(400).json({ message: "New password same as old!!" });
+      }else {
+        const salt = await bcrypt.genSalt();
+        const passwordHash = await bcrypt.hash(NewPass, salt);
+        user.Password = passwordHash;
+        await user.save();
+
+        res
+          .status(200)
+          .json({
+            success: true,
+            message: "Password updated successfully",
+          });
+      }
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: "error Password change " });
+    }
+  },
+  deactivateUserAcc:async(req,res)=>{
+    try {
+      const userId = req.body.userId;
+      const user = await User.findById(userId);
+      const isBlocked = user.Blocked;
+      user.Blocked = !isBlocked;
+      await user.save()
+      res.status(200).json({message:"user deactivated successfully", success: true})
+    } catch (error) {
+      console.log(error, " users deactivated failed");
+      res
+        .status(400)
+        .json({ message: "error deactivated  users", error });
     }
   }
 };

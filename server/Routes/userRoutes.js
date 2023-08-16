@@ -28,6 +28,9 @@ userRoutes.put('/reportPost',auth,userController.reportPost)
 //userProfile
 userRoutes.get('/userProfile/:id',auth,userController.userProfile)
 userRoutes.get('/userDetail/:id',auth,userController.userDetail)
+userRoutes.put('/editUser',auth,upload.array('file'),userController.editUser)
+userRoutes.put('/editUserPass',auth,userController.editUserPass)
+userRoutes.put('/deactivateUserAcc',auth,userController.deactivateUserAcc)
 
 //userEditPost
 userRoutes.post('/editPost',auth,userController.editPost)

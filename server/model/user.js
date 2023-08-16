@@ -48,6 +48,7 @@ const userSchema= new mongoose.Schema(
         Blocked:Boolean,
         Location:String,
         Occupation:String,
+        Bio:String,
         jti: {
             type: String,
         },
