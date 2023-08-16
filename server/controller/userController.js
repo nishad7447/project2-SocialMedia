@@ -4,6 +4,9 @@ import Post from "../model/post.js";
 import SavedPost from "../model/savedPost.js";
 import User from "../model/user.js";
 import bcrypt from "bcrypt";
+import Razorpay from "razorpay";
+import crypto from "crypto";
+import Ad from "../model/sponsoredAd.js";
 
 const userController = {
   createPost: async (req, res) => {
@@ -89,7 +92,14 @@ const userController = {
       let users = await User.find().select(userFields.join(" "));
       users = users.filter((users) => users._id.toString() !== req.body.userId);
 
-      res.status(200).json({ posts, users });
+      const ads = await Ad.find();
+      // Select a random index within the range of available ads
+      const randomIndex = Math.floor(Math.random() * ads.length);
+
+      // Get the randomly selected ad
+      const randomAd = ads[randomIndex];
+      console.log(randomAd)
+      res.status(200).json({ posts, users, randomAd });
     } catch (error) {
       console.log(error);
       res.status(500).json({ message: `Server error ${error}` });
@@ -291,13 +301,11 @@ const userController = {
             .status(200)
             .json({ success: true, message: "Report updated successfully." });
         } else {
-          return res
-            .status(200)
-            .json({
-              success: true,
-              message:
-                "You have already reported this post with the same reason.",
-            });
+          return res.status(200).json({
+            success: true,
+            message:
+              "You have already reported this post with the same reason.",
+          });
         }
       } else {
         // If the user is reporting for the first time, add their report to the reports array
@@ -405,41 +413,120 @@ const userController = {
       const isMatch = await bcrypt.compare(CurrentPass, user.Password);
       if (!isMatch) {
         return res.status(400).json({ message: "Incorrect Password" });
-      } else if (CurrentPass===NewPass){
+      } else if (CurrentPass === NewPass) {
         return res.status(400).json({ message: "New password same as old!!" });
-      }else {
+      } else {
         const salt = await bcrypt.genSalt();
         const passwordHash = await bcrypt.hash(NewPass, salt);
         user.Password = passwordHash;
         await user.save();
 
-        res
-          .status(200)
-          .json({
-            success: true,
-            message: "Password updated successfully",
-          });
+        res.status(200).json({
+          success: true,
+          message: "Password updated successfully",
+        });
       }
     } catch (error) {
       console.error(error);
       res.status(500).json({ message: "error Password change " });
     }
   },
-  deactivateUserAcc:async(req,res)=>{
+  deactivateUserAcc: async (req, res) => {
     try {
       const userId = req.body.userId;
       const user = await User.findById(userId);
       const isBlocked = user.Blocked;
       user.Blocked = !isBlocked;
-      await user.save()
-      res.status(200).json({message:"user deactivated successfully", success: true})
+      await user.save();
+      res
+        .status(200)
+        .json({ message: "user deactivated successfully", success: true });
     } catch (error) {
       console.log(error, " users deactivated failed");
-      res
-        .status(400)
-        .json({ message: "error deactivated  users", error });
+      res.status(400).json({ message: "error deactivated  users", error });
     }
-  }
+  },
+  createOrder: async (req, res) => {
+    try {
+      const { amount } = req.body;
+      const instance = new Razorpay({
+        key_id: process.env.RAZORPAY_API_KEY,
+        key_secret: process.env.RAZORPAY_API_SECRET,
+      });
+
+      const options = {
+        amount: Number(amount) * 100,
+        currency: "INR",
+        receipt: "receipt_order_74394",
+      };
+
+      const order = await instance.orders.create(options);
+      console.log(order);
+      if (!order) return res.status(500).send("Some error occurred");
+      console.log(order, "This is orders");
+      res.json(order);
+    } catch (err) {
+      console.log(err, "error order create");
+      res.status(500).send(err);
+    }
+  },
+  createAd: async (req, res) => {
+    try {
+      const {
+        orderCreationId,
+        razorpayPaymentId,
+        razorpayOrderId,
+        razorpaySignature,
+        Name,
+        Link,
+        Description,
+        Amount,
+        ExpiresWithIn,
+        userId,
+      } = req.body;
+
+      const shasum = crypto.createHmac(
+        "sha256",
+        process.env.RAZORPAY_API_SECRET
+      );
+      shasum.update(`${orderCreationId}|${razorpayPaymentId}`);
+      const digest = shasum.digest("hex");
+      if (digest !== razorpaySignature) {
+        return res.status(400).json({ message: "Transaction not legit!" });
+      }
+
+      const uploadedFile = await cloudinary.uploader.upload(req.files[0].path, {
+        resource_type: "image",
+      });
+      console.log(userId, "userssid", req.body);
+      const newAd = Ad({
+        UserId: userId,
+        Name,
+        Link,
+        Description,
+        Amount,
+        ExpiresWithIn,
+        AdImage: uploadedFile.url,
+        razorpayDetails: {
+          orderId: razorpayOrderId,
+          paymentId: razorpayPaymentId,
+          signature: razorpaySignature,
+        },
+        timestamp: Date.now(),
+      });
+
+      const savedAd = await newAd.save();
+      console.log(savedAd);
+      res.json({
+        success: true,
+        orderId: razorpayOrderId,
+        paymentId: razorpayPaymentId,
+      });
+    } catch (err) {
+      console.log(err, "error in payment confirmation and data adding db");
+      res.status(500).send(err);
+    }
+  },
 };
 
 export default userController;

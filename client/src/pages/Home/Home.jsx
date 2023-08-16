@@ -12,7 +12,7 @@ import { toast } from 'react-toastify';
 import { AiFillHeart } from 'react-icons/ai';
 import { GoBookmark, GoBookmarkFill } from 'react-icons/go';
 import { SlOptionsVertical } from 'react-icons/sl'
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { MdDeleteForever, MdReportProblem } from 'react-icons/md';
 import Modal from '../../components/Modal/Modal';
 import ShareModal from '../../components/ShareModal/ShareModal';
@@ -33,6 +33,7 @@ export default function Home() {
   const [posts, setPosts] = useState([]);
   const [suggestedUsers, setSuggestedUsers] = useState([])
   const [updateUI, setUpdateUI] = useState(false)
+  const [ad,setAd]=useState(null)
 
   useEffect(() => {
     if (search === '' || search === null) {
@@ -53,6 +54,7 @@ export default function Home() {
         console.log(res)
         setPosts(res.data.posts)
         setSuggestedUsers(res.data.users)
+        setAd(res.data.randomAd)
       })
       .catch((error) => {
         console.error(error.message, "post fetch url err=>user not working");
@@ -440,23 +442,23 @@ export default function Home() {
                     <div className="p-4">
                       <div className="flex justify-between items-center">
                         <h2 className="text-lg font-bold mb-2">Sponsored Ad</h2>
-                        <a className="text-gray-500 text-sm font-bold" href="https://www.example.com/create-ad" target="_blank" rel="noopener noreferrer">
+                        <Link className="text-gray-500 text-sm font-bold" to='/SponsoredAd' >
                           Create Ad
-                        </a>
+                        </Link>
                       </div>
                       {/* eslint-disable-next-line jsx-a11y/img-redundant-alt */}
-                      <img className="w-full h-auto rounded-lg mb-4" src="https://via.placeholder.com/800x400" alt="Ad Image" />
+                      <img className="w-full h-auto rounded-lg mb-4" src={ad.AdImage} alt="Ad Image" />
                       <div className="flex justify-between">
 
                         <div className="flex items-center mb-2">
-                          <p className="text-sm text-gray-500">Sponsored</p>
+                          <p className="text-sm text-gray-500">{ad.Name}</p>
                         </div>
                         <div className="flex items-center mb-2">
-                          <a className="text-sm text-blue-500" href="https://www.example.com" target="_blank" rel="noopener noreferrer">Example.com</a>
+                          <Link className="text-sm text-blue-500" to={`https://www.${ad.Link}`} target="_blank" >{ad.Link}</Link>
                         </div>
 
                       </div>
-                      <p className="mb-4 text-sm">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce ultricies facilisis justo, sit amet aliquam odio congue vitae.</p>
+                      <p className="mb-4 text-sm">{ad.Description}</p>
 
                     </div>
                   </Card>

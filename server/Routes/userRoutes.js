@@ -32,6 +32,10 @@ userRoutes.put('/editUser',auth,upload.array('file'),userController.editUser)
 userRoutes.put('/editUserPass',auth,userController.editUserPass)
 userRoutes.put('/deactivateUserAcc',auth,userController.deactivateUserAcc)
 
+//ad and payment
+userRoutes.post('/createOrder',auth,userController.createOrder)
+userRoutes.post('/createAd',auth,upload.array('file'),userController.createAd)
+
 //userEditPost
 userRoutes.post('/editPost',auth,userController.editPost)
 
