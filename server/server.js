@@ -13,6 +13,7 @@ import errorHandler from './middleware/errorHandler.js'
 import adminRoutes from './Routes/adminRoutes.js'
 import chatRoutes from './Routes/chatRoutes.js'
 import messageRoutes from './Routes/messageRoutes.js'
+import {Server} from 'socket.io'
 
 // config
 const __filename=fileURLToPath(import.meta.url)
@@ -43,6 +44,46 @@ mongoose.connect(process.env.MONGO_URL,{
 .catch((err)=>{console.log(err,'DB error');})
 
 
-
 const port=process.env.PORT 
-app.listen(port,()=>{console.log(`Server running on port ${port}`)})
+const server = app.listen(port,()=>{console.log(`Server running on port ${port}`)})
+
+// This code creates a new instance of a Server object from the socket.io library
+const io = new Server(server, {
+    pingTimeout: 3000,
+     cors: {
+      origin: "http://localhost:3000",
+     },
+  });
+
+  io.on('connection', (socket)=> {
+    console.log("connected to socket.io");
+  
+    socket.on('setup', (userData)=> {
+      socket.join(userData);
+        console.log(userData)
+    });
+  
+    socket.on('join chat', (room)=> {
+      socket.join(room);
+      console.log("user joined room "+ room);
+    });
+  
+    socket.on('new message', (newMessageRecieved)=> {
+      console.log("new Message",newMessageRecieved)
+      const chat = newMessageRecieved.chat;
+  
+      // console.log("Chat ID:", chat);
+  
+      if(!chat.users) return console.log("chat.user is not defined");
+  
+      chat.users.forEach((user) => {
+        // console.log(newMessageRecieved.sender._id,"id hereeeee", user._id)
+        if(user._id === newMessageRecieved.sender._id){
+          // console.log(user)
+        } 
+        return socket.in(user._id).emit("message received", newMessageRecieved)
+  
+      })
+    })
+  
+  })

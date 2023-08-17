@@ -98,7 +98,7 @@ const userController = {
 
       // Get the randomly selected ad
       const randomAd = ads[randomIndex];
-      console.log(randomAd)
+
       res.status(200).json({ posts, users, randomAd });
     } catch (error) {
       console.log(error);

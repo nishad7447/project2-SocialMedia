@@ -57,7 +57,6 @@ const chatController = {
                 path:"latestMessage.sender",
                 select:"UserName ProfilePic Email"
             })
-            console.log(result)
             res.status(200).send(result)
         })
     } catch (error) {

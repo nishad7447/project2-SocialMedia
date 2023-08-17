@@ -4,19 +4,19 @@ import User from '../model/user.js';
 
 const messageController={
     sendMessage: async(req,res)=>{
-        const {content, chatId,msgUserId} = req.body
+        const {content, chatId, userId} = req.body
         if(!content || !chatId){
             console.log("Invalid data passed into request");
             return res.sendStatus(400)
         }
         var newMessage={
-            sender:msgUserId,
+            sender: userId,
             content:content,
             chat:chatId,
         }
         try {
             var message = await Message.create(newMessage)
-            message = await message.populate('sender','UserName ProfilePi')
+            message = await message.populate('sender','UserName ProfilePic Email')
             message = await message.populate('chat')
             message = await User.populate(message,{
                 path: 'chat.users',
@@ -25,6 +25,7 @@ const messageController={
             await Chat.findByIdAndUpdate(req.body.chatId,{
                 latestMessage:message
             })
+            console.log(message)
             res.status(201).json(message)
         } catch (error) {
             console.log(error,"sendMsg error catch")
