@@ -16,5 +16,8 @@ adminRoutes.get('/allposts',auth,adminController.allposts)
 //postManagement
 adminRoutes.delete('/deletePost/:id',auth,userController.deletePost)
 
+//adsManagement
+adminRoutes.get('/allAds',auth,adminController.allAds)
+adminRoutes.delete('/deleteAd/:id',auth,adminController.deleteAd)
 
 export default adminRoutes

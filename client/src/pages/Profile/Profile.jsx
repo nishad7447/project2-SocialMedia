@@ -50,8 +50,15 @@ const Profile = () => {
                     setUser(res.data.user)
                 })
                 .catch((error) => {
-                    console.error(error.message, "user fetch url err=>user not working");
-                })
+                    console.log("user error details", error)
+
+                    if (error.response && error.response.data && error.response.data.message) {
+                        const errorMessage = error.response.data.message;
+                        toast.error(errorMessage);
+                    } else {
+                        toast.error('An error occurred while user fetch details.');
+                    }
+                });
         }
         axiosInstance.get(`${UserBaseURL}/userProfile/${userId ? userId : users._id}`)
             .then((res) => {
@@ -60,7 +67,14 @@ const Profile = () => {
                 setSuggestedUsers(res.data.users)
             })
             .catch((error) => {
-                console.error(error.message, "post fetch url err=>user not working");
+                console.log("user error fetch posts", error)
+
+                if (error.response && error.response.data && error.response.data.message) {
+                    const errorMessage = error.response.data.message;
+                    toast.error(errorMessage);
+                } else {
+                    toast.error('An error occurred while user fetch posts.');
+                }
             })
             .finally(() => {
                 setLoadingUser(false); // Set loadingUser to false once the user details are fetched or the API call completes
@@ -87,10 +101,16 @@ const Profile = () => {
                 toast.success(res?.data.message)
                 setUpdateUI((prevState) => !prevState)
             })
-            .catch((err) => {
-                console.log(err, "Error clicking like")
-                toast.error(err?.data?.message)
-            })
+            .catch((error) => {
+                console.log("user error clicking like", error)
+
+                if (error.response && error.response.data && error.response.data.message) {
+                    const errorMessage = error.response.data.message;
+                    toast.error(errorMessage);
+                } else {
+                    toast.error('An error occurred while user clicking like.');
+                }
+            });
     }
     const renderLikeInfo = (post) => {
         const likeCount = post.likes.length;
@@ -119,10 +139,16 @@ const Profile = () => {
                 toast.success(res?.data.message)
                 setUpdateUI((prevState) => !prevState)
             })
-            .catch((err) => {
-                console.log(err, "Error clicking like")
-                toast.error(err?.data?.message)
-            })
+            .catch((error) => {
+                console.log("user error saved post", error)
+
+                if (error.response && error.response.data && error.response.data.message) {
+                    const errorMessage = error.response.data.message;
+                    toast.error(errorMessage);
+                } else {
+                    toast.error('An error occurred while user saved post.');
+                }
+            });
     }
     //post settings
     const [openDropdowns, setOpenDropdowns] = useState({});
@@ -165,9 +191,15 @@ const Profile = () => {
                     toast.success(res.data.message);
                 }
             })
-            .catch((err) => {
-                toast.error(err.data.message);
-                console.log(err, "delete post error");
+            .catch((error) => {
+                console.log("user error delete post", error)
+
+                if (error.response && error.response.data && error.response.data.message) {
+                    const errorMessage = error.response.data.message;
+                    toast.error(errorMessage);
+                } else {
+                    toast.error('An error occurred while user delete post.');
+                }
             });
     }
 
@@ -208,9 +240,15 @@ const Profile = () => {
                     toast.success(res.data.message);
                 }
             })
-            .catch((err) => {
-                console.log(err, "report post error");
-                toast.error(err?.data?.message);
+            .catch((error) => {
+                console.log("user error report post", error)
+
+                if (error.response && error.response.data && error.response.data.message) {
+                    const errorMessage = error.response.data.message;
+                    toast.error(errorMessage);
+                } else {
+                    toast.error('An error occurred while user report post.');
+                }
             });
     }
 
@@ -534,10 +572,16 @@ function EditModal({ onCancel, setUpdateUI, editPostId, editPostContent }) {
                 setUpdateUI((prev) => !prev)
                 onCancel()
             })
-            .catch((err) => {
-                toast.error(err.message, "Edit post error")
-                console.log(err, "Edit post error")
-            })
+            .catch((error) => {
+                console.log("user error edit post", error)
+
+                if (error.response && error.response.data && error.response.data.message) {
+                    const errorMessage = error.response.data.message;
+                    toast.error(errorMessage);
+                } else {
+                    toast.error('An error occurred while user edit post.');
+                }
+            });
     }
     const autoSizeTextarea = (e) => {
         e.target.rows = Math.min(6, e.target.scrollHeight / 20); // You can adjust the row height as needed

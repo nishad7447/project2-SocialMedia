@@ -31,7 +31,14 @@ function SavedPosts() {
                 // setSuggestedUsers(res.data.users)
             })
             .catch((error) => {
-                console.error(error.message, "saved post fecthing error");
+                console.log("user error fetch allsavedpost", error)
+
+                if (error.response && error.response.data && error.response.data.message) {
+                    const errorMessage = error.response.data.message;
+                    toast.error(errorMessage);
+                } else {
+                    toast.error('An error occurred while user fetch allsavedpost.');
+                }
             })
             .finally(() => {
                 setLoadingUser(false); // Set loadingUser to false once the user details are fetched or the API call completes
@@ -58,10 +65,16 @@ function SavedPosts() {
                 toast.success(res?.data.message)
                 setUpdateUI((prevState) => !prevState)
             })
-            .catch((err) => {
-                console.log(err, "Error clicking like")
-                toast.error(err?.data?.message)
-            })
+            .catch((error) => {
+                console.log("user error clicking like", error)
+
+                if (error.response && error.response.data && error.response.data.message) {
+                    const errorMessage = error.response.data.message;
+                    toast.error(errorMessage);
+                } else {
+                    toast.error('An error occurred while user clicking like.');
+                }
+            });
     }
     const renderLikeInfo = (post) => {
         const likeCount = post.likes.length;
@@ -91,32 +104,38 @@ function SavedPosts() {
                 toast.success(res?.data.message)
                 setUpdateUI((prevState) => !prevState)
             })
-            .catch((err) => {
-                console.log(err, "Error clicking like")
-                toast.error(err?.data?.message)
-            })
+            .catch((error) => {
+                console.log("user error saved post", error)
+
+                if (error.response && error.response.data && error.response.data.message) {
+                    const errorMessage = error.response.data.message;
+                    toast.error(errorMessage);
+                } else {
+                    toast.error('An error occurred while user saved post.');
+                }
+            });
     }
 
     //moment.js config
     const formatPostDate = (date) => {
         const now = moment();
         const postDate = moment(date);
-      
+
         if (now.diff(postDate, 'seconds') < 60) {
-          return 'Just now';
+            return 'Just now';
         } else if (now.diff(postDate, 'days') === 0) {
-          return postDate.fromNow(); // Display "x minutes ago", "an hour ago", etc.
+            return postDate.fromNow(); // Display "x minutes ago", "an hour ago", etc.
         } else if (now.diff(postDate, 'days') === 1) {
-          return 'Yesterday';
+            return 'Yesterday';
         } else if (now.diff(postDate, 'days') <= 4) {
-          return `${now.diff(postDate, 'days')} days ago`; // Display "X days ago" for posts within the last 4 days
+            return `${now.diff(postDate, 'days')} days ago`; // Display "X days ago" for posts within the last 4 days
         } else if (now.diff(postDate, 'years') === 0) {
-          return postDate.format('MMMM D'); // Display "Month Day" for posts within the current year
+            return postDate.format('MMMM D'); // Display "Month Day" for posts within the current year
         } else {
-          return postDate.format('LL'); // Display "Month Day, Year" for posts older than a year
+            return postDate.format('LL'); // Display "Month Day, Year" for posts older than a year
         }
-      };
-      
+    };
+
 
     return (
         <>

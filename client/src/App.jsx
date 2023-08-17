@@ -20,6 +20,7 @@ import Profile from "./pages/Profile/Profile";
 import Chat from "./pages/Chat/Chat";
 import ProfileSettings from "./pages/Profile/ProfileSettings";
 import SponsoredAd from "./pages/SponsoredAd/SponsoredAd";
+import AdManagement from "./pages/Admin/AdManagement/AdManagement";
 
 
 
@@ -47,9 +48,10 @@ const App = () => {
         <Route path="/admin" element={<AdminProtected><Dashboard/></AdminProtected>} />
         <Route path="/usermanage" element={<AdminProtected><UserManagement/></AdminProtected>}/>
         <Route path="/postmanage" element={<AdminProtected><PostManagement/></AdminProtected>} />
+        <Route path="/adsmanage" element={<AdminProtected><AdManagement/></AdminProtected>} />
 
         <Route path="*" element={<Navigate to="/404" />} />
-        <Route path="/404" element={<Protected><ErrPage/></Protected>}/>
+        <Route path="/404" element={<ErrPage/>}/>
       </Routes>
     </Router>
     <ToastContainer className="dark:bg-gray-800" autoClose={3000}/>

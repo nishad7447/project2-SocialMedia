@@ -12,6 +12,7 @@ import { setLogin, setLogout, setMessage, setOnline, setSearch } from '../redux/
 import { useDispatch, useSelector } from 'react-redux'
 import { TiArrowBack } from 'react-icons/ti'
 import axios from 'axios';
+import { toast } from 'react-toastify';
 
 const Spinner = () => {
   return (
@@ -49,7 +50,14 @@ export default function Protected({ children }) {
         }
       })
       .catch((error) => {
-        console.error(error.message, "/Base url err=>user not working");
+        console.log(" user /Base url err=>user not working", error)
+
+        if (error.response && error.response.data && error.response.data.message) {
+          const errorMessage = error.response.data.message;
+          toast.error(errorMessage);
+        } else {
+          toast.error('An error occurred while /Base url err=>user not working.');
+        }
       })
       .finally(() => {
         setLoadingUser(false); // Set loadingUser to false once the user details are fetched or the API call completes
@@ -71,16 +79,16 @@ export default function Protected({ children }) {
     localStorage.removeItem('jwtToken');
     localStorage.removeItem('user');
     axios.get(`${UserBaseURL}/logout/${user._id}`)
-    .then((res) => { 
-      if(res.data.message==="Logout success"){
-        navigate('/signin');
-      }
-     })
-    .catch((err)=>{console.log(err)})
+      .then((res) => {
+        if (res.data.message === "Logout success") {
+          navigate('/signin');
+        }
+      })
+      .catch((err) => { console.log(err) })
   }
   console.log(token, user, "<=reduxil stored | err msg=>", message)
 
-  const {search}=useSelector((state)=>state.auth)
+  const { search } = useSelector((state) => state.auth)
   return (
     <div className={`flex flex-col min-h-screen  transition-all bg-gray-100 dark:bg-gray-900`}>
       {loadingUser ? (
@@ -121,7 +129,7 @@ export default function Protected({ children }) {
                   placeholder="Search..."
                   className="block h-full w-full rounded-full bg-lightPrimary text-sm font-medium text-navy-700 outline-none placeholder:!text-gray-400 dark:bg-navy-900 dark:text-white dark:placeholder:!text-white sm:w-fit"
                   value={search}
-                  onChange={(e)=> dispatch(setSearch(e.target.value))}
+                  onChange={(e) => dispatch(setSearch(e.target.value))}
                 />
               </div>
               <span

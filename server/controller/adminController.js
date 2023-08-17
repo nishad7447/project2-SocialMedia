@@ -1,6 +1,7 @@
 import jwt from "jsonwebtoken";
 import User from "../model/user.js";
 import Post from "../model/post.js";
+import Ad from "../model/sponsoredAd.js";
 
 const adminCredentials = {
   Email: "admin@gmail.com",
@@ -82,7 +83,31 @@ const adminController = {
         .status(400)
         .json({ message: "fetching all posts failed", error });
     }
-  }
+  },
+  allAds: async(req,res)=>{
+    try {
+      const ads = await Ad.find()
+        .sort({ createdAt: -1 })
+        .populate("UserId", "ProfilePic UserName Name")
+        .exec();
+      res.status(200).json({success:true, ads})
+    } catch (error) {
+      console.log(error, " fetching all ads failed");
+      res
+        .status(400)
+        .json({ message: "fetching all ads failed", error });
+    }
+  },
+  deleteAd: async (req, res) => {
+    try {
+      const adId = req.params.id;
+      await Ad.findByIdAndDelete(adId)
+      res.status(200).json({ success: true, message: "Ad deleted success" });
+    } catch (error) {
+      console.log(error);
+      res.status(500).json({ error: "Internal server error in deleteAd" });
+    }
+  },
 };
 
 export default adminController;

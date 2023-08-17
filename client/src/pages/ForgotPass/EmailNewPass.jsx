@@ -9,24 +9,31 @@ import { toast } from "react-toastify";
 
 export default function EmailNewPass() {
 
-    const { userId, token } = useParams();
+  const { userId, token } = useParams();
 
-    useEffect(() => {
-        fetch(`${UserBaseURL}/auth/password-reset/${userId}/${token}`)
-          .then((response) => response.json())
-          .then((data) => {
-            console.log(data);
-            setEmail(data.Email)
-          })
-          .catch((error) => {
-            console.log(error);
-          });
-      }, [userId, token]);
+  useEffect(() => {
+    fetch(`${UserBaseURL}/auth/password-reset/${userId}/${token}`)
+      .then((response) => response.json())
+      .then((data) => {
+        console.log(data);
+        setEmail(data.Email)
+      })
+      .catch((error) => {
+        console.log("user email new pass", error)
+
+        if (error.response && error.response.data && error.response.data.message) {
+          const errorMessage = error.response.data.message;
+          toast.error(errorMessage);
+        } else {
+          toast.error('An error occurred while user email new pass.');
+        }
+      });
+  }, [userId, token]);
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [repassword, setRePassword] = useState('')
-  
+
   const [emailErr, setEmailErr] = useState('')
   const [passErr, setPassErr] = useState('')
   const nav = useNavigate()
@@ -38,7 +45,7 @@ export default function EmailNewPass() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  
+
   const userForgotPass = () => {
 
     if (password !== repassword) {
@@ -52,7 +59,7 @@ export default function EmailNewPass() {
         console.log(res.data.message)
 
         if (res.data.message === "Reset Password Success") {
-            toast.success(res.data.message)
+          toast.success(res.data.message)
           nav('/signin')
         }
       })
@@ -109,47 +116,47 @@ export default function EmailNewPass() {
             disabled
           />
 
-       
-            <div className="flex space-x-1">
-              {/* Password */}
-              <InputField
-                variant="auth"
-                extra="mb-3"
-                label="New Password *"
-                placeholder="New Password"
-                id="Password"
-                type="password"
-                state={passErr ? "error" : ""}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
 
-              {/* Confirm Password */}
-              <InputField
-                variant="auth"
-                extra="mb-3"
-                label="Re-Password *"
-                placeholder="Re-Password"
-                id="RePassword"
-                type="password"
-                state={passErr ? "error" : ""}
-                value={repassword}
-                onChange={(e) => setRePassword(e.target.value)}
-              />
-            </div>
+          <div className="flex space-x-1">
+            {/* Password */}
+            <InputField
+              variant="auth"
+              extra="mb-3"
+              label="New Password *"
+              placeholder="New Password"
+              id="Password"
+              type="password"
+              state={passErr ? "error" : ""}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+
+            {/* Confirm Password */}
+            <InputField
+              variant="auth"
+              extra="mb-3"
+              label="Re-Password *"
+              placeholder="Re-Password"
+              id="RePassword"
+              type="password"
+              state={passErr ? "error" : ""}
+              value={repassword}
+              onChange={(e) => setRePassword(e.target.value)}
+            />
+          </div>
 
 
           <span className="text-red-500">
             {
-             passErr 
+              passErr
             }
           </span>
 
-         
-              <button onClick={userForgotPass} className="linear mt-2 w-full rounded-xl bg-blue-500 py-[12px] text-base font-medium text-white transition duration-200 hover:bg-blue-600 active:bg-blue-700">
-                Reset Password
-              </button>
-            
+
+          <button onClick={userForgotPass} className="linear mt-2 w-full rounded-xl bg-blue-500 py-[12px] text-base font-medium text-white transition duration-200 hover:bg-blue-600 active:bg-blue-700">
+            Reset Password
+          </button>
+
 
         </div>
       </Card>

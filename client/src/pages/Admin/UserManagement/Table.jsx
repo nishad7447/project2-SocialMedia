@@ -6,7 +6,7 @@ import { FcLock, FcUnlock } from 'react-icons/fc'
 import { AdminBaseURL } from "../../../API";
 import { toast } from 'react-toastify';
 import { axiosAdminInstance } from "../../../axios";
-import {FaTimes} from "react-icons/fa";
+import { FaTimes } from "react-icons/fa";
 
 
 export default function Table({ tableData, setUpdateUI }) {
@@ -74,18 +74,23 @@ export default function Table({ tableData, setUpdateUI }) {
           toast.success(res.data.message);
         }
       })
-      .catch((err) => {
-        toast.error(err.data.message);
-        console.log(err, "user block or unblock error");
+      .catch((error) => {
+        console.log(" admin block user", error)
+
+        if (error.response && error.response.data && error.response.data.message) {
+          const errorMessage = error.response.data.message;
+          toast.error(errorMessage);
+        } else {
+          toast.error('An error occurred while admin block user.');
+        }
       });
   };
 
   const handleCancelBlock = () => {
-
     setShowConfirmationModal(false);
   };
 
-  
+
 
   return (
     <Card extra={"w-full h-full px-6 pb-6 sm:overflow-x-auto"}>
@@ -163,7 +168,7 @@ export default function Table({ tableData, setUpdateUI }) {
                   </div>
                 </td>
                 <td className="min-w-[150px] border-white/0 py-3 pr-4">
-                  <p onClick={()=>handleBlockORunblock(row._id)} className="ml-1 cursor-pointer text-sm font-bold text-navy-700 dark:text-white">
+                  <p onClick={() => handleBlockORunblock(row._id)} className="ml-1 cursor-pointer text-sm font-bold text-navy-700 dark:text-white">
                     {row.Blocked === true ?
                       <FcLock size={35} className="bg-red-500 rounded-3xl p-1 dark:bg-red-500 " /> :
                       <FcUnlock size={35} className="bg-gray-200 rounded-3xl p-1 dark:bg-white " />}
@@ -213,17 +218,17 @@ export default function Table({ tableData, setUpdateUI }) {
         </div>
       </div>
       {showConfirmationModal && (
-         <ConfirmationModal
-           onCancel={handleCancelBlock}
-           onConfirm={handleConfirmBlock}
-         />
+        <ConfirmationModal
+          onCancel={handleCancelBlock}
+          onConfirm={handleConfirmBlock}
+        />
       )}
     </Card>
   );
 }
 
 function ConfirmationModal({ onCancel, onConfirm }) {
-  
+
   const modalRef = useRef();
 
   const handleOutsideClick = (event) => {
@@ -237,41 +242,41 @@ function ConfirmationModal({ onCancel, onConfirm }) {
     return () => {
       document.removeEventListener('mousedown', handleOutsideClick);
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-700 bg-opacity-40">
-  <div ref={modalRef} className="bg-white rounded-lg p-4 pt-2 dark:bg-navy-700">
-    <div className="flex justify-between items-center mb-2 ">
-      <p className="text-xl font-semibold ">Confirmation</p>
-      <button
-        className="text-white bg-red-500 p-2 rounded-3xl"
-        onClick={onCancel}
-      >
-        <FaTimes />
-      </button>
-    </div>
-    <div className="flex items-center mb-4">
+      <div ref={modalRef} className="bg-white rounded-lg p-4 pt-2 dark:bg-navy-700">
+        <div className="flex justify-between items-center mb-2 ">
+          <p className="text-xl font-semibold ">Confirmation</p>
+          <button
+            className="text-white bg-red-500 p-2 rounded-3xl"
+            onClick={onCancel}
+          >
+            <FaTimes />
+          </button>
+        </div>
+        <div className="flex items-center mb-4">
           <hr className="w-full border-gray-300" />
         </div>
-    <p className="text-lg font-semibold mb-4">
-      Are you sure you want to block or unblock this user?
-    </p>
-    <div className="flex justify-end space-x-4">
-      <button
-        className="px-4 py-2 bg-gray-200 rounded-md dark:text-black dark:bg-gray-800"
-        onClick={onCancel}
-      >
-        Cancel
-      </button>
-      <button
-        className="px-4 py-2 bg-red-500 text-white rounded-md"
-        onClick={onConfirm}
-      >
-        Block/Unblock
-      </button>
+        <p className="text-lg font-semibold mb-4">
+          Are you sure you want to block or unblock this user?
+        </p>
+        <div className="flex justify-end space-x-4">
+          <button
+            className="px-4 py-2 bg-gray-200 rounded-md dark:text-black dark:bg-gray-800"
+            onClick={onCancel}
+          >
+            Cancel
+          </button>
+          <button
+            className="px-4 py-2 bg-red-500 text-white rounded-md"
+            onClick={onConfirm}
+          >
+            Block/Unblock
+          </button>
+        </div>
+      </div>
     </div>
-  </div>
-</div>
   );
 }

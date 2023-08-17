@@ -33,18 +33,18 @@ export default function Home() {
   const [posts, setPosts] = useState([]);
   const [suggestedUsers, setSuggestedUsers] = useState([])
   const [updateUI, setUpdateUI] = useState(false)
-  const [ad,setAd]=useState(null)
+  const [ad, setAd] = useState(null)
 
   useEffect(() => {
     if (search === '' || search === null) {
       setUpdateUI((prev) => !prev)
-    }else{
+    } else {
       setPosts(posts.filter((post) =>
-    post.content.toLowerCase().includes(search.toLowerCase()) ||
-    post.userId.UserName.toLowerCase().includes(search.toLowerCase())
-    ));
+        post.content.toLowerCase().includes(search.toLowerCase()) ||
+        post.userId.UserName.toLowerCase().includes(search.toLowerCase())
+      ));
     }
-      // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [search])
 
 
@@ -57,7 +57,15 @@ export default function Home() {
         setAd(res.data.randomAd)
       })
       .catch((error) => {
-        console.error(error.message, "post fetch url err=>user not working");
+        console.log("post fetch url err=>user not working", error)
+
+        if (error.response && error.response.data && error.response.data.message) {
+          const errorMessage = error.response.data.message;
+          toast.error(errorMessage);
+        } else {
+          toast.error('An error occurred while user fetch url.');
+        }
+        console.error(error.message, "");
       })
       .finally(() => {
         setLoadingUser(false); // Set loadingUser to false once the user details are fetched or the API call completes
@@ -84,10 +92,16 @@ export default function Home() {
         toast.success(res?.data.message)
         setUpdateUI((prevState) => !prevState)
       })
-      .catch((err) => {
-        console.log(err, "Error clicking like")
-        toast.error(err?.data?.message)
-      })
+      .catch((error) => {
+        console.log("user error clicking like", error)
+
+        if (error.response && error.response.data && error.response.data.message) {
+          const errorMessage = error.response.data.message;
+          toast.error(errorMessage);
+        } else {
+          toast.error('An error occurred while user error clicking like.');
+        }
+      });
   }
   const renderLikeInfo = (post) => {
     const likeCount = post.likes.length;
@@ -117,10 +131,16 @@ export default function Home() {
         toast.success(res?.data.message)
         setUpdateUI((prevState) => !prevState)
       })
-      .catch((err) => {
-        console.log(err, "Error clicking like")
-        toast.error(err?.data?.message)
-      })
+      .catch((error) => {
+        console.log("user error save post", error)
+
+        if (error.response && error.response.data && error.response.data.message) {
+          const errorMessage = error.response.data.message;
+          toast.error(errorMessage);
+        } else {
+          toast.error('An error occurred while user save post.');
+        }
+      });
   }
 
   const friends = [
@@ -178,9 +198,15 @@ export default function Home() {
           toast.success(res.data.message);
         }
       })
-      .catch((err) => {
-        toast.error(err.data.message);
-        console.log(err, "delete post error");
+      .catch((error) => {
+        console.log("user error delete post", error)
+
+        if (error.response && error.response.data && error.response.data.message) {
+          const errorMessage = error.response.data.message;
+          toast.error(errorMessage);
+        } else {
+          toast.error('An error occurred while user delete post.');
+        }
       });
   }
 
@@ -221,9 +247,15 @@ export default function Home() {
           toast.success(res.data.message);
         }
       })
-      .catch((err) => {
-        console.log(err, "report post error");
-        toast.error(err?.data?.message);
+      .catch((error) => {
+        console.log("user error report post", error)
+
+        if (error.response && error.response.data && error.response.data.message) {
+          const errorMessage = error.response.data.message;
+          toast.error(errorMessage);
+        } else {
+          toast.error('An error occurred while user report post.');
+        }
       });
   }
 
@@ -231,18 +263,18 @@ export default function Home() {
     nav(`/profile/${userId}`)
   }
 
-   //edit modal
-   const [editModal, setEditModal] = useState(false)
-   const [editPostId, setEditPostId] = useState(null)
-   const [editPostContent, setEditPostContent] = useState('')
-   const showEditModal = (postId, content) => {
-       setEditPostId(postId)
-       setEditPostContent(content)
-       setEditModal(true)
-   }
-   const editModalCancel = () => {
-       setEditModal(false)
-   }
+  //edit modal
+  const [editModal, setEditModal] = useState(false)
+  const [editPostId, setEditPostId] = useState(null)
+  const [editPostContent, setEditPostContent] = useState('')
+  const showEditModal = (postId, content) => {
+    setEditPostId(postId)
+    setEditPostContent(content)
+    setEditModal(true)
+  }
+  const editModalCancel = () => {
+    setEditModal(false)
+  }
 
   //share
   const [showShareModal, setShowShareModal] = useState(false);
@@ -259,7 +291,7 @@ export default function Home() {
   const formatPostDate = (date) => {
     const now = moment();
     const postDate = moment(date);
-  
+
     if (now.diff(postDate, 'seconds') < 60) {
       return 'Just now';
     } else if (now.diff(postDate, 'days') === 0) {
@@ -274,7 +306,7 @@ export default function Home() {
       return postDate.format('LL'); // Display "Month Day, Year" for posts older than a year
     }
   };
-  
+
 
 
   return (
@@ -360,8 +392,8 @@ export default function Home() {
                                   {
                                     post?.userId?.UserName === user.UserName ?
                                       <>
-                                      <li onClick={() => showDeleteModal(post._id)} className='flex p-2 text-sm'><MdDeleteForever className='text-red-500 mr-1 ' size={20} /> Delete</li>
-                                      <li onClick={() => showEditModal(post?._id, post?.content)} className='flex p-2 text-sm'><FaEdit className='text-blue-500 mr-1 ' size={18} /> Edit</li>
+                                        <li onClick={() => showDeleteModal(post._id)} className='flex p-2 text-sm'><MdDeleteForever className='text-red-500 mr-1 ' size={20} /> Delete</li>
+                                        <li onClick={() => showEditModal(post?._id, post?.content)} className='flex p-2 text-sm'><FaEdit className='text-blue-500 mr-1 ' size={18} /> Edit</li>
                                       </>
                                       :
                                       <li onClick={() => showReportModal(post._id)} className='flex p-2 text-sm'><MdReportProblem className='text-yellow-500 mr-1 ' size={20} /> Report</li>
@@ -523,9 +555,9 @@ export default function Home() {
       {showShareModal && (
         <ShareModal isOpen={showShareModal} onClose={closeShareModal} id={sharePostId} />
       )}
-       {editModal && (
-                    <EditModal onCancel={editModalCancel} setUpdateUI={setUpdateUI} editPostId={editPostId} editPostContent={editPostContent} />
-        )}
+      {editModal && (
+        <EditModal onCancel={editModalCancel} setUpdateUI={setUpdateUI} editPostId={editPostId} editPostContent={editPostContent} />
+      )}
     </>
   );
 }
@@ -536,78 +568,84 @@ function EditModal({ onCancel, setUpdateUI, editPostId, editPostContent }) {
   const [editContent, setEditContent] = useState('')
 
   const handleOutsideClick = (event) => {
-      if (modalRef.current && !modalRef.current.contains(event.target)) {
-          onCancel();
-      }
+    if (modalRef.current && !modalRef.current.contains(event.target)) {
+      onCancel();
+    }
   };
 
   useEffect(() => {
-      setEditContent(editPostContent)
-      document.addEventListener('mousedown', handleOutsideClick);
-      return () => {
-          document.removeEventListener('mousedown', handleOutsideClick);
-      };
-      // eslint-disable-next-line react-hooks/exhaustive-deps
+    setEditContent(editPostContent)
+    document.addEventListener('mousedown', handleOutsideClick);
+    return () => {
+      document.removeEventListener('mousedown', handleOutsideClick);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const changeContent = () => {
-      axiosInstance.post(`${UserBaseURL}/editPost`, { postId: editPostId, content: editContent })
-          .then((res) => {
-              toast.success("Post Edited success")
-              setUpdateUI((prev)=>!prev)
-              onCancel()
-          })
-          .catch((err) => {
-              toast.error(err.message, "Edit post error")
-              console.log(err, "Edit post error")
-          })
+    axiosInstance.post(`${UserBaseURL}/editPost`, { postId: editPostId, content: editContent })
+      .then((res) => {
+        toast.success("Post Edited success")
+        setUpdateUI((prev) => !prev)
+        onCancel()
+      })
+      .catch((error) => {
+        console.log("user error edit post", error)
+
+        if (error.response && error.response.data && error.response.data.message) {
+          const errorMessage = error.response.data.message;
+          toast.error(errorMessage);
+        } else {
+          toast.error('An error occurred while user edit post.');
+        }
+      });
   }
   const autoSizeTextarea = (e) => {
-      e.target.rows = Math.min(6, e.target.scrollHeight / 20); // You can adjust the row height as needed
+    e.target.rows = Math.min(6, e.target.scrollHeight / 20); // You can adjust the row height as needed
   };
 
 
   return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-700 bg-opacity-40 dark:text-white">
-          <div ref={modalRef} className="bg-white rounded-lg p-4 pt-2 dark:bg-navy-700">
-              <div className="flex justify-between items-center mb-2 ">
-                  <p className="text-xl font-semibold ">Edit post</p>
-                  <button
-                      className="text-white bg-red-500 p-2 rounded-3xl"
-                      onClick={onCancel}
-                  >
-                      <FaTimes />
-                  </button>
-              </div>
-              <div className="flex items-center mb-4">
-                  <hr className="w-full border-gray-300" />
-              </div>
-              <label className="text-sm font-thin mb-3">Edit the content of the post : </label> <br />
-              <div className="flex justify-center items-center mb-7">
-                  <textarea
-                      placeholder="New post..."
-                      className="flex-grow bg-transparent text-sm font-medium drop-shadow-xl px-4 py-2 outline-none rounded-3xl bg-lightPrimary text-navy-700 dark:bg-navy-900 dark:text-white resize-none"
-                      rows={1}
-                      value={editContent}
-                      onChange={(e) => setEditContent(e.target.value)}
-                      onInput={autoSizeTextarea}
-                  />
-                  <button
-                      onClick={changeContent}
-                      className="text-white bg-blue-500 hover:bg-blue-600 rounded-3xl p-2 ml-2"
-                  >
-                      <BiSolidMessageSquareEdit size={18} />
-                  </button>
-              </div>
-              <div className="flex justify-end space-x-4">
-                  <button
-                      className="px-4 py-2 bg-gray-200 rounded-md dark:text-black dark:bg-gray-800"
-                      onClick={onCancel}
-                  >
-                      Cancel
-                  </button>
-              </div>
-          </div>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-700 bg-opacity-40 dark:text-white">
+      <div ref={modalRef} className="bg-white rounded-lg p-4 pt-2 dark:bg-navy-700">
+        <div className="flex justify-between items-center mb-2 ">
+          <p className="text-xl font-semibold ">Edit post</p>
+          <button
+            className="text-white bg-red-500 p-2 rounded-3xl"
+            onClick={onCancel}
+          >
+            <FaTimes />
+          </button>
+        </div>
+        <div className="flex items-center mb-4">
+          <hr className="w-full border-gray-300" />
+        </div>
+        <label className="text-sm font-thin mb-3">Edit the content of the post : </label> <br />
+        <div className="flex justify-center items-center mb-7">
+          <textarea
+            placeholder="New post..."
+            className="flex-grow bg-transparent text-sm font-medium drop-shadow-xl px-4 py-2 outline-none rounded-3xl bg-lightPrimary text-navy-700 dark:bg-navy-900 dark:text-white resize-none"
+            rows={1}
+            value={editContent}
+            onChange={(e) => setEditContent(e.target.value)}
+            onInput={autoSizeTextarea}
+          />
+          <button
+            onClick={changeContent}
+            className="text-white bg-blue-500 hover:bg-blue-600 rounded-3xl p-2 ml-2"
+          >
+            <BiSolidMessageSquareEdit size={18} />
+          </button>
+        </div>
+        <div className="flex justify-end space-x-4">
+          <button
+            className="px-4 py-2 bg-gray-200 rounded-md dark:text-black dark:bg-gray-800"
+            onClick={onCancel}
+          >
+            Cancel
+          </button>
+        </div>
       </div>
+    </div>
   );
 }

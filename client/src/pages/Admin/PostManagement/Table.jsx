@@ -69,31 +69,37 @@ export default function Table({ tableData, setUpdateUI }) {
     setShowConfirmationModal(false);
   };
 
-//delete posts
-  const [showDelModal,setDelModal]=useState(false)
+  //delete posts
+  const [showDelModal, setDelModal] = useState(false)
 
-  const handleDeleteModal=(postId)=>{
+  const handleDeleteModal = (postId) => {
     setPostId(postId)
     setDelModal(true)
   }
-  const handleDelCancel=()=>{
+  const handleDelCancel = () => {
     setPostId(null)
     setDelModal(false)
   }
   const handleConfirm = () => {
     setDelModal(false)
     axiosAdminInstance.delete(`${AdminBaseURL}/deletePost/${postId}`)
-    .then((res) => {
-      console.log(res,"delete post res")
-      if (res.data.success) {
-        setUpdateUI((prev) => !prev);
-        toast.success(res.data.message);
-      }
-    })
-    .catch((err) => {
-      toast.error(err.data.message);
-      console.log(err, "delete post error");
-    });
+      .then((res) => {
+        console.log(res, "delete post res")
+        if (res.data.success) {
+          setUpdateUI((prev) => !prev);
+          toast.success(res.data.message);
+        }
+      })
+      .catch((error) => {
+        console.log(" admin delete post", error)
+
+        if (error.response && error.response.data && error.response.data.message) {
+          const errorMessage = error.response.data.message;
+          toast.error(errorMessage);
+        } else {
+          toast.error('An error occurred while admin delete post.');
+        }
+      });
   }
 
 
@@ -218,7 +224,7 @@ export default function Table({ tableData, setUpdateUI }) {
                   </p>
                 </td>
                 <td className="min-w-[150px] border-white/0 py-3 pr-4">
-                  <MdOutlineDeleteForever className="text-red-500 ml-3" size={24} onClick={()=>handleDeleteModal(row._id)} />
+                  <MdOutlineDeleteForever className="text-red-500 ml-3" size={24} onClick={() => handleDeleteModal(row._id)} />
                 </td>
               </tr>
             ))}
@@ -274,8 +280,8 @@ export default function Table({ tableData, setUpdateUI }) {
   );
 }
 // delete modal
-const DelModal=({ onCancel, onConfirm }) =>{
-  
+const DelModal = ({ onCancel, onConfirm }) => {
+
   const modalRef = useRef();
 
   const handleOutsideClick = (event) => {
@@ -289,42 +295,42 @@ const DelModal=({ onCancel, onConfirm }) =>{
     return () => {
       document.removeEventListener('mousedown', handleOutsideClick);
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-700 bg-opacity-40">
-  <div ref={modalRef} className="bg-white rounded-lg p-4 pt-2 dark:bg-navy-700">
-    <div className="flex justify-between items-center mb-2 ">
-      <p className="text-xl font-semibold ">Confirmation</p>
-      <button
-        className="text-white bg-red-500 p-2 rounded-3xl"
-        onClick={onCancel}
-      >
-        <FaTimes />
-      </button>
-    </div>
-    <div className="flex items-center mb-4">
+      <div ref={modalRef} className="bg-white rounded-lg p-4 pt-2 dark:bg-navy-700">
+        <div className="flex justify-between items-center mb-2 ">
+          <p className="text-xl font-semibold ">Confirmation</p>
+          <button
+            className="text-white bg-red-500 p-2 rounded-3xl"
+            onClick={onCancel}
+          >
+            <FaTimes />
+          </button>
+        </div>
+        <div className="flex items-center mb-4">
           <hr className="w-full border-gray-300" />
         </div>
-    <p className="text-lg font-semibold mb-4">
-      Are you sure you want to delete this post?
-    </p>
-    <div className="flex justify-end space-x-4">
-      <button
-        className="px-4 py-2 bg-gray-200 rounded-md dark:text-black dark:bg-gray-800"
-        onClick={onCancel}
-      >
-        Cancel
-      </button>
-      <button
-        className="px-4 py-2 bg-red-500 text-white rounded-md"
-        onClick={onConfirm}
-      >
-        Confirm
-      </button>
+        <p className="text-lg font-semibold mb-4">
+          Are you sure you want to delete this post?
+        </p>
+        <div className="flex justify-end space-x-4">
+          <button
+            className="px-4 py-2 bg-gray-200 rounded-md dark:text-black dark:bg-gray-800"
+            onClick={onCancel}
+          >
+            Cancel
+          </button>
+          <button
+            className="px-4 py-2 bg-red-500 text-white rounded-md"
+            onClick={onConfirm}
+          >
+            Confirm
+          </button>
+        </div>
+      </div>
     </div>
-  </div>
-</div>
   );
 }
 //report modal
@@ -399,4 +405,3 @@ function ConfirmationModal({ reports, onCancel }) {
   );
 }
 
- 
