@@ -51,6 +51,21 @@ export default function Chat() {
     socket.on('connection', () => isSocketConnected(true))
   }, [userId])
 
+  useEffect(() => {
+    axiosInstance.get(`${UserBaseURL}/chat/`)
+      .then((res) => setChatUsers(res.data))
+      .catch((error) => {
+        console.log("user error fetch chat", error)
+
+        if (error.response && error.response.data && error.response.data.message) {
+          const errorMessage = error.response.data.message;
+          toast.error(errorMessage);
+        } else {
+          toast.error('An error occurred while user fetch chat.');
+        }
+      });
+  }, [updateUI])
+
   const handleInputMessageChange = (event) => {
     setInputMessage(event.target.value);
   };
@@ -78,10 +93,13 @@ export default function Chat() {
 
   useEffect(() => {
     socket.on("message received", (newMessageRecieved) => {
+      console.log(chatId,"=both=", newMessageRecieved.chat._id)
       if (!chatId || chatId !== newMessageRecieved.chat._id) {
+        setUpdateUI((prev) => !prev)
         console.log("failed newMessageRecieved")
-      } else {
+      } else if(chatId===newMessageRecieved.chat._id){
         console.log('perfect ok', newMessageRecieved)
+        setChatId(newMessageRecieved.chat._id)
         setUpdateUI((prev) => !prev)
         setMessages([...messages, newMessageRecieved])
         console.log(messages, 'realtime msg')
@@ -126,20 +144,6 @@ export default function Chat() {
     setAddUserModal(false)
   }
 
-  useEffect(() => {
-    axiosInstance.get(`${UserBaseURL}/chat/`)
-      .then((res) => setChatUsers(res.data))
-      .catch((error) => {
-        console.log("user error fetch chat", error)
-
-        if (error.response && error.response.data && error.response.data.message) {
-          const errorMessage = error.response.data.message;
-          toast.error(errorMessage);
-        } else {
-          toast.error('An error occurred while user fetch chat.');
-        }
-      });
-  }, [updateUI])
   // console.log(JSON.stringify(chatUsers))
 
   const handleChat = (chatId) => {
@@ -318,7 +322,7 @@ export default function Chat() {
                   className="flex flex-row items-center h-16 rounded-xl bg-white w-full px-4 dark:text-black"
                 >
                   {
-                    messages.length === 0 ? '' :
+                    !chatId ? '' :
                       (
                         <>
                           <div className="flex-grow ml-4">

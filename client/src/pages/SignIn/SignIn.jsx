@@ -205,12 +205,12 @@ export default function SignIn() {
 
             {/* Checkbox */}
             <div className="mb-4 flex items-center justify-between px-2">
-              <div className="flex items-center">
+              {/* <div className="flex items-center">
                 <Checkbox />
                 <p className="ml-2 text-sm font-medium text-gray-900 dark:text-white">
                   Keep me logged In
                 </p>
-              </div>
+              </div> */}
               <Link
                 className="text-sm font-medium text-blue-500 hover:text-blue-600 dark:text-white"
                 to="/forgot-pass"

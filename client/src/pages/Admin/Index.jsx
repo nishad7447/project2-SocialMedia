@@ -164,18 +164,6 @@ const Dashboard = () => {
           <PieChartCard />
         </div>
 
-        {/* Complex Table , Task & Calendar */}
-
-        <ComplexTable tableData={tableDataComplex} />
-
-        {/* Task chart & Calendar */}
-
-          <TaskCard />
-        {/* <div className="grid grid-cols-1 gap-5 rounded-[20px] md:grid-cols-2">
-          <div className="grid grid-cols-1 rounded-[20px]">
-            <MiniCalendar /> 
-          </div>
-        </div> */}
       </div>
     </div>
   );

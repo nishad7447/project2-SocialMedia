@@ -39,6 +39,17 @@ userRoutes.post('/createAd',auth,upload.array('file'),userController.createAd)
 //userEditPost
 userRoutes.post('/editPost',auth,userController.editPost)
 
+//follow
+userRoutes.post('/follow',auth,userController.follow)
+
+//unfollow
+userRoutes.post('/unfollow',auth,userController.unfollow)
+
+//followersPage
+userRoutes.get('/getFollowers/:id',auth,userController.getFollowers)
+
+//followingPage
+userRoutes.get('/getFollowings/:id',auth,userController.getFollowings)
 
 //logout
 userRoutes.get('/logout/:id',userController.logout)

@@ -85,21 +85,23 @@ const userController = {
     try {
       const posts = await Post.find()
         .sort({ createdAt: -1 })
-        .populate("userId", "ProfilePic UserName Name")
+        .populate("userId", "ProfilePic UserName Name Followers Followings")
         .exec();
 
-      const userFields = ["ProfilePic", "UserName"];
+      const userFields = ["ProfilePic", "UserName", "Followers", "Followings"];
       let users = await User.find().select(userFields.join(" "));
       users = users.filter((users) => users._id.toString() !== req.body.userId);
 
-      const ads = await Ad.find();
-      // Select a random index within the range of available ads
-      const randomIndex = Math.floor(Math.random() * ads.length);
+      const UserFollowersFollowings=await User.findById(req.body.userId)
+      .populate("ProfilePic UserName Name Followers Followings")
 
-      // Get the randomly selected ad
+      const NumPosts = await Post.find({ userId: req.body.userId })
+      
+      const ads = await Ad.find();
+      const randomIndex = Math.floor(Math.random() * ads.length);
       const randomAd = ads[randomIndex];
 
-      res.status(200).json({ posts, users, randomAd });
+      res.status(200).json({UserFollowersFollowings, posts, users, randomAd, NumPosts:NumPosts.length });
     } catch (error) {
       console.log(error);
       res.status(500).json({ message: `Server error ${error}` });
@@ -328,7 +330,7 @@ const userController = {
         .populate("userId", "ProfilePic UserName Name")
         .exec();
 
-      const userFields = ["ProfilePic", "UserName"];
+      const userFields = ["ProfilePic", "UserName","Followers","Followings"];
       let users = await User.find().select(userFields.join(" "));
       users = users.filter((users) => users._id.toString() !== userId);
 
@@ -527,6 +529,91 @@ const userController = {
       res.status(500).send(err);
     }
   },
+  follow:async(req,res)=>{
+    const {userId,oppoId} = req.body
+    try {
+      const currentUser = await User.findById(userId);
+      if (!currentUser) {
+        return res.status(404).json({ message: "User not found" });
+      }
+  
+      const userToFollow = await User.findById(oppoId);
+      if (!userToFollow) {
+        return res.status(404).json({ message: "Opponent user not found" });
+      }
+  
+      if (currentUser.Followings.includes(oppoId)) {
+        return res.status(400).json({ message: "Already following" });
+      }
+  
+      currentUser.Followings.push(oppoId);
+      await currentUser.save();
+  
+      userToFollow.Followers.push(userId);
+      await userToFollow.save();
+  
+      return res.status(200).json({ message: "Follow successful" });
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ message: "Internal server error" });
+    }
+  },
+   unfollow : async (req, res) => {
+    const { userId, oppoId } = req.body;
+    try {
+      const currentUser = await User.findById(userId);
+      if (!currentUser) {
+        return res.status(404).json({ message: "User not found" });
+      }
+  
+      const userToUnfollow = await User.findById(oppoId);
+      if (!userToUnfollow) {
+        return res.status(404).json({ message: "Opponent user not found" });
+      }
+  
+      if (!currentUser.Followings.includes(oppoId)) {
+        return res.status(400).json({ message: "Not following this user" });
+      }
+  
+      // Remove the opponent user's ID from the current user's Followings array and save
+      currentUser.Followings = currentUser.Followings.filter(id => id.toString() !== oppoId);
+      await currentUser.save();
+  
+      // Remove the current user's ID from the opponent user's Followers array and save
+      userToUnfollow.Followers = userToUnfollow.Followers.filter(id => id.toString() !== userId);
+      await userToUnfollow.save();
+  
+      return res.status(200).json({ message: "Unfollow successful" });
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ message: "Internal server error" });
+      }
+  },
+  getFollowers:async(req,res)=>{
+    try {
+      const userId=req.params.id
+      console.log(userId)
+      const followers=await User.findById(userId)
+      .populate("ProfilePic UserName Name Followers Followings")
+      console.log(followers)
+      return res.status(200).json({followers,success:true, message: "getFollowers successful" });
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ message: "getFollowers error" });
+    }
+  },
+  getFollowings:async(req,res)=>{
+    try {
+      const userId=req.params.id
+      const followings=await User.findById(userId)
+      .populate("ProfilePic UserName Name Followers Followings")
+         
+      return res.status(200).json({followings,success:true, message: "getFollowings successful" });
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ message: "getFollowings error" });
+    }
+  }
 };
 
 export default userController;

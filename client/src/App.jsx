@@ -21,6 +21,7 @@ import Chat from "./pages/Chat/Chat";
 import ProfileSettings from "./pages/Profile/ProfileSettings";
 import SponsoredAd from "./pages/SponsoredAd/SponsoredAd";
 import AdManagement from "./pages/Admin/AdManagement/AdManagement";
+import Search from "./pages/Search/Search";
 
 
 
@@ -35,13 +36,14 @@ const App = () => {
         <Route path="/password-reset/:userId/:token" Component={EmailNewPass} />
         <Route path="/" element={<Protected><Home/></Protected>} />
         <Route path="/savedposts" element={<Protected><SavedPosts/></Protected>} />
-        <Route path="/followers" element={<Protected><Followers/></Protected>} />
-        <Route path="/following" element={<Protected><Following/></Protected>} />
+        <Route path="/followers/:id" element={<Protected><Followers/></Protected>} />
+        <Route path="/following/:id" element={<Protected><Following/></Protected>} />
         <Route path="/profile" element={<Protected ><Profile />/</Protected>} />
         <Route path="/profile/:userId"  element={<Protected><Profile /></Protected>} />
         <Route path="/settings" element={<Protected><ProfileSettings/></Protected>} />
         <Route path='/chat' element ={<Protected><Chat /></Protected>} />
         <Route path='/SponsoredAd' element ={<Protected><SponsoredAd /></Protected>} />
+        <Route path="/search" element={<Protected><Search/></Protected>} />
 
         {/* Admin */}
         <Route path="/admin-login" element={<AdminLogin/>} />

@@ -32,14 +32,14 @@ const userSchema= new mongoose.Schema(
             type:String,
             default:'',
         },
-        Followers:{
+        Followers:[{
             type:mongoose.Schema.Types.ObjectId,
-            ref:'followers'
-        },
-        Followings:{
+            ref:'User'
+        }],
+        Followings:[{
             type:mongoose.Schema.Types.ObjectId,
-            ref:'followings'
-        },
+            ref:'User'
+        }],
         ChatIds: [{
             type: mongoose.Schema.Types.ObjectId,
             ref: 'chat',

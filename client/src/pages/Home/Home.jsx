@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { BiHeart, BiCommentDots, BiSolidShareAlt, BiSolidMessageSquareEdit } from "react-icons/bi";
 import { SiGooglemessages } from 'react-icons/si'
-import { FaEdit, FaTimes, FaUserPlus } from "react-icons/fa";
+import { FaEdit, FaTimes } from "react-icons/fa";
 import Card from '../../components/Card/Card';
 import CreatePost from '../../components/CreatePost/CreatePost';
 import { useSelector } from 'react-redux';
@@ -17,6 +17,8 @@ import { MdDeleteForever, MdReportProblem } from 'react-icons/md';
 import Modal from '../../components/Modal/Modal';
 import ShareModal from '../../components/ShareModal/ShareModal';
 import moment from 'moment'
+import FollowBTN from '../../components/Follow/UnFollow/FollowBTN';
+import UnFollowBTN from '../../components/Follow/UnFollow/UnFollowBTN';
 
 
 const Spinner = () => {
@@ -28,25 +30,14 @@ const Spinner = () => {
 };
 export default function Home() {
   const nav = useNavigate()
-  const { user, search } = useSelector((state) => state.auth)
+  const { user } = useSelector((state) => state.auth)
   const [loadingUser, setLoadingUser] = useState(true);
   const [posts, setPosts] = useState([]);
   const [suggestedUsers, setSuggestedUsers] = useState([])
   const [updateUI, setUpdateUI] = useState(false)
   const [ad, setAd] = useState(null)
-
-  useEffect(() => {
-    if (search === '' || search === null) {
-      setUpdateUI((prev) => !prev)
-    } else {
-      setPosts(posts.filter((post) =>
-        post.content.toLowerCase().includes(search.toLowerCase()) ||
-        post.userId.UserName.toLowerCase().includes(search.toLowerCase())
-      ));
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [search])
-
+  const [NumPosts,setNumPosts]=useState(null)
+  const [followings,setFollowings]=useState([])
 
   useEffect(() => {
     axiosInstance.get(`${UserBaseURL}/getAllPosts`)
@@ -55,6 +46,8 @@ export default function Home() {
         setPosts(res.data.posts)
         setSuggestedUsers(res.data.users)
         setAd(res.data.randomAd)
+        setNumPosts(res.data.NumPosts)
+        setFollowings(res.data.UserFollowersFollowings.Followings)
       })
       .catch((error) => {
         console.log("post fetch url err=>user not working", error)
@@ -142,20 +135,6 @@ export default function Home() {
         }
       });
   }
-
-  const friends = [
-    {
-      id: 1,
-      name: 'Jane Doe',
-      avatar: 'https://via.placeholder.com/40',
-    },
-    {
-      id: 2,
-      name: 'Bob Smith',
-      avatar: 'https://via.placeholder.com/40',
-    },
-    // Add more friends here...
-  ];
 
   //post settings
   const [openDropdowns, setOpenDropdowns] = useState({});
@@ -332,16 +311,16 @@ export default function Home() {
                       </div>
                       <p className="mb-4">{user?.Bio}</p>
                       <div className="flex justify-between">
-                        <div onClick={() => nav('/followers')}>
-                          <h3 className="text-lg font-bold">1200</h3>
+                        <div onClick={() => nav(`/followers/${user?._id}`)}>
+                          <h3 className="text-lg font-bold">{user?.Followers.length}</h3>
                           <p className="text-gray-600">Followers</p>
                         </div>
-                        <div onClick={() => nav('/following')}>
-                          <h3 className="text-lg font-bold">800</h3>
+                        <div onClick={() => nav(`/following/${user?._id}`)}>
+                          <h3 className="text-lg font-bold">{user?.Followings.length}</h3>
                           <p className="text-gray-600">Following</p>
                         </div>
                         <div>
-                          <h3 className="text-lg font-bold">250</h3>
+                          <h3 className="text-lg font-bold">{NumPosts}</h3>
                           <p className="text-gray-600">Posts</p>
                         </div>
                       </div>
@@ -357,9 +336,13 @@ export default function Home() {
                         <div key={friend?._id} className="flex items-center justify-between mb-4">
                           <div className="flex items-center">
                             <img className="w-10 h-10 rounded-full mr-2" src={friend?.ProfilePic} alt="Friend Avatar" />
-                            <h3 className="text-sm font-bold">{friend?.UserName}</h3>
+                            <h3 className="text-sm font-bold cursor-pointer" onClick={() => handleGoToUser(friend?._id)}>{friend?.UserName}</h3>
                           </div>
-                          <FaUserPlus className="w-5 h-5 text-blue-500 hover:text-blue-600" />
+                          {friend?.Followers.includes(user._id) ? (
+                            <UnFollowBTN friendId={friend?._id} setUpdateUI={setUpdateUI} />
+                          ) : (
+                            <FollowBTN friendId={friend?._id} setUpdateUI={setUpdateUI} />
+                          )}
                         </div>
                       ))}
                     </div>
@@ -379,7 +362,7 @@ export default function Home() {
                           <div className="flex relative items-center mb-4">
                             <img className="w-10 h-10 rounded-full mr-2" src={post?.userId?.ProfilePic} alt="User Avatar" />
                             <div>
-                              <h3 className="text-sm font-bold" onClick={() => handleGoToUser(post.userId._id)}>{post?.userId?.UserName}</h3>
+                              <h3 className="text-sm font-bold cursor-pointer" onClick={() => handleGoToUser(post.userId._id)}>{post?.userId?.UserName}</h3>
                               <p className="text-xs text-gray-600">{formatPostDate(post?.createdAt)}</p>
                             </div>
                             <SlOptionsVertical
@@ -499,13 +482,13 @@ export default function Home() {
                     <div className="p-4">
                       <h2 className="text-lg font-bold mb-2">Friends List</h2>
                       {/* Display the list of friends */}
-                      {friends.map((friend) => (
-                        <div key={friend.id} className="flex items-center justify-between mb-4">
+                      {followings.map((followings) => (
+                        <div key={followings._id} className="flex items-center justify-between mb-4">
                           <div className="flex items-center">
-                            <img className="w-10 h-10 rounded-full mr-2" src={friend.avatar} alt="Friend Avatar" />
-                            <h3 className="text-sm font-bold">{friend.name}</h3>
+                            <img className="w-10 h-10 rounded-full mr-2" src={followings.ProfilePic} alt="followings __filenameAvatar" />
+                            <h3 className="text-sm font-bold">{followings.UserName}</h3>
                           </div>
-                          <SiGooglemessages className="w-5 h-5 text-blue-500 hover:text-blue-600" />
+                          <SiGooglemessages onClick={()=>nav('/chat')} className="w-5 h-5 text-blue-500 hover:text-blue-600" />
                         </div>
                       ))}
                     </div>

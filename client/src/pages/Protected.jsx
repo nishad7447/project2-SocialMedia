@@ -31,6 +31,7 @@ export default function Protected({ children }) {
   const onOpenSidenav = () => {
     // Implement your logic for opening the sidenav here
   };
+  // eslint-disable-next-line no-unused-vars
   const { token, user, message } = useSelector((state) => state.auth)
   const dispatch = useDispatch()
 
@@ -86,7 +87,7 @@ export default function Protected({ children }) {
       })
       .catch((err) => { console.log(err) })
   }
-  console.log(token, user, "<=reduxil stored | err msg=>", message)
+  // console.log(token, user, "<=reduxil stored | err msg=>", message)
 
   const { search } = useSelector((state) => state.auth)
   return (
@@ -129,7 +130,12 @@ export default function Protected({ children }) {
                   placeholder="Search..."
                   className="block h-full w-full rounded-full bg-lightPrimary text-sm font-medium text-navy-700 outline-none placeholder:!text-gray-400 dark:bg-navy-900 dark:text-white dark:placeholder:!text-white sm:w-fit"
                   value={search}
-                  onChange={(e) => dispatch(setSearch(e.target.value))}
+                  onChange={(e) => {
+                    dispatch(setSearch(e.target.value));
+                    if (e.target.value.trim() !== "") {
+                      nav('/search');
+                    }
+                  }}
                 />
               </div>
               <span

@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { BiHeart, BiCommentDots, BiSolidShareAlt, BiBriefcase, BiMap, BiSolidMessageSquareEdit } from "react-icons/bi";
-import { FaCog, FaEdit, FaTimes, FaUserPlus } from "react-icons/fa";
+import { FaCog, FaEdit, FaTimes } from "react-icons/fa";
 import Card from '../../components/Card/Card';
 import CreatePost from '../../components/CreatePost/CreatePost';
 import { useSelector } from 'react-redux';
@@ -16,6 +16,8 @@ import { MdDeleteForever, MdReportProblem } from 'react-icons/md';
 import Modal from '../../components/Modal/Modal';
 import ShareModal from '../../components/ShareModal/ShareModal';
 import moment from 'moment'
+import UnFollowBTN from '../../components/Follow/UnFollow/UnFollowBTN';
+import FollowBTN from '../../components/Follow/UnFollow/FollowBTN';
 
 const Spinner = () => {
     return (
@@ -296,6 +298,9 @@ const Profile = () => {
         }
     };
 
+    const handleGoToUser = (userId) => {
+        nav(`/profile/${userId}`)
+      }
 
     return (
         <>
@@ -320,12 +325,20 @@ const Profile = () => {
                                                 </div>
                                             </div>
                                             {
-                                                loggedInUser.UserName === users.UserName && (
+                                                loggedInUser.UserName === users.UserName ? (
                                                     <div className="flex items-center ">
                                                         <span className="text-gray-600 hover:text-blue-500 cursor-pointer" onClick={() => nav('/settings')}>
                                                             <FaCog />
                                                         </span>
                                                     </div>
+                                                )
+                                                :
+                                                (
+                                                    users?.Followers.includes(loggedInUser?._id || userId) ? (
+                                                        <UnFollowBTN friendId={users?._id} setUpdateUI={setUpdateUI} />
+                                                    ) : (
+                                                        <FollowBTN friendId={users?._id} setUpdateUI={setUpdateUI} />
+                                                    ) 
                                                 )
                                             }
                                         </div>
@@ -344,16 +357,16 @@ const Profile = () => {
                                             <p className="text-gray-600">{users?.Location}</p>
                                         </div>
                                         <div className="flex justify-between mt-4">
-                                            <div onClick={() => nav('/followers')}>
-                                                <h3 className="text-lg font-bold">1200</h3>
+                                            <div className='cursor-pointer' onClick={() => nav(`/followers/${users?._id}`)}>
+                                                <h3 className="text-lg font-bold">{users?.Followers.length}</h3>
                                                 <p className="text-gray-600">Followers</p>
                                             </div>
-                                            <div onClick={() => nav('/following')}>
-                                                <h3 className="text-lg font-bold">800</h3>
+                                            <div className='cursor-pointer' onClick={() => nav(`/following/${users?._id}`)}>
+                                                <h3 className="text-lg font-bold">{users?.Followings.length}</h3>
                                                 <p className="text-gray-600">Following</p>
                                             </div>
-                                            <div>
-                                                <h3 className="text-lg font-bold">250</h3>
+                                            <div >
+                                                <h3 className="text-lg font-bold">{posts.length}</h3>
                                                 <p className="text-gray-600">Posts</p>
                                             </div>
                                         </div>
@@ -370,10 +383,13 @@ const Profile = () => {
                                             <div key={friend?._id} className="flex items-center justify-between mb-4">
                                                 <div className="flex items-center">
                                                     <img className="w-10 h-10 rounded-full mr-2" src={friend?.ProfilePic} alt="Friend Avatar" />
-                                                    <h3 className="text-sm font-bold">{friend?.UserName}</h3>
+                                                    <h3 className="text-sm font-bold cursor-pointer" onClick={() => handleGoToUser(friend?._id)}>{friend?.UserName}</h3>
                                                 </div>
-                                                <FaUserPlus className="w-5 h-5 text-blue-500 hover:text-blue-600" />
-                                            </div>
+                                                {friend?.Followers.includes(loggedInUser?._id || userId) ? (
+                                                    <UnFollowBTN friendId={friend?._id} setUpdateUI={setUpdateUI} />
+                                                ) : (
+                                                    <FollowBTN friendId={friend?._id} setUpdateUI={setUpdateUI} />
+                                                )}                                            </div>
                                         ))}
                                     </div>
                                 </Card>
@@ -548,6 +564,7 @@ export default Profile;
 function EditModal({ onCancel, setUpdateUI, editPostId, editPostContent }) {
     const modalRef = useRef();
     const [editContent, setEditContent] = useState('')
+    // eslint-disable-next-line no-unused-vars
     const { user } = useSelector((state) => state.auth)
 
     const handleOutsideClick = (event) => {
@@ -567,7 +584,7 @@ function EditModal({ onCancel, setUpdateUI, editPostId, editPostContent }) {
 
     const changeContent = () => {
         axiosInstance.post(`${UserBaseURL}/editPost`, { postId: editPostId, content: editContent })
-            .then((res) => {
+            .then(() => {
                 toast.success("Post Edited success")
                 setUpdateUI((prev) => !prev)
                 onCancel()
