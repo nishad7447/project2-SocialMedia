@@ -30,7 +30,7 @@ export default function AdManagement() {
   }, [updateUI])
   const regex = new RegExp(searchQuery.trim(), "i");
   const ads = allads.filter((post) =>
-    regex.test(post?.userId?.Name)
+    regex.test(post?.UserId?.Name)
   );
 
   return (

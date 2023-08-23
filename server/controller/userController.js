@@ -7,6 +7,7 @@ import bcrypt from "bcrypt";
 import Razorpay from "razorpay";
 import crypto from "crypto";
 import Ad from "../model/sponsoredAd.js";
+import Notification from "../model/Notification.js";
 
 const userController = {
   createPost: async (req, res) => {
@@ -92,16 +93,25 @@ const userController = {
       let users = await User.find().select(userFields.join(" "));
       users = users.filter((users) => users._id.toString() !== req.body.userId);
 
-      const UserFollowersFollowings=await User.findById(req.body.userId)
-      .populate("ProfilePic UserName Name Followers Followings")
+      const UserFollowersFollowings = await User.findById(
+        req.body.userId
+      ).populate("ProfilePic UserName Name Followers Followings");
 
-      const NumPosts = await Post.find({ userId: req.body.userId })
-      
+      const NumPosts = await Post.find({ userId: req.body.userId });
+
       const ads = await Ad.find();
       const randomIndex = Math.floor(Math.random() * ads.length);
       const randomAd = ads[randomIndex];
 
-      res.status(200).json({UserFollowersFollowings, posts, users, randomAd, NumPosts:NumPosts.length });
+      res
+        .status(200)
+        .json({
+          UserFollowersFollowings,
+          posts,
+          users,
+          randomAd,
+          NumPosts: NumPosts.length,
+        });
     } catch (error) {
       console.log(error);
       res.status(500).json({ message: `Server error ${error}` });
@@ -136,6 +146,19 @@ const userController = {
       if (postResult.status === "rejected") {
         console.error(postResult.reason);
         return res.status(500).json({ error: "Error saving post" });
+      }
+      
+      //notification
+      if (userId !== post.userId) {
+        // To avoid notifying the owner if they like their own post
+        const newNotification = new Notification({
+          userId: post.userId,
+          type: "comment",
+          postId: postId, 
+          senderId:userId
+
+        });
+        await newNotification.save();
       }
       return res.status(201).json({ message: "Comment added successfully" });
     } catch (error) {
@@ -179,6 +202,19 @@ const userController = {
       } else {
         post.likes.push(userId);
         await post.save();
+
+        // Create a notification for the post owner
+        if (userId !== post.userId) {
+          // To avoid notifying the owner if they like their own post
+          const newNotification = new Notification({
+            userId: post.userId,
+            type: "like",
+            postId: postId, 
+            senderId:userId
+          });
+          await newNotification.save();
+        }
+
         return res.status(200).json({ message: "Post liked" });
       }
     } catch (error) {
@@ -330,11 +366,14 @@ const userController = {
         .populate("userId", "ProfilePic UserName Name")
         .exec();
 
-      const userFields = ["ProfilePic", "UserName","Followers","Followings"];
-      let users = await User.find().select(userFields.join(" "));
-      users = users.filter((users) => users._id.toString() !== userId);
+      // const userFields = ["ProfilePic", "UserName","Followers","Followings"];
+      // let users = await User.find().select(userFields.join(" "));
+      // users = users.filter((users) => users._id.toString() !== userId);
+      const followings = await User.findById(req.body.userId).populate(
+        "ProfilePic UserName Name Followers Followings"
+      );
 
-      res.status(200).json({ posts, users });
+      res.status(200).json({ posts, users: followings });
     } catch (error) {
       console.log(error);
       res.status(500).json({ message: `Server error ${error}` });
@@ -529,90 +568,161 @@ const userController = {
       res.status(500).send(err);
     }
   },
-  follow:async(req,res)=>{
-    const {userId,oppoId} = req.body
-    try {
-      const currentUser = await User.findById(userId);
-      if (!currentUser) {
-        return res.status(404).json({ message: "User not found" });
-      }
-  
-      const userToFollow = await User.findById(oppoId);
-      if (!userToFollow) {
-        return res.status(404).json({ message: "Opponent user not found" });
-      }
-  
-      if (currentUser.Followings.includes(oppoId)) {
-        return res.status(400).json({ message: "Already following" });
-      }
-  
-      currentUser.Followings.push(oppoId);
-      await currentUser.save();
-  
-      userToFollow.Followers.push(userId);
-      await userToFollow.save();
-  
-      return res.status(200).json({ message: "Follow successful" });
-    } catch (error) {
-      console.error(error);
-      return res.status(500).json({ message: "Internal server error" });
-    }
-  },
-   unfollow : async (req, res) => {
+  follow: async (req, res) => {
     const { userId, oppoId } = req.body;
     try {
       const currentUser = await User.findById(userId);
       if (!currentUser) {
         return res.status(404).json({ message: "User not found" });
       }
-  
+
+      const userToFollow = await User.findById(oppoId);
+      if (!userToFollow) {
+        return res.status(404).json({ message: "Opponent user not found" });
+      }
+
+      if (currentUser.Followings.includes(oppoId)) {
+        return res.status(400).json({ message: "Already following" });
+      }
+
+      currentUser.Followings.push(oppoId);
+      await currentUser.save();
+
+      userToFollow.Followers.push(userId);
+      await userToFollow.save();
+
+      const newNotification = new Notification({
+        userId: oppoId,
+        type: "follow", 
+        senderId:userId
+      });
+
+      return res.status(200).json({ message: "Follow successful" });
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ message: "Internal server error" });
+    }
+  },
+  unfollow: async (req, res) => {
+    const { userId, oppoId } = req.body;
+    try {
+      const currentUser = await User.findById(userId);
+      if (!currentUser) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
       const userToUnfollow = await User.findById(oppoId);
       if (!userToUnfollow) {
         return res.status(404).json({ message: "Opponent user not found" });
       }
-  
+
       if (!currentUser.Followings.includes(oppoId)) {
         return res.status(400).json({ message: "Not following this user" });
       }
-  
+
       // Remove the opponent user's ID from the current user's Followings array and save
-      currentUser.Followings = currentUser.Followings.filter(id => id.toString() !== oppoId);
+      currentUser.Followings = currentUser.Followings.filter(
+        (id) => id.toString() !== oppoId
+      );
       await currentUser.save();
-  
+
       // Remove the current user's ID from the opponent user's Followers array and save
-      userToUnfollow.Followers = userToUnfollow.Followers.filter(id => id.toString() !== userId);
+      userToUnfollow.Followers = userToUnfollow.Followers.filter(
+        (id) => id.toString() !== userId
+      );
       await userToUnfollow.save();
-  
+
       return res.status(200).json({ message: "Unfollow successful" });
     } catch (error) {
       console.error(error);
       return res.status(500).json({ message: "Internal server error" });
-      }
+    }
   },
-  getFollowers:async(req,res)=>{
+  getFollowers: async (req, res) => {
     try {
-      const userId=req.params.id
-      console.log(userId)
-      const followers=await User.findById(userId)
-      .populate("ProfilePic UserName Name Followers Followings")
-      console.log(followers)
-      return res.status(200).json({followers,success:true, message: "getFollowers successful" });
+      const userId = req.params.id;
+      console.log(userId);
+      const followers = await User.findById(userId).populate(
+        "ProfilePic UserName Name Followers Followings"
+      );
+      console.log(followers);
+      return res
+        .status(200)
+        .json({ followers, success: true, message: "getFollowers successful" });
     } catch (error) {
       console.error(error);
       return res.status(500).json({ message: "getFollowers error" });
     }
   },
-  getFollowings:async(req,res)=>{
+  getFollowings: async (req, res) => {
     try {
-      const userId=req.params.id
-      const followings=await User.findById(userId)
-      .populate("ProfilePic UserName Name Followers Followings")
-         
-      return res.status(200).json({followings,success:true, message: "getFollowings successful" });
+      const userId = req.params.id;
+      const followings = await User.findById(userId).populate(
+        "ProfilePic UserName Name Followers Followings"
+      );
+
+      return res
+        .status(200)
+        .json({
+          followings,
+          success: true,
+          message: "getFollowings successful",
+        });
     } catch (error) {
       console.error(error);
       return res.status(500).json({ message: "getFollowings error" });
     }
+  },
+  notifications:async(req,res)=>{
+    try {
+      const userId = req.body.userId; 
+      const notifications = await Notification.find({ userId })
+        .populate({path: 'senderId',select: 'ProfilePic UserName', })
+        .populate({path: 'postId',select: 'content fileUrl', })
+        .sort({ createdAt: -1 })
+      console.log(notifications)
+      res.status(201).json({success: true,notifications,});
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ message: "notifications error" });
+    }
+  },
+  removeMsgCount:async(req,res)=>{
+    try{
+      const notifiId=req.params.id
+      console.log(notifiId,"niiifiiicatioin")
+      var Notifications = await Notification.findById(notifiId);
+      Notifications.msgCount=0
+      Notifications.read=true
+      await Notifications.save()
+      res.status(201).json({success: true,Notifications,});
+    }catch(error){
+      console.error(error);
+      return res.status(500).json({ message: "notifications removeMsgCount error" });
+    }
+  },
+  clearAllNotifi:async(req,res)=>{
+    try{
+      const userId = req.body.userId; 
+      await Notification.updateMany({ userId: userId }, { $set: { read: true } });
+
+      res.status(200).json({ success: true, message: "All notifications marked as read." });
+
+    }catch(error){
+        console.log(error, "clearAllNotifi error catch");
+        res.status(400).json({ error });
+    }
+  },
+  delAllNotifi:async(req,res)=>{
+    try{
+      const userId= req.body.userId
+      await Notification.deleteMany({userId:userId})
+
+      res.status(200).json({success:true,message:'All notifications deleted'})
+    }catch(error){
+      console.log(error, "delAllNotifi error catch");
+      res.status(400).json({ error });
+   }
   }
 };
 

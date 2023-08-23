@@ -13,6 +13,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { TiArrowBack } from 'react-icons/ti'
 import axios from 'axios';
 import { toast } from 'react-toastify';
+import { MdOutlineDeleteSweep } from 'react-icons/md';
 
 const Spinner = () => {
   return (
@@ -27,6 +28,8 @@ export default function Protected({ children }) {
   //   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [darkmode, setDarkmode] = useState(false);
   const [loadingUser, setLoadingUser] = useState(true);
+  const [notifications, setNotifications] = useState([]);
+  const [updateUi,setUpdateUi] = useState(false)
 
   const onOpenSidenav = () => {
     // Implement your logic for opening the sidenav here
@@ -69,11 +72,23 @@ export default function Protected({ children }) {
     if (localStorage.getItem('jwtToken')) {
       console.log(localStorage.getItem('jwtToken'));
       validateToken();
+
+      // Fetch notifications here
+      axiosInstance.get(`${UserBaseURL}/notifications`)
+        .then((response) => {
+          if (response.data.success) {
+            setNotifications(response.data.notifications);
+          }
+        })
+        .catch((error) => {
+          console.log("Error fetching notifications:", error);
+        });
+
     } else {
       navigate('/signin');
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [updateUi]);
 
   const handleSignOutClick = () => {
     dispatch(setLogout())
@@ -90,6 +105,37 @@ export default function Protected({ children }) {
   // console.log(token, user, "<=reduxil stored | err msg=>", message)
 
   const { search } = useSelector((state) => state.auth)
+  
+  const clearAllNotifi = () => {
+    axiosInstance.get(`${UserBaseURL}/clearAllNotifi`)
+    .then((res)=>{
+      if(res.data.success){
+        setUpdateUi((prev) => !prev)
+      }
+    })
+  }
+
+  
+  const delAllNotifi = () => {
+    axiosInstance.get(`${UserBaseURL}/delAllNotifi`)
+    .then((res)=>{
+      if(res.data.success){
+        setUpdateUi((prev) => !prev)
+      }
+    })
+  }
+
+  const notifictionBtn = (notifiId,notifiType) =>{
+    if(notifiType==="message"){
+      axiosInstance.get(`${UserBaseURL}/removeMsgCount/${notifiId}`)
+      .then((res)=>{
+        if(res.data.success){
+          nav('/chat')
+        }
+      })
+    }
+  }
+  
   return (
     <div className={`flex flex-col min-h-screen  transition-all bg-gray-100 dark:bg-gray-900`}>
       {loadingUser ? (
@@ -153,43 +199,155 @@ export default function Protected({ children }) {
                 }
                 animation="origin-[65%_0%] md:origin-top-right transition-all duration-300 ease-in-out"
                 children={
-                  <div className="flex w-[360px] flex-col gap-3 rounded-[20px] bg-white p-4 shadow-xl shadow-shadow-500 dark:!bg-navy-700 dark:text-white dark:shadow-none sm:w-[460px]">
-                    <div className="flex items-center justify-between">
+                  <div className="flex w-[360px] flex-col gap-3 rounded-[20px] bg-white p-4 shadow-xl shadow-shadow-500 dark:!bg-navy-700 dark:text-white sm:w-[460px] max-h-[400px] overflow-y-auto ">                   
+                   <div className="flex items-center justify-between sticky top-2">
                       <p className="text-base font-bold text-navy-700 dark:text-white">
                         Notification
                       </p>
-                      <p className="text-sm font-bold text-navy-700 dark:text-white">
+                      <div className='flex'>
+                      <p onClick={clearAllNotifi} className="text-sm mr-2 font-bold text-navy-700 dark:text-white">
                         Mark all read
                       </p>
+                      <MdOutlineDeleteSweep size={18} onClick={delAllNotifi}/>
+                      </div>
                     </div>
+                    {notifications.length === 0 ? (
+                      <p className="text-sm text-gray-500 dark:text-white">
+                        No new notifications
+                      </p>
+                    ) : (
+                      notifications.map(notification => (
+                        !notification.read ?
+                      ( <button
+                        onClick={()=>notifictionBtn(notification._id,notification.type)}
+                          key={notification._id}
+                          className="flex w-full items-center hover:bg-gray-100 dark:hover:bg-navy-800 p-2 rounded-lg transition-colors duration-150"
+                        >
+                          <div className="flex ">
+                            <div className="flex items-center justify-center w-10 h-10 bg-blue-500 rounded-full text-white mr-3">
+                              <img
+                                src={notification.senderId.ProfilePic}
+                                alt="User Avatar"
+                                className="h-9 w-9 rounded-full bg-gray-200"
+                              />
+                            </div>
+                            {notification.type === 'message' ?
+                              <h3 className="mr-2 text-xs mt-4">
+                                New message from
+                              </h3>
+                              : ''}
+                            <span className=" mr-2 text-xs mt-4 font-bold">{notification.senderId.UserName}</span>
+                            <h3 className="mr-2 text-xs mt-4">
+                              {notification.type === 'like' ? 'liked your post' :
+                                notification.type === 'comment' ? 'commented on your post' : ''}
+                            </h3>
+                            {
+                              notification.postId ?
+                                notification.postId.fileUrl ? (
+                                  <div className="w-10 h-10 mb-4">
+                                    {(() => {
+                                      const extension = notification.postId?.fileUrl.split('.').pop().toLowerCase();
+                                      if (['jpg', 'jpeg', 'png', 'gif'].includes(extension)) {
+                                        return <img className="w-full h-full rounded-lg" src={notification.postId?.fileUrl} alt="notification.postId" />;
+                                      } else if (extension === 'mp4') {
+                                        return (
+                                          <video className="w-full h-full rounded-lg" controls>
+                                            <source src={notification.postId?.fileUrl} type="video/mp4" />
+                                            Your browser does not support the video tag.
+                                          </video>
+                                        );
+                                      } else if (extension === 'mp3') {
+                                        return (
+                                          <audio className="w-full" controls>
+                                            <source src={notification.postId?.fileUrl} type="audio/mp3" />
+                                            Your browser does not support the audio element.
+                                          </audio>
+                                        );
+                                      } else {
+                                        return <p>Unsupported file format</p>;
+                                      }
+                                    })()}
+                                  </div>
+                                ) : (
+                                  <p className="max-w-[40%] text-xs mt-4 font-bold">
+                                    "  {notification.postId.content.split(' ', 10).join(' ')}{notification.postId.content.split(' ').length > 3 ? '...' : ''}"
+                                  </p>
 
-                    <button className="flex w-full items-center">
-                      <div className="flex h-full w-[85px] items-center justify-center rounded-xl bg-gradient-to-b from-brandLinear to-brand-500 py-4 text-2xl text-white">
-                        <BsArrowBarUp />
-                      </div>
-                      <div className="ml-2 flex h-full w-full flex-col justify-center rounded-lg px-1 text-sm">
-                        <p className="mb-1 text-left text-base font-bold text-gray-900 dark:text-white">
-                          New Update: Horizon UI Dashboard PRO
-                        </p>
-                        <p className="font-base text-left text-xs text-gray-900 dark:text-white">
-                          A new update for your downloaded item is available!
-                        </p>
-                      </div>
-                    </button>
-
-                    <button className="flex w-full items-center">
-                      <div className="flex h-full w-[85px] items-center justify-center rounded-xl bg-gradient-to-b from-brandLinear to-brand-500 py-4 text-2xl text-white">
-                        <BsArrowBarUp />
-                      </div>
-                      <div className="ml-2 flex h-full w-full flex-col justify-center rounded-lg px-1 text-sm">
-                        <p className="mb-1 text-left text-base font-bold text-gray-900 dark:text-white">
-                          New Update: Horizon UI Dashboard PRO
-                        </p>
-                        <p className="font-base text-left text-xs text-gray-900 dark:text-white">
-                          A new update for your downloaded item is available!
-                        </p>
-                      </div>
-                    </button>
+                                )
+                                :
+                                <div className="flex items-center justify-center ml-auto text-xs text-white bg-red-500 mt-4 h-4 w-4 rounded leading-none">
+                                  {notification.msgCount}
+                                </div>
+                            }
+                          </div>
+                        </button>)
+                        :
+                        (
+                           <div
+                              key={notification._id}
+                              className="flex w-full items-center text-gray-700 hover:bg-gray-100 dark:hover:bg-navy-800 p-2 rounded-lg transition-colors duration-150"
+                            >
+                              <div className="flex ">
+                                <div className="flex items-center justify-center w-10 h-10 bg-blue-500 rounded-full text-white mr-3">
+                                  <img
+                                    src={notification.senderId.ProfilePic}
+                                    alt="User Avatar"
+                                    className="h-9 w-9 rounded-full bg-gray-200"
+                                  />
+                                </div>
+                                {notification.type === 'message' ?
+                                  <h3 className="mr-2 text-xs mt-4">
+                                    New message from
+                                  </h3>
+                                  : ''}
+                                <span className=" mr-2 text-xs mt-4 font-bold">{notification.senderId.UserName}</span>
+                                <h3 className="mr-2 text-xs mt-4">
+                                  {notification.type === 'like' ? 'liked your post' :
+                                    notification.type === 'comment' ? 'commented on your post' : ''}
+                                </h3>
+                                {
+                                  notification.postId ?
+                                    notification.postId.fileUrl ? (
+                                      <div className="w-10 h-10 mb-4">
+                                        {(() => {
+                                          const extension = notification.postId?.fileUrl.split('.').pop().toLowerCase();
+                                          if (['jpg', 'jpeg', 'png', 'gif'].includes(extension)) {
+                                            return <img className="w-full h-full rounded-lg" src={notification.postId?.fileUrl} alt="notification.postId" />;
+                                          } else if (extension === 'mp4') {
+                                            return (
+                                              <video className="w-full h-full rounded-lg" controls>
+                                                <source src={notification.postId?.fileUrl} type="video/mp4" />
+                                                Your browser does not support the video tag.
+                                              </video>
+                                            );
+                                          } else if (extension === 'mp3') {
+                                            return (
+                                              <audio className="w-full" controls>
+                                                <source src={notification.postId?.fileUrl} type="audio/mp3" />
+                                                Your browser does not support the audio element.
+                                              </audio>
+                                            );
+                                          } else {
+                                            return <p>Unsupported file format</p>;
+                                          }
+                                        })()}
+                                      </div>
+                                    ) : (
+                                      <p className="max-w-[40%] text-xs mt-4 font-bold">
+                                        "  {notification.postId.content.split(' ', 10).join(' ')}{notification.postId.content.split(' ').length > 3 ? '...' : ''}"
+                                      </p>
+    
+                                    )
+                                    :
+                                    <div className="flex items-center justify-center ml-auto text-xs text-white bg-red-500 mt-4 h-4 w-4 rounded leading-none">
+                                      {notification.msgCount}
+                                    </div>
+                                }
+                              </div>
+                            </div>
+                        )                      
+                      ))
+                    )}
                   </div>
                 }
                 classNames={"py-2 top-4 -left-[230px] md:-left-[440px] w-max"}
@@ -263,8 +421,9 @@ export default function Protected({ children }) {
 
           {children}
         </>
-      )}
-    </div>
+      )
+      }
+    </div >
 
 
   );

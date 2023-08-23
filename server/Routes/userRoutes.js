@@ -51,6 +51,17 @@ userRoutes.get('/getFollowers/:id',auth,userController.getFollowers)
 //followingPage
 userRoutes.get('/getFollowings/:id',auth,userController.getFollowings)
 
+//notification
+userRoutes.get('/notifications',auth,userController.notifications)
+userRoutes.get('/removeMsgCount/:id',auth,userController.removeMsgCount)
+
+//clear clearAllNotifi
+userRoutes.get('/clearAllNotifi',auth,userController.clearAllNotifi)
+
+//DelAllNotifi
+userRoutes.get('/delAllNotifi',auth,userController.delAllNotifi)
+
+
 //logout
 userRoutes.get('/logout/:id',userController.logout)
 export default userRoutes 

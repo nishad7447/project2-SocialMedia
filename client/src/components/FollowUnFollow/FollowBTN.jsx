@@ -1,7 +1,7 @@
 import React from 'react'
 import { FaUserPlus } from 'react-icons/fa'
-import { axiosInstance } from '../../../axios'
-import { UserBaseURL } from '../../../API';
+import { axiosInstance } from '../../axios'
+import { UserBaseURL } from '../../API';
 import { toast } from 'react-toastify';
 
 

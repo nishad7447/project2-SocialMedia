@@ -1,8 +1,8 @@
 import React from 'react'
-import { axiosInstance } from '../../../axios'
-import { UserBaseURL } from '../../../API';
+import { axiosInstance } from '../../axios'
+import { UserBaseURL } from '../../API';
 import { toast } from 'react-toastify';
-import {  RiUserUnfollowLine } from 'react-icons/ri';
+import {RiUserUnfollowLine } from 'react-icons/ri';
 
 
 export default function UnFollowBTN({ friendId, setUpdateUI }) {

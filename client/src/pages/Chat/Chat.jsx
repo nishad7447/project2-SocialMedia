@@ -93,17 +93,16 @@ export default function Chat() {
 
   useEffect(() => {
     socket.on("message received", (newMessageRecieved) => {
-      console.log(chatId,"=both=", newMessageRecieved.chat._id)
+      setUpdateUI((prev) => !prev)
+      console.log(chatId, "=both=", newMessageRecieved.chat._id)
       if (!chatId || chatId !== newMessageRecieved.chat._id) {
-        setUpdateUI((prev) => !prev)
-        console.log("failed newMessageRecieved")
-      } else if(chatId===newMessageRecieved.chat._id){
-        console.log('perfect ok', newMessageRecieved)
-        setChatId(newMessageRecieved.chat._id)
-        setUpdateUI((prev) => !prev)
-        setMessages([...messages, newMessageRecieved])
-        console.log(messages, 'realtime msg')
-      }
+        console.log("failed to msg")
+        return  
+      } 
+       console.log('perfect ok', newMessageRecieved)
+       setMessages([...messages, newMessageRecieved])
+       console.log(messages, 'realtime msg')
+     
     })
   })
 
@@ -140,7 +139,7 @@ export default function Chat() {
   }, [messages]);
 
   const [showAddUserModal, setAddUserModal] = useState(false)
-  const closeModal = () => {
+  const closeModal = () => {  
     setAddUserModal(false)
   }
 

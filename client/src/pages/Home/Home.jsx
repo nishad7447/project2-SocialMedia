@@ -17,8 +17,8 @@ import { MdDeleteForever, MdReportProblem } from 'react-icons/md';
 import Modal from '../../components/Modal/Modal';
 import ShareModal from '../../components/ShareModal/ShareModal';
 import moment from 'moment'
-import FollowBTN from '../../components/Follow/UnFollow/FollowBTN';
-import UnFollowBTN from '../../components/Follow/UnFollow/UnFollowBTN';
+import FollowBTN from '../../components/FollowUnFollow/FollowBTN';
+import UnFollowBTN from '../../components/FollowUnFollow/UnFollowBTN';
 
 
 const Spinner = () => {

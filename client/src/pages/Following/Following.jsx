@@ -3,8 +3,8 @@ import { axiosInstance } from '../../axios'
 import { UserBaseURL } from '../../API'
 import { toast } from 'react-toastify';
 import { useSelector } from 'react-redux';
-import UnFollowBTN from '../../components/Follow/UnFollow/UnFollowBTN';
-import FollowBTN from '../../components/Follow/UnFollow/FollowBTN';
+import FollowBTN from '../../components/FollowUnFollow/FollowBTN';
+import UnFollowBTN from '../../components/FollowUnFollow/UnFollowBTN';
 import { useParams } from 'react-router-dom';
 
 const Following = () => {

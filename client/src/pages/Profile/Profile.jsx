@@ -16,8 +16,9 @@ import { MdDeleteForever, MdReportProblem } from 'react-icons/md';
 import Modal from '../../components/Modal/Modal';
 import ShareModal from '../../components/ShareModal/ShareModal';
 import moment from 'moment'
-import UnFollowBTN from '../../components/Follow/UnFollow/UnFollowBTN';
-import FollowBTN from '../../components/Follow/UnFollow/FollowBTN';
+import FollowBTN from '../../components/FollowUnFollow/FollowBTN';
+import UnFollowBTN from '../../components/FollowUnFollow/UnFollowBTN';
+import { SiGooglemessages } from 'react-icons/si';
 
 const Spinner = () => {
     return (
@@ -66,7 +67,7 @@ const Profile = () => {
             .then((res) => {
                 console.log(res)
                 setPosts(res.data.posts)
-                setSuggestedUsers(res.data.users)
+                setSuggestedUsers(res.data.users?.Followings)
             })
             .catch((error) => {
                 console.log("user error fetch posts", error)
@@ -79,7 +80,7 @@ const Profile = () => {
                 }
             })
             .finally(() => {
-                setLoadingUser(false); // Set loadingUser to false once the user details are fetched or the API call completes
+                setLoadingUser(false);
             });
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [updateUI])
@@ -300,7 +301,7 @@ const Profile = () => {
 
     const handleGoToUser = (userId) => {
         nav(`/profile/${userId}`)
-      }
+    }
 
     return (
         <>
@@ -332,14 +333,14 @@ const Profile = () => {
                                                         </span>
                                                     </div>
                                                 )
-                                                :
-                                                (
-                                                    users?.Followers.includes(loggedInUser?._id || userId) ? (
-                                                        <UnFollowBTN friendId={users?._id} setUpdateUI={setUpdateUI} />
-                                                    ) : (
-                                                        <FollowBTN friendId={users?._id} setUpdateUI={setUpdateUI} />
-                                                    ) 
-                                                )
+                                                    :
+                                                    (
+                                                        users?.Followers.includes(loggedInUser?._id || userId) ? (
+                                                            <UnFollowBTN friendId={users?._id} setUpdateUI={setUpdateUI} />
+                                                        ) : (
+                                                            <FollowBTN friendId={users?._id} setUpdateUI={setUpdateUI} />
+                                                        )
+                                                    )
                                             }
                                         </div>
                                         <p className="mb-4">{users?.Bio}</p>
@@ -372,27 +373,26 @@ const Profile = () => {
                                         </div>
                                     </div>
                                 </Card>
-
-
-                                {/* Friend Suggestions */}
-                                <Card extra="mt-4">
-                                    <div className="p-4">
-                                        <h2 className="text-lg font-bold mb-2">Friend Suggestions</h2>
-                                        {/* Display the list of friend suggestions */}
-                                        {suggestedUsers.map((friend) => (
-                                            <div key={friend?._id} className="flex items-center justify-between mb-4">
-                                                <div className="flex items-center">
-                                                    <img className="w-10 h-10 rounded-full mr-2" src={friend?.ProfilePic} alt="Friend Avatar" />
-                                                    <h3 className="text-sm font-bold cursor-pointer" onClick={() => handleGoToUser(friend?._id)}>{friend?.UserName}</h3>
+                                {
+                                    loggedInUser._id === users._id ?
+                                        <Card extra="mt-4">
+                                            <div className="p-4">
+                                                <div>
+                                                    <h2 className="text-lg font-bold mb-2">My Friend Lists</h2>
+                                                    {suggestedUsers.map((friend) => (
+                                                        <div key={friend?._id} className="flex items-center justify-between mb-4">
+                                                            <div className="flex items-center">
+                                                                <img className="w-10 h-10 rounded-full mr-2" src={friend?.ProfilePic} alt="Friend Avatar" />
+                                                                <h3 className="text-sm font-bold cursor-pointer" onClick={() => handleGoToUser(friend?._id)}>{friend?.UserName}</h3>
+                                                            </div>
+                                                            <SiGooglemessages onClick={() => nav('/chat')} className="w-5 h-5 text-blue-500 hover:text-blue-600" />
+                                                        </div>
+                                                    ))}
                                                 </div>
-                                                {friend?.Followers.includes(loggedInUser?._id || userId) ? (
-                                                    <UnFollowBTN friendId={friend?._id} setUpdateUI={setUpdateUI} />
-                                                ) : (
-                                                    <FollowBTN friendId={friend?._id} setUpdateUI={setUpdateUI} />
-                                                )}                                            </div>
-                                        ))}
-                                    </div>
-                                </Card>
+                                            </div>
+                                        </Card>
+                                        : ''
+                                }
                             </div>
                         </div>
 

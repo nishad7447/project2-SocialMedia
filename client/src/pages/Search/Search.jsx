@@ -17,8 +17,8 @@ import Modal from '../../components/Modal/Modal'
 import CommentModal from '../../components/CommentModal/CommentModal'
 import ShareModal from '../../components/ShareModal/ShareModal'
 import { setSearch } from '../../redux/slice'
-import UnFollowBTN from '../../components/Follow/UnFollow/UnFollowBTN'
-import FollowBTN from '../../components/Follow/UnFollow/FollowBTN'
+import FollowBTN from '../../components/FollowUnFollow/FollowBTN';
+import UnFollowBTN from '../../components/FollowUnFollow/UnFollowBTN';
 
 const Spinner = () => {
     return (
