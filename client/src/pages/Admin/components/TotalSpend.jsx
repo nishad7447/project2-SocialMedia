@@ -141,7 +141,7 @@ const TotalSpent = () => {
                   </div>
                 </div>
               </div>
-              <div className="h-full w-full">
+              <div className="h-[400px] w-full">
                 <LineChart
                   chartOptions={lineChartOptionsTotalSpent}
                   chartData={lineChartDataTotalSpent}
