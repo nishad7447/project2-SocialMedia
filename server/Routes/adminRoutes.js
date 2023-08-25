@@ -20,4 +20,12 @@ adminRoutes.delete('/deletePost/:id',auth,userController.deletePost)
 adminRoutes.get('/allAds',auth,adminController.allAds)
 adminRoutes.delete('/deleteAd/:id',auth,adminController.deleteAd)
 
+//AdminManagement
+adminRoutes.get('/dashboard',auth,adminController.dashboard)
+
+//calculate
+adminRoutes.get('/calculate',auth,adminController.calculate)
+//UserJoinTraffic
+adminRoutes.get('/UserJoinTraffic',auth,adminController.UserJoinTraffic)
+
 export default adminRoutes

@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import Dropdown from '../components/Dropdown/Dropdown';
 import { FiAlignJustify } from "react-icons/fi";
 import { Link, useNavigate } from "react-router-dom";
-import { BsArrowBarUp } from "react-icons/bs";
 import { FiSearch } from "react-icons/fi";
 import { RiMoonFill, RiSunFill } from "react-icons/ri";
 import { IoMdNotificationsOutline } from "react-icons/io";
@@ -46,6 +45,7 @@ export default function Protected({ children }) {
         if (response.data.success) {
           dispatch(setLogin({ user: response.data.data }));
           dispatch(setOnline(true))
+          setUpdateUi((prev) => !prev)
           console.log(response.data, "data vanuuuuuuuuuuuuuu");
         } else {
           dispatch(setMessage(response.message));
@@ -105,7 +105,7 @@ export default function Protected({ children }) {
   // console.log(token, user, "<=reduxil stored | err msg=>", message)
 
   const { search } = useSelector((state) => state.auth)
-  
+
   const clearAllNotifi = () => {
     axiosInstance.get(`${UserBaseURL}/clearAllNotifi`)
     .then((res)=>{
@@ -136,6 +136,7 @@ export default function Protected({ children }) {
     }
   }
   
+
   return (
     <div className={`flex flex-col min-h-screen  transition-all bg-gray-100 dark:bg-gray-900`}>
       {loadingUser ? (
@@ -239,7 +240,8 @@ export default function Protected({ children }) {
                             <span className=" mr-2 text-xs mt-4 font-bold">{notification.senderId.UserName}</span>
                             <h3 className="mr-2 text-xs mt-4">
                               {notification.type === 'like' ? 'liked your post' :
-                                notification.type === 'comment' ? 'commented on your post' : ''}
+                                notification.type === 'comment' ? 'commented on your post' : 
+                                  notification.type === 'follow' ? 'started following you' : ''}
                             </h3>
                             {
                               notification.postId ?
@@ -275,9 +277,11 @@ export default function Protected({ children }) {
 
                                 )
                                 :
-                                <div className="flex items-center justify-center ml-auto text-xs text-white bg-red-500 mt-4 h-4 w-4 rounded leading-none">
+                                notification.type === 'message' ?
+                                (<div className="flex items-center justify-center ml-auto text-xs text-white bg-red-500 mt-4 h-4 w-4 rounded leading-none">
                                   {notification.msgCount}
-                                </div>
+                                </div>)
+                                : ''
                             }
                           </div>
                         </button>)

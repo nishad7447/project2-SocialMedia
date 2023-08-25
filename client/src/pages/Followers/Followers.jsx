@@ -29,6 +29,7 @@ const Followers = () => {
         }
         console.error(error.message, "");
       })
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [updateUI])
 
 

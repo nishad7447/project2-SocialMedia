@@ -597,6 +597,8 @@ const userController = {
         senderId:userId
       });
 
+      await newNotification.save()
+
       return res.status(200).json({ message: "Follow successful" });
     } catch (error) {
       console.error(error);
@@ -680,7 +682,7 @@ const userController = {
         .populate({path: 'senderId',select: 'ProfilePic UserName', })
         .populate({path: 'postId',select: 'content fileUrl', })
         .sort({ createdAt: -1 })
-      console.log(notifications)
+      // console.log(notifications)
       res.status(201).json({success: true,notifications,});
     } catch (error) {
       console.error(error);

@@ -108,6 +108,79 @@ const adminController = {
       res.status(500).json({ error: "Internal server error in deleteAd" });
     }
   },
+  dashboard:async(req,res)=>{
+    try{
+
+      const allUsers=await User.find()
+      const allPosts=await Post.find()
+      const allAds= await Ad.find()
+      res.status(201).json({allUsers,allPosts,allAds,success:true})
+  
+    } catch (error) {
+      console.log(error);
+      res.status(500).json({ error: "Internal server error in dashboard" });    }
+  },
+  calculate: async (req, res) => {
+    try {
+      const allAds = await Ad.find();
+      
+      const monthlyTotals = {
+        April: 0,
+        May: 0,
+        June: 0,
+        July: 0,
+        August: 0,
+        September: 0
+      };
+  
+      allAds.forEach(ad => {
+        const adDate = new Date(ad.createdAt);
+        const monthName = adDate.toLocaleDateString('en-US', { month: 'long' });
+  
+        if (Object.keys(monthlyTotals).includes(monthName)) {
+          monthlyTotals[monthName] += ad.Amount;
+        }
+      });
+  
+      res.status(200).json({monthlyTotals,success:true});
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: 'An error occurred calculate' });
+    }
+  },
+  UserJoinTraffic:async(req,res)=>{
+    try{
+      const allUsers=await User.find()
+      const JoinMonthlyTotals = {
+        April: 0,
+        May: 0,
+        June: 0,
+        July: 0,
+        August: 0,
+        September: 0,
+        October:0
+      };
+  
+      allUsers.forEach(user => {
+        const userDate = new Date(user.createdAt);
+        const monthName = userDate.toLocaleDateString('en-US', { month: 'long' });
+  
+        if (Object.keys(JoinMonthlyTotals).includes(monthName)) {
+          JoinMonthlyTotals[monthName] += 1;
+        }
+      });
+  
+      const numberOfMonths = Object.keys(JoinMonthlyTotals).length;
+      const totalJoins = Object.values(JoinMonthlyTotals).reduce((total, count) => total + count, 0);
+      const monthlyAverage = totalJoins / numberOfMonths;
+
+      res.status(200).json({JoinMonthlyTotals,monthlyAverage,success:true});
+    }catch(error){
+      console.log(error)
+      res.status(500).json({success:false,message:"Error fetching UserJoinTraffic"})
+    }
+  }
+  
 };
 
 export default adminController;

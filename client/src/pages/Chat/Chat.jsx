@@ -41,8 +41,8 @@ export default function Chat() {
   const [inputMessage, setInputMessage] = useState('');
   const [messages, setMessages] = useState([]);
   const [chatUsers, setChatUsers] = useState([])
-  const [oppId, setOppId] = useState(null)
   const [chatId, setChatId] = useState(null)
+  // eslint-disable-next-line no-unused-vars
   const [isSocket, isSocketConnected] = useState(false);
 
   useEffect(() => {
@@ -91,7 +91,7 @@ export default function Chat() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [chatId])
 
-  useEffect(() => {
+  const fetchNewmsg=() => {
     socket.on("message received", (newMessageRecieved) => {
       setUpdateUI((prev) => !prev)
       console.log(chatId, "=both=", newMessageRecieved.chat._id)
@@ -104,7 +104,11 @@ export default function Chat() {
        console.log(messages, 'realtime msg')
      
     })
-  })
+  }
+  useEffect(()=>{
+    fetchNewmsg()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  },[])
 
   const handleSendMessage = async () => {
     if (inputMessage.trim() !== '') {
