@@ -1,2 +1,2 @@
-export const UserBaseURL ='http://api.onlyfriends.fun'
-export const AdminBaseURL ='http://api.onlyfriends.fun/admin'
+export const UserBaseURL ='https://api.onlyfriends.fun'
+export const AdminBaseURL ='https://api.onlyfriends.fun/admin'

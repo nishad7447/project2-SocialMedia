@@ -5,7 +5,7 @@ import { FaFacebook, FaGithub, FaTimes } from 'react-icons/fa';
 
 const ShareModal = ({ isOpen, onClose,id }) => {
     const [isCopied, setIsCopied] = useState(false);
-    const [inputValue, setInputValue] = useState('http://localhost:3000/#'+id);
+    const [inputValue, setInputValue] = useState('https://onlyfriends.fun/#'+id);
 
 
     const closeRef = useRef(null);

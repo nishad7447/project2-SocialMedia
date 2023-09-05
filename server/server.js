@@ -57,7 +57,7 @@ const server = app.listen(port, () => {
 const io = new Server(server, {
   pingTimeout: 3000,
   cors: {
-    origin: "http://localhost:3000",
+    origin: "https://onlyfriends.fun",
   },
 });
 
