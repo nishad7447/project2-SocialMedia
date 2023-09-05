@@ -73,22 +73,28 @@ export default function Protected({ children }) {
       console.log(localStorage.getItem('jwtToken'));
       validateToken();
 
-      // Fetch notifications here
-      axiosInstance.get(`${UserBaseURL}/notifications`)
-        .then((response) => {
-          if (response.data.success) {
-            setNotifications(response.data.notifications);
-          }
-        })
-        .catch((error) => {
-          console.log("Error fetching notifications:", error);
-        });
-
     } else {
       navigate('/signin');
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [updateUi]);
+  }, []);
+
+  useEffect(()=>{
+    if(localStorage.getItem('jwtToken')){
+
+            // Fetch notifications here
+            axiosInstance.get(`${UserBaseURL}/notifications`)
+            .then((response) => {
+              if (response.data.success) {
+                setNotifications(response.data.notifications);
+              }
+            })
+            .catch((error) => {
+              console.log("Error fetching notifications:", error);
+            });
+            
+    }
+  },[updateUi])
 
   const handleSignOutClick = () => {
     dispatch(setLogout())

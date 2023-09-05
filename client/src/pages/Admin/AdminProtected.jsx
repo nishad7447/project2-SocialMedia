@@ -115,11 +115,6 @@ const AdminNavbar = ({ children }) => {
                     <RiAdvertisementFill size={24} className=' mr-1' /> Ads
                   </Link>
                 </li>
-                <li>
-                  <Link to="/contact" className="hover:underline dark:text-white">
-                    Contact
-                  </Link>
-                </li>
               </ul>
               {/* Sign Out button (Visible on larger screens and iPad) */}
               <div className="hidden md:block">
@@ -170,15 +165,6 @@ const AdminNavbar = ({ children }) => {
                   onClick={toggleMobileMenu}
                 >
                   <RiAdvertisementFill size={24} className='ml-3 mr-3' /> Ads
-                </Link>
-              </li>
-              <li>
-                <Link
-                  to="/contact"
-                  className="block ml-5 py-1 hover:underline dark:text-white"
-                  onClick={toggleMobileMenu}
-                >
-                  Contact
                 </Link>
               </li>
               {/* Sign Out button (Visible on mobile) */}

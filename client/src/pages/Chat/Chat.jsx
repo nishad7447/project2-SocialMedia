@@ -108,7 +108,7 @@ export default function Chat() {
   useEffect(()=>{
     fetchNewmsg()
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  },[])
+  },[chatId])
 
   const handleSendMessage = async () => {
     if (inputMessage.trim() !== '') {
