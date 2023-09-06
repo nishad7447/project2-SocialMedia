@@ -389,10 +389,12 @@ export default function Home() {
                             if (post?.fileUrl) {
                               const extension = post?.fileUrl.split('.').pop().toLowerCase();
                               if (['jpg', 'jpeg', 'png', 'gif'].includes(extension)) {
-                                return <img className="w-full h-auto rounded-lg mb-4" src={post?.fileUrl} alt="Post " />;
+                                return (
+                                    <img className="w-full max-h-[550px] rounded-lg mb-4" src={post?.fileUrl} alt="Post" />
+                                )
                               } else if (extension === 'mp4') {
                                 return (
-                                  <video className="w-full h-auto rounded-lg mb-4" controls>
+                                  <video className="w-full max-h-[550px] rounded-lg mb-4" controls>
                                     <source src={post?.fileUrl} type="video/mp4" />
                                     Your browser does not support the video tag.
                                   </video>

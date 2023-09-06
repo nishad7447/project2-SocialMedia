@@ -91,24 +91,18 @@ export default function Chat() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [chatId])
 
-  const fetchNewmsg=() => {
-    socket.on("message received", (newMessageRecieved) => {
-      setUpdateUI((prev) => !prev)
-      console.log(chatId, "=both=", newMessageRecieved.chat._id)
-      if (!chatId || chatId !== newMessageRecieved.chat._id) {
-        console.log("failed to msg")
-        return  
-      } 
-       console.log('perfect ok', newMessageRecieved)
-       setMessages([...messages, newMessageRecieved])
-       console.log(messages, 'realtime msg')
-     
+  useEffect(() => {
+    socket.on('message received', (newMessageRecieved) => {
+        if (!chatId || chatId !== newMessageRecieved.chat._id) {
+            console.log("failed to msg")
+            return
+        } else {
+            setUpdateUI((prev) => !prev)
+            setMessages([...messages, newMessageRecieved]);
+            // console.log("perfect ok", newMessageRecieved);
+        }
     })
-  }
-  useEffect(()=>{
-    fetchNewmsg()
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  },[chatId])
+})
 
   const handleSendMessage = async () => {
     if (inputMessage.trim() !== '') {

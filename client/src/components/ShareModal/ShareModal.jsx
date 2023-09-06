@@ -1,11 +1,11 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { AiFillTwitterCircle } from 'react-icons/ai';
 import { BsFillChatDotsFill } from 'react-icons/bs';
 import { FaFacebook, FaGithub, FaTimes } from 'react-icons/fa';
 
-const ShareModal = ({ isOpen, onClose,id }) => {
+const ShareModal = ({ isOpen, onClose, id }) => {
     const [isCopied, setIsCopied] = useState(false);
-    const [inputValue, setInputValue] = useState('https://onlyfriends.fun/#'+id);
+    // eslint-disable-next-line no-unused-vars
+    const [inputValue, setInputValue] = useState('https://onlyfriends.fun/#' + id);
 
 
     const closeRef = useRef(null);
@@ -19,6 +19,7 @@ const ShareModal = ({ isOpen, onClose,id }) => {
         return () => {
             document.removeEventListener('mousedown', handleOutsideClick);
         };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
 
@@ -38,43 +39,43 @@ const ShareModal = ({ isOpen, onClose,id }) => {
     const [facebookSdkLoaded, setFacebookSdkLoaded] = useState(false);
 
     useEffect(() => {
-      if (!facebookSdkLoaded) {
-        // Initialize the Facebook SDK
-        window.fbAsyncInit = function() {
-          window.FB.init({
-            appId: '825163632269804',
-            xfbml: true,
-            version: 'v12.0',
-          });
-        };
-  
-        // Load the SDK asynchronously
-        (function(d, s, id) {
-          var js,
-            fjs = d.getElementsByTagName(s)[0];
-          if (d.getElementById(id)) return;
-          js = d.createElement(s);
-          js.id = id;
-          js.src = 'https://connect.facebook.net/en_US/sdk.js';
-          fjs.parentNode.insertBefore(js, fjs);
-        })(document, 'script', 'facebook-jssdk');
-  
-        setFacebookSdkLoaded(true);
-      }
+        if (!facebookSdkLoaded) {
+            // Initialize the Facebook SDK
+            window.fbAsyncInit = function () {
+                window.FB.init({
+                    appId: '825163632269804',
+                    xfbml: true,
+                    version: 'v12.0',
+                });
+            };
+
+            // Load the SDK asynchronously
+            (function (d, s, id) {
+                var js,
+                    fjs = d.getElementsByTagName(s)[0];
+                if (d.getElementById(id)) return;
+                js = d.createElement(s);
+                js.id = id;
+                js.src = 'https://connect.facebook.net/en_US/sdk.js';
+                fjs.parentNode.insertBefore(js, fjs);
+            })(document, 'script', 'facebook-jssdk');
+
+            setFacebookSdkLoaded(true);
+        }
     }, [facebookSdkLoaded]);
 
     const handleFacebookShare = () => {
         window.FB.ui(
-          {
-            display: 'popup',
-            method: 'share',
-            href: inputValue,
-          },
-          function(response) {
-            // Callback function after sharing
-          }
+            {
+                display: 'popup',
+                method: 'share',
+                href: inputValue,
+            },
+            function (response) {
+                // Callback function after sharing
+            }
         );
-      };
+    };
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-700 bg-opacity-40 dark:text-white">
@@ -92,9 +93,16 @@ const ShareModal = ({ isOpen, onClose,id }) => {
                     <div className="content pt-6">
                         <p className="text-base">Share this link via</p>
                         <ul className="icons flex space-x-4 mt-4">
-                            <a href="#" className="fab fa-facebook-f" onClick={handleFacebookShare}><FaFacebook size={26}/></a>
-                            <a href="#" className="fab fa-git"><FaGithub size={26}/></a>
-                            <a href="#" className="fab fa-chat"><BsFillChatDotsFill size={26}/></a>
+                            <button className="fab-button" onClick={handleFacebookShare}>
+                                <FaFacebook size={26} />
+                            </button>
+                            <button className="fab-button">
+                                <FaGithub size={26} />
+                            </button>
+                            <button className="fab-button">
+                                <BsFillChatDotsFill size={26} />
+                            </button>
+
                         </ul>
                         <p className="text-base mt-6">Or copy link</p>
                         <div className={`field flex items-center border mt-3 ${isCopied ? 'active' : ''}`}>

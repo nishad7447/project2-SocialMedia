@@ -18,6 +18,7 @@ const Spinner = () => {
   );
 };
 const AdminNavbar = ({ children }) => {
+  // eslint-disable-next-line no-unused-vars
   const { adminToken, admin } = useSelector((state) => state.auth)
   const dispatch = useDispatch()
   const nav = useNavigate()

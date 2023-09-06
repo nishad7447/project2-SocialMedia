@@ -1,5 +1,4 @@
 import InputField from "../../components/IniputField/InputField";
-import Checkbox from "../../components/Checkbox/Checkbox";
 import Card from "../../components/Card/Card";
 import FixedPlugin from "../../components/FixedPlugin/FixedPlugin";
 import { Link, useNavigate } from "react-router-dom";

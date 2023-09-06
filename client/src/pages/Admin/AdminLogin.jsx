@@ -1,10 +1,8 @@
 import InputField from "../../components/IniputField/InputField";
-import Checkbox from "../../components/Checkbox/Checkbox";
 import Card from "../../components/Card/Card";
 import FixedPlugin from "../../components/FixedPlugin/FixedPlugin";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
-import axios from "axios";
 import { AdminBaseURL } from "../../API";
 import { axiosAdminInstance } from "../../axios";
 
