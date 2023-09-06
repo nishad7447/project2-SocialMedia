@@ -2,10 +2,12 @@
 
 React Social Media is a web application that combines a React frontend with a Node.js Express.js backend. It provides a platform for social interactions, allowing users to connect and share their experiences.
 
-## Demo
+## Deployment
 
-- **Frontend**: [React Social Media](https://onlyfriends.fun)
-- **Backend**: [API Backend](https://api.onlyfriends.fun)
+This project is deployed in a distributed manner:
+
+- **Frontend**: The frontend is hosted on Vercel and accessible at [onlyfriends.fun](https://onlyfriends.fun).
+- **Backend**: The backend is hosted on AWS EC2 and accessible at [api.onlyfriends.fun](https://api.onlyfriends.fun).
 
 ## Features
 
@@ -42,13 +44,6 @@ React Social Media is a web application that combines a React frontend with a No
   - Mongosh 
   - JSON Web Tokens (JWT) for authentication
   - Socket.IO for real-time communication
-
-## Deployment
-
-This project is deployed in a distributed manner:
-
-- **Frontend**: The frontend is hosted on Vercel and accessible at [onlyfriends.fun](https://onlyfriends.fun).
-- **Backend**: The backend is hosted on AWS EC2 and accessible at [api.onlyfriends.fun](https://api.onlyfriends.fun).
 
 ## Local Development
 
