@@ -2,10 +2,6 @@
 
 React Social Media is a web application that combines a React frontend with a Node.js Express.js backend. It provides a platform for social interactions, allowing users to connect and share their experiences.
 
-**Frontend:** The frontend is built using React, a powerful JavaScript library for building user interfaces. It offers a responsive and interactive user experience.
-
-**Backend:** The backend is powered by Node.js and Express.js, providing a robust and scalable server-side infrastructure for the application.
-
 ## Demo
 
 - **Frontend**: [React Social Media](https://onlyfriends.fun)
@@ -13,26 +9,37 @@ React Social Media is a web application that combines a React frontend with a No
 
 ## Features
 
-- **User Authentication**: Users can create accounts, log in, and securely manage their profiles.
+- **User Authentication**: Users can create accounts, log in, and securely manage each route.
 - **Posting and Sharing**: Users can create and share posts, images, and updates with their connections.
-- **Real-time Interactions**: Enjoy real-time messaging and notifications to stay connected.
+- **Real-time Interactions**: Enjoy real-time messaging to stay connected.
 - **User Profiles**: Users have customizable profiles where they can showcase their interests.
-- **News Feed**: A dynamic news feed that displays posts and updates from connections.
 - **Comments and Likes**: Interact with posts through comments and likes.
-- **Search and Discovery**: Discover new users and content through search functionality.
-- **Security**: Secure user data and authentication mechanisms to protect user information.
+- **Search**: Discover new users and content through search functionality.
+- **Sponsored Ads**: Users can create sponsored ads by completing payments using Razorpay.
+
+## Admin Panel
+
+- **Dashboard**: The admin dashboard provides an overview of the platform's activity, including user statistics, post statistics, and ad revenue.
+- **User Management**: Admins can manage user accounts, including account Block/unblock.
+- **Post Management**: Admins have the ability to moderate posts, including the removal of inappropriate content.
+- **Ad Management**: The admin panel allows for the management of sponsored ads, including ad creation, monitoring, and billing.
 
 ## Technologies Used
 
 - **Frontend**:
   - React
-  - HTML/CSS
-  - JavaScript
+  - Redux
+  - Tailwind Css
+  - RazorPay
+  - Google-oauth
   - Axios (for API communication)
 - **Backend**:
   - Node.js
   - Express.js
-  - MongoDB (or your preferred database)
+  - NodeMailer
+  - Cloudinary
+  - Multer
+  - Mongosh 
   - JSON Web Tokens (JWT) for authentication
   - Socket.IO for real-time communication
 
@@ -53,3 +60,14 @@ To run the project locally, follow these steps:
 
    ```bash
    git clone https://github.com/your-username/react-social-media.git
+
+```bash
+  cd client
+
+```bash
+npm i
+
+```bash
+npm start
+
+No need to run backend already connected with the api.onlyfriends.fun
