@@ -60,14 +60,20 @@ To run the project locally, follow these steps:
 
    ```bash
    git clone https://github.com/your-username/react-social-media.git
+   
+2. Change directory to client folder:
 
-```bash
-  cd client
+    ```bash
+   cd client
 
-```bash
-npm i
+3. Install dependencys:
 
-```bash
-npm start
+   ```bash
+   npm i
+
+4. Run project:
+
+   ```bash
+   npm start
 
 No need to run backend already connected with the api.onlyfriends.fun
