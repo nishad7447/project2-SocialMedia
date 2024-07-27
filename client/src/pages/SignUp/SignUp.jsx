@@ -80,7 +80,7 @@ export default function SignUp() {
       .then((res) => {
         console.log(res.data.message);
 
-        if (res.data.message === "Otp send Verification Pending") {
+        if (res.data.message === "OTP sent, verification pending") {
           toast.info(res.data.message)
           showOtpModal()
         }

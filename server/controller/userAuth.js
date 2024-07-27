@@ -14,37 +14,45 @@ const authToken = process.env.TWILIO_AUTH_TOKEN;
 const serviceSID = process.env.TWILIO_SERVICE_SID;
 const client = twilio(accountSid, authToken);
 
-export const signupOtpSend=async(req,res)=>{
+export const signupOtpSend = async (req, res) => {
   try {
     let { Name, UserName, Email, Password, Mobile } = req.body;
-    Mobile = Number(Mobile);
+    Mobile = Number(Mobile).toString(); 
+
     const user = await User.findOne({ Email: Email });
     if (user) {
-      return res.status(400).json({ message: "User already Exist" });
+      return res.status(400).json({ message: "User already exists" });
     }
 
     const usernameExist = await User.findOne({ UserName: UserName });
     if (usernameExist) {
-      return res.status(400).json({ message: "User name taken" });
+      return res.status(400).json({ message: "Username taken" });
     }
 
     const mobileExist = await User.findOne({ Mobile: Mobile });
     if (mobileExist) {
-      return res.status(400).json({ message: "Mobile already Exist" });
+      return res.status(400).json({ message: "Mobile already exists" });
     }
-    client.verify.v2
-    .services(serviceSID)
-    .verifications.create({ to: "+91" + Mobile, channel: "sms" })
-    .then((verification) =>
-      res.status(200).json({ message: "Otp send Verification Pending" })
-    );
 
-    // res.json({ message: "User signed up successfully" });
+    const formattedMobile = `+91${Mobile}`; // Ensure the mobile number is in E.164 format
+
+    client.verify.v2
+      .services(serviceSID)
+      .verifications.create({ to: formattedMobile, channel: "sms" })
+      .then((verification) => {
+        console.log({ verification });
+        res.status(200).json({ message: "OTP sent, verification pending" });
+      })
+      .catch((err) => {
+        console.error('Twilio API Error:', err);
+        res.status(500).json({ error: err.message }); // Return the error message to the client
+      });
+
   } catch (error) {
-    console.log(error, "signup otp send error");
+    console.error('Server Error:', error);
     res.status(500).json({ error: error.message });
   }
-}
+};
 
 export const register = async (req, res) => {
   try {
@@ -66,8 +74,10 @@ export const register = async (req, res) => {
     if (mobileExist) {
       return res.status(400).json({ message: "Mobile already Exist" });
     }
-
-    //verify Otp
+    const salt = await bcrypt.genSalt();
+    const passwordHash = await bcrypt.hash(Password, salt);
+    console.log({salt,passwordHash});
+    // verify Otp
     client.verify.v2
     .services(serviceSID)
     .verificationChecks.create({ to: "+91" + Mobile, code: otp })
@@ -75,7 +85,7 @@ export const register = async (req, res) => {
       if (response.status === "approved") {
         const salt = await bcrypt.genSalt();
         const passwordHash = await bcrypt.hash(Password, salt);
-    
+        console.log({salt,passwordHash});
         const profilePics = [
           "https://cdn.pixabay.com/photo/2016/04/01/10/11/avatar-1299805_1280.png",
           "https://cdn.pixabay.com/photo/2012/04/01/18/22/user-23874_1280.png",

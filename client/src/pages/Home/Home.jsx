@@ -464,18 +464,18 @@ export default function Home() {
                         </Link>
                       </div>
                       {/* eslint-disable-next-line jsx-a11y/img-redundant-alt */}
-                      <img className="w-full h-auto rounded-lg mb-4" src={ad.AdImage} alt="Ad Image" />
+                      <img className="w-full h-auto rounded-lg mb-4" src={ad?.AdImage} alt="Ad Image" />
                       <div className="flex justify-between">
 
                         <div className="flex items-center mb-2">
-                          <p className="text-sm text-gray-500">{ad.Name}</p>
+                          <p className="text-sm text-gray-500">{ad?.Name}</p>
                         </div>
                         <div className="flex items-center mb-2">
-                          <Link className="text-sm text-blue-500" to={`https://www.${ad.Link}`} target="_blank" >{ad.Link}</Link>
+                          <Link className="text-sm text-blue-500" to={`https://www.${ad?.Link}`} target="_blank" >{ad?.Link}</Link>
                         </div>
 
                       </div>
-                      <p className="mb-4 text-sm">{ad.Description}</p>
+                      <p className="mb-4 text-sm">{ad?.Description}</p>
 
                     </div>
                   </Card>

@@ -14,7 +14,6 @@ import adminRoutes from "./Routes/adminRoutes.js";
 import chatRoutes from "./Routes/chatRoutes.js";
 import messageRoutes from "./Routes/messageRoutes.js";
 import { Server } from "socket.io";
-
 // config
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
