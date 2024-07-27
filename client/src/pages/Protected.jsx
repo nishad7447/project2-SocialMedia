@@ -13,6 +13,7 @@ import { TiArrowBack } from 'react-icons/ti'
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import { MdOutlineDeleteSweep } from 'react-icons/md';
+import { SiGooglemessages } from 'react-icons/si';
 
 const Spinner = () => {
   return (
@@ -381,6 +382,7 @@ export default function Protected({ children }) {
                   <RiMoonFill className="h-4 w-4 text-gray-600 dark:text-white" />
                 )}
               </div>
+              <SiGooglemessages onClick={()=>nav('/chat')} className="w-5 h-5 cursor-pointer text-gray-600" />
               {/* Profile & Dropdown */}
               <Dropdown
                 button={
