@@ -49,57 +49,57 @@ export default function SignUp() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const userSignupOtpSend = () => {
-    // Check if any field is empty
-    if (!email || !password || !name || !username) {
-      setFormErr("Please fill in all fields");
-      return;
-    }
-    // Validate email format
-    if (!validateEmail(email)) {
-      setEmailErr("Invalid email address");
-      return;
-    }
-    if (!validateMobile(mobile)) {
-      setMobErr("Invalid Mobile");
-      return;
-    }
-    // Validate password strength
-    if (!validatePasswordStrength(password)) {
-      setPassErr("Password must be at least 3 char");
-      return;
-    }
-    axios
-      .post(`${UserBaseURL}/auth/signup-otpSend`, {
-        Email: email,
-        Password: password,
-        Name: name,
-        UserName: username,
-        Mobile: mobile,
-      })
-      .then((res) => {
-        console.log(res.data.message);
+  // const userSignupOtpSend = () => {
+  //   // Check if any field is empty
+  //   if (!email || !password || !name || !username) {
+  //     setFormErr("Please fill in all fields");
+  //     return;
+  //   }
+  //   // Validate email format
+  //   if (!validateEmail(email)) {
+  //     setEmailErr("Invalid email address");
+  //     return;
+  //   }
+  //   if (!validateMobile(mobile)) {
+  //     setMobErr("Invalid Mobile");
+  //     return;
+  //   }
+  //   // Validate password strength
+  //   if (!validatePasswordStrength(password)) {
+  //     setPassErr("Password must be at least 3 char");
+  //     return;
+  //   }
+  //   axios
+  //     .post(`${UserBaseURL}/auth/signup-otpSend`, {
+  //       Email: email,
+  //       Password: password,
+  //       Name: name,
+  //       UserName: username,
+  //       Mobile: mobile,
+  //     })
+  //     .then((res) => {
+  //       console.log(res.data.message);
 
-        if (res.data.message === "OTP sent, verification pending") {
-          toast.info(res.data.message)
-          showOtpModal()
-        }
-      })
-      .catch((err) => {
-        console.log(err.response.data.message);
-        toast.error(err.response.data.message)
-        if (err?.response.data.message === "User already Exist") {
-          setEmailErr(err.response.data.message);
-        } else if (err?.response.data.message === "User name taken") {
-          setUsernameErr(err.response.data.message);
-        } else if (err?.response.data.message === "Mobile already Exist") {
-          setMobErr(err.response.data.message);
-        } else {
-          setFormErr(err?.response.data.message)
-        }
-        // console.log(err,'login post error ')
-      });
-  }
+  //       if (res.data.message === "OTP sent, verification pending") {
+  //         toast.info(res.data.message)
+  //         showOtpModal()
+  //       }
+  //     })
+  //     .catch((err) => {
+  //       console.log(err.response.data.message);
+  //       toast.error(err.response.data.message)
+  //       if (err?.response.data.message === "User already Exist") {
+  //         setEmailErr(err.response.data.message);
+  //       } else if (err?.response.data.message === "User name taken") {
+  //         setUsernameErr(err.response.data.message);
+  //       } else if (err?.response.data.message === "Mobile already Exist") {
+  //         setMobErr(err.response.data.message);
+  //       } else {
+  //         setFormErr(err?.response.data.message)
+  //       }
+  //       // console.log(err,'login post error ')
+  //     });
+  // }
 
   const userSignupOtpSubmit = () => {
     // Check if any field is empty
@@ -133,12 +133,14 @@ export default function SignUp() {
       })
       .then((res) => {
         console.log(res.data.message);
-
-        if (res.data.message === "Verification success") {
-          console.log("succ");
-          toast.success('Otp verified & signed up')
-          nav("/");
-        }
+        console.log("succ");
+        toast.success('Otp verified & signed up')
+        nav("/");
+        // if (res.data.message === "Verification success") {
+        //   console.log("succ");
+        //   toast.success('Otp verified & signed up')
+        //   nav("/");
+        // }
       })
       .catch((err) => {
         console.log(err.response.data.message);
@@ -337,7 +339,8 @@ export default function SignUp() {
                 {formErr || emailErr || usernameErr || passErr || mobErr}
               </span>
               <button
-                onClick={userSignupOtpSend}
+                // onClick={userSignupOtpSend}
+                onClick={userSignupOtpSubmit}
                 className="linear mt-2 w-full rounded-xl bg-blue-500 py-[12px] text-base font-medium text-white transition duration-200 hover:bg-blue-600 active:bg-blue-700"
               >
                 Sign Up

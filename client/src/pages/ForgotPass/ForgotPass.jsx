@@ -32,11 +32,11 @@ export default function ForgotPass() {
     axios.post(`${UserBaseURL}/auth/forgot-otpSend`, { Email: email })
       .then((res) => {
         console.log(res.data.message)
-        if(res.data.message!=='password reset link sent to your email account'){                                                                                                                                                                                                                                                                                                                                                                                                     
+        if(res.data.message!=='password reset link sent to your email account' && res.data.message!=='password reset link Already sent to your email account'){                                                                                                                                                                                                                                                                                                                                                                                                     
           setShowOtpField(true)
           toast.success('OTP send to mobile')
         }else{
-          toast.success('Reset Password link send to Email successfully');
+          toast.success(res.data.message);
         }
       }).catch((err) => {
         console.log(err?.response.data.message)
@@ -210,7 +210,7 @@ export default function ForgotPass() {
               </button>
             ) : (
               <button onClick={sendOTP} className="linear mt-2 w-full rounded-xl bg-blue-500 py-[12px] text-base font-medium text-white transition duration-200 hover:bg-blue-600 active:bg-blue-700">
-                Send OTP
+                Send Link
               </button>
             )
           }
