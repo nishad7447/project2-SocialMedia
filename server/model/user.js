@@ -21,7 +21,7 @@ const userSchema= new mongoose.Schema(
         },
         Mobile: {
             type: Number,
-            unique: true,
+            // unique: true,
             max: 999999999999, 
           },          
         Password:{
